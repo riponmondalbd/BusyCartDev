@@ -135,7 +135,7 @@ export const updateProfilePhoto = async (req: any, res: any) => {
 
     res.json({
       message: "Profile photo updated successfully",
-      user: updatedUser,
+      // user: updatedUser,
     });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });
