@@ -170,7 +170,7 @@ export const deleteProfilePhoto = async (req: any, res: any) => {
 
     res.json({
       message: "Profile photo deleted successfully",
-      user: updateUser,
+      // user: updateUser,
     });
   } catch (error) {
     res.status(500).json({ message: "Something went wrong" });

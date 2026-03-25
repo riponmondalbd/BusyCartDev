@@ -14,7 +14,12 @@ const router = express.Router();
 router.get("/profile", protect, getProfile);
 router.put("/profile", protect, updateUserProfile);
 router.put("/password", protect, updatePassword);
-router.put("/photo", protect, upload.single("image"), updateProfilePhoto);
-router.delete("/photo", protect, deleteProfilePhoto);
+router.put(
+  "/profile/photo",
+  protect,
+  upload.single("image"),
+  updateProfilePhoto,
+);
+router.delete("/profile/photo", protect, deleteProfilePhoto);
 
 export default router;
