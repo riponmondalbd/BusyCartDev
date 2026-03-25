@@ -27,7 +27,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     res
       .status(201)
-      .json({ message: "User registered successfully", userId: user.id });
+      .json({ message: "User registered successfully", id: user.id });
   } catch (error) {
     res.status(500).json({ message: "Error registering user" });
   }
@@ -52,7 +52,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
     // generate JWT token
     const token = jwt.sign(
-      { userId: user.id, role: user.role },
+      { id: user.id, role: user.role },
       process.env.JWT_SECRET!,
       { expiresIn: "1h" },
     );
