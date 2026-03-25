@@ -11,7 +11,7 @@ export const getProfile = async (req: any, res: any) => {
     }
 
     const user = await prisma.user.findUnique({
-      where: { id: req.user.id },
+      where: { id: req.user.userId },
       select: {
         id: true,
         name: true,
@@ -42,7 +42,7 @@ export const updateUserProfile = async (req: any, res: any) => {
     const { name, email } = req.body;
 
     const updatedUser = await prisma.user.update({
-      where: { id: req.user.id },
+      where: { id: req.user.userId },
       data: { name, email },
       select: {
         name: true,
@@ -63,7 +63,9 @@ export const updatePassword = async (req: any, res: any) => {
 
     const { oldPassword, newPassword } = req.body;
 
-    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+    });
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -81,7 +83,7 @@ export const updatePassword = async (req: any, res: any) => {
     const hashed = await bcrypt.hash(newPassword, 10);
 
     await prisma.user.update({
-      where: { id: req.user.id },
+      where: { id: req.user.userId },
       data: { password: hashed },
     });
 
@@ -96,7 +98,9 @@ export const updateProfilePhoto = async (req: any, res: any) => {
   try {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });
 
-    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.userId },
+    });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     if (!req.file) return res.status(400).json({ message: "No file uploaded" });
@@ -122,7 +126,7 @@ export const updateProfilePhoto = async (req: any, res: any) => {
     const result = await uploadFromBuffer();
 
     const updatedUser = await prisma.user.update({
-      where: { id: req.user.id },
+      where: { id: req.user.userId },
       data: {
         imageUrl: result.secure_url,
         imagePublicId: result.public_id,
