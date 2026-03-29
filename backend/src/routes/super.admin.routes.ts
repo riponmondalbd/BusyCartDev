@@ -4,6 +4,7 @@ import {
   deleteUserBySuperAdmin,
   getAllAdmins,
   getAllUsers,
+  updateUserRole,
 } from "../controller/super.admin.controller";
 import { protect } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/authorize";
@@ -17,6 +18,12 @@ router.delete(
   protect,
   authorize("SUPER_ADMIN"),
   deleteUserBySuperAdmin,
+);
+router.put(
+  "/users/:id/role",
+  protect,
+  authorize("SUPER_ADMIN"),
+  updateUserRole,
 );
 
 export default router;
