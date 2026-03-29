@@ -79,3 +79,29 @@ export const loginUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error logging in user" });
   }
 };
+
+// logout user
+export const logoutUser = async (req: Request, res: Response) => {
+  try {
+    const token = req.cookies?.refreshToken;
+
+    if (!token) {
+      return res.status(400).json({ message: "No refresh token found" });
+    }
+
+    // delete refresh token from DB
+    await prisma.refreshToken.delete({
+      where: { token },
+    });
+
+    // clear refresh token cookie
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: false,
+      sameSite: "strict",
+    });
+    res.json({ message: "Logout successful" });
+  } catch (error) {
+    res.status(500).json({ message: "Error logging out user" });
+  }
+};
