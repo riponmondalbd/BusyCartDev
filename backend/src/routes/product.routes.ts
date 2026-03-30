@@ -3,6 +3,7 @@ import {
   createProduct,
   getAllProducts,
   getProductById,
+  updateProduct,
 } from "../controller/product.controller";
 import { protect } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/authorize";
@@ -19,5 +20,12 @@ router.post(
 );
 router.get("/products", getAllProducts);
 router.get("/products/:id", getProductById);
+router.put(
+  "/products/:id",
+  protect,
+  authorize("ADMIN", "SUPER_ADMIN"),
+  upload.array("images", 5),
+  updateProduct,
+);
 
 export default router;

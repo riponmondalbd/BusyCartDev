@@ -130,3 +130,90 @@ export const getProductById = async (req: Request, res: Response) => {
     });
   }
 };
+
+// update product - admin and super admin only
+export const updateProduct = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, description, price, discount, stock } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Product id is required",
+      });
+    }
+
+    const product = await prisma.product.findUnique({
+      where: { id: id as string },
+    });
+
+    if (!product) {
+      return res.status(404).json({
+        message: "Product not found",
+      });
+    }
+
+    let imageUrls = product.images; // default: keep old images
+
+    // If new images uploaded
+    if (req.files && (req.files as Express.Multer.File[]).length > 0) {
+      //  Delete old images from Cloudinary
+      for (const url of product.images) {
+        // Extract public_id from URL
+        const parts = url.split("/");
+        const publicIdWithExtension = parts.slice(-1)[0]; // last part
+        const publicId = `busycart_products/${publicIdWithExtension.split(".")[0]}`;
+        try {
+          await cloudinary.uploader.destroy(publicId);
+        } catch (err) {
+          console.error("Failed to delete Cloudinary image:", err);
+        }
+      }
+
+      //  Upload new images
+      imageUrls = [];
+      for (const file of req.files as Express.Multer.File[]) {
+        const uploadResult: any = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "busycart_products" },
+            (error, result) => {
+              if (error) return reject(error);
+              resolve(result);
+            },
+          );
+          stream.end(file.buffer);
+        });
+        imageUrls.push(uploadResult.secure_url);
+      }
+    }
+
+    // Optional validation
+    if (discount && Number(discount) >= Number(price)) {
+      return res
+        .status(400)
+        .json({ message: "Discount must be less than price" });
+    }
+
+    const updatedProduct = await prisma.product.update({
+      where: { id: id as string },
+      data: {
+        name,
+        description,
+        price: Number(price),
+        discount: discount ? Number(discount) : null,
+        stock: Number(stock),
+        images: imageUrls,
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      product: updatedProduct,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to update product",
+      error: error.message,
+    });
+  }
+};
