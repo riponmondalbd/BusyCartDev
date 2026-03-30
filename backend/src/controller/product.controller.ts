@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import cloudinary from "../config/cloudinary";
 import { prisma } from "../prisma/prisma";
 
+// create product - admin and super admin only
 export const createProduct = async (req: Request, res: Response) => {
   try {
     const { name, description, price, discount, stock } = req.body;
@@ -71,6 +72,27 @@ export const createProduct = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to create product",
+      error: error.message,
+    });
+  }
+};
+
+// get all products
+export const getAllProducts = async (req: Request, res: Response) => {
+  try {
+    const products = await prisma.product.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      products,
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      message: "Failed to get all products",
       error: error.message,
     });
   }
