@@ -16,5 +16,3 @@ router.use("/admin", adminRoutes);
 router.use("/refresh", refreshTokenRoutes);
 
 export default router;
-
-// messing delete profile
