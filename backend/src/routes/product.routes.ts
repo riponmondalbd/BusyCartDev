@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createProduct,
   getAllProducts,
+  getProductById,
 } from "../controller/product.controller";
 import { protect } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/authorize";
@@ -17,5 +18,6 @@ router.post(
   createProduct,
 );
 router.get("/products", getAllProducts);
+router.get("/products/:id", getProductById);
 
 export default router;
