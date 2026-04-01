@@ -36,3 +36,5 @@ router.delete(
 );
 
 export default router;
+
+// GET http://localhost:5000/api/products?page=2&limit=5&search=phone&minPrice=100&maxPrice=500&sort=price_desc

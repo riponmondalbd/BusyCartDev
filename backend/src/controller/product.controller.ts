@@ -5,12 +5,12 @@ import { prisma } from "../prisma/prisma";
 // create product - admin and super admin only
 export const createProduct = async (req: Request, res: Response) => {
   try {
-    const { name, description, price, discount, stock } = req.body;
+    const { name, description, price, discount, stock, categoryId } = req.body;
 
     // Basic validation
-    if (!name || !price || stock === undefined) {
+    if (!name || !price || stock === undefined || !categoryId) {
       return res.status(400).json({
-        message: "Name, price and stock are required",
+        message: "Name, price, stock and categoryId are required",
       });
     }
 
@@ -28,7 +28,7 @@ export const createProduct = async (req: Request, res: Response) => {
 
     const imageUrls: string[] = [];
 
-    // 🔹 Single reliable upload method
+    // Single reliable upload method
     for (const file of req.files as Express.Multer.File[]) {
       const uploadResult: any = await new Promise((resolve, reject) => {
         const stream = cloudinary.uploader.upload_stream(
@@ -48,20 +48,23 @@ export const createProduct = async (req: Request, res: Response) => {
     }
 
     // Optional validation
-    if (discount && Number(discount) >= Number(price)) {
-      return res.status(400).json({
-        message: "Discount price must be less than regular price",
-      });
+    if (discount !== undefined && price !== undefined) {
+      if (Number(discount) >= Number(price)) {
+        return res.status(400).json({
+          message: "Discount must be less than price",
+        });
+      }
     }
 
     const newProduct = await prisma.product.create({
       data: {
-        name,
-        description,
-        price: Number(price),
-        discount: discount ? Number(discount) : null,
-        stock: Number(stock),
+        ...(name && { name }),
+        ...(description && { description }),
+        ...(price !== undefined && { price: Number(price) }),
+        ...(discount !== undefined && { discount: Number(discount) }),
+        ...(stock !== undefined && { stock: Number(stock) }),
         images: imageUrls,
+        categoryId,
       },
     });
 
@@ -77,23 +80,93 @@ export const createProduct = async (req: Request, res: Response) => {
   }
 };
 
-// get all products
-export const getAllProducts = async (req: Request, res: Response) => {
+// get all products with pagination and filters
+export const getAllProducts = async (req: any, res: any) => {
   try {
-    const products = await prisma.product.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    const {
+      page = "1",
+      limit = "10",
+      search,
+      category,
+      minPrice,
+      maxPrice,
+      sort,
+    } = req.query;
 
-    res.status(200).json({
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Filtering conditions
+    const where: any = {
+      isDeleted: false,
+    };
+
+    // Search by name
+    if (search) {
+      where.name = {
+        contains: search,
+        mode: "insensitive",
+      };
+    }
+
+    // Filter by category
+    if (category) {
+      where.category = {
+        is: {
+          slug: category,
+        },
+      };
+    }
+    // Filter by price range
+    if (minPrice || maxPrice) {
+      where.price = {};
+      if (minPrice) where.price.gte = Number(minPrice);
+      if (maxPrice) where.price.lte = Number(maxPrice);
+    }
+
+    // Sorting
+    let orderBy: any = { createdAt: "desc" };
+
+    if (sort === "price_asc") {
+      orderBy = { price: "asc" };
+    } else if (sort === "price_desc") {
+      orderBy = { price: "desc" };
+    } else if (sort === "newest") {
+      orderBy = { createdAt: "desc" };
+    }
+
+    const [products, totalProducts] = await Promise.all([
+      prisma.product.findMany({
+        where,
+        skip,
+        take: limitNumber,
+        orderBy,
+        include: {
+          category: true,
+        },
+      }),
+      prisma.product.count({ where }),
+    ]);
+
+    const totalPages = Math.ceil(totalProducts / limitNumber);
+
+    return res.status(200).json({
       success: true,
-      products,
+      meta: {
+        totalProducts,
+        totalPages,
+        currentPage: pageNumber,
+        limit: limitNumber,
+      },
+      data: products,
     });
-  } catch (error: any) {
-    res.status(500).json({
-      message: "Failed to get all products",
-      error: error.message,
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch products",
+      error: (error as Error).message,
     });
   }
 };
@@ -111,6 +184,9 @@ export const getProductById = async (req: Request, res: Response) => {
 
     const product = await prisma.product.findUnique({
       where: { id: id as string },
+      include: {
+        category: true,
+      },
     });
 
     if (!product) {
@@ -188,12 +264,13 @@ export const updateProduct = async (req: Request, res: Response) => {
     }
 
     // Optional validation
-    if (discount && Number(discount) >= Number(price)) {
-      return res
-        .status(400)
-        .json({ message: "Discount must be less than price" });
+    if (discount !== undefined && price !== undefined) {
+      if (Number(discount) >= Number(price)) {
+        return res.status(400).json({
+          message: "Discount must be less than price",
+        });
+      }
     }
-
     const updatedProduct = await prisma.product.update({
       where: { id: id as string },
       data: {

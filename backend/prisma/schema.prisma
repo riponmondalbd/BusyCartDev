@@ -68,6 +68,7 @@ model Product {
   price       Float
   discount    Float?
   stock       Int
+  isDeleted   Boolean  @default(false)
   images      String[]
 
   // Make categoryId nullable initially to avoid migration errors
