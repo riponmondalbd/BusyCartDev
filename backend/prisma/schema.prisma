@@ -23,7 +23,7 @@ model User {
   isVerified Boolean @default(true)
 
   imageUrl      String?
-  imagePublicId String? // important for deleting from cloudinary
+  imagePublicId String? // for deleting from Cloudinary
 
   refreshTokens RefreshToken[]
 
@@ -43,6 +43,24 @@ model RefreshToken {
   @@index([userId])
 }
 
+model Category {
+  id       String  @id @default(uuid())
+  name     String
+  slug     String  @unique
+  image    String?
+  isActive Boolean @default(true)
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Self relation for parent-child
+  parentId String?
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+}
+
 model Product {
   id          String   @id @default(uuid())
   name        String
@@ -51,6 +69,10 @@ model Product {
   discount    Float?
   stock       Int
   images      String[]
+
+  // Make categoryId nullable initially to avoid migration errors
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
