@@ -104,3 +104,132 @@ export const getAllCategories = async (req: Request, res: Response) => {
     });
   }
 };
+
+// update category - admin super admin only
+export const updateCategory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { name, slug, parentId } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Category id is required",
+      });
+    }
+
+    // find category by id
+    const category = await prisma.category.findUnique({
+      where: { id: id as string },
+    });
+
+    if (!category) {
+      return res.status(404).json({
+        message: "Category not found",
+      });
+    }
+
+    // Check slug uniqueness if changed
+    if (slug && slug !== category.slug) {
+      const existing = await prisma.category.findUnique({ where: { slug } });
+      if (existing) {
+        return res.status(400).json({ message: "Slug already exists" });
+      }
+    }
+
+    // Check parent category if provided
+    if (parentId && parentId !== category.parentId) {
+      const parentCategory = await prisma.category.findUnique({
+        where: { id: parentId },
+      });
+      if (!parentCategory) {
+        return res.status(404).json({ message: "Parent category not found" });
+      }
+    }
+
+    let imageUrl = category.image; // default: keep old image
+
+    // If new image uploaded
+    if (req.file) {
+      const file = req.file;
+      // Delete old image from Cloudinary if exists
+      if (category.image) {
+        const parts = category.image.split("/");
+        const publicIdWithExt = parts.slice(-1)[0];
+        const publicId = `busycart_categories/${publicIdWithExt.split(".")[0]}`;
+        await cloudinary.uploader.destroy(publicId);
+      }
+
+      // Upload new image
+      const uploadResult: any = await new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { folder: "busycart_categories" },
+          (error, result) => {
+            if (error) return reject(error);
+            resolve(result);
+          },
+        );
+        stream.end(file.buffer);
+      });
+
+      imageUrl = uploadResult.secure_url;
+    }
+
+    const updatedCategory = await prisma.category.update({
+      where: { id: id as string },
+      data: {
+        ...(name && { name }),
+        ...(slug && { slug }),
+        ...(parentId && { parentId: parentId as string }),
+        ...(imageUrl && { image: imageUrl }),
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      category: updatedCategory,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Failed to update category",
+      error: error.message,
+    });
+  }
+};
+
+// delete category - admin super admin only
+export const deleteCategory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (!id)
+      return res.status(400).json({ message: "Category id is required" });
+
+    // find category by id
+    const category = await prisma.category.findUnique({
+      where: { id: id as string },
+    });
+    if (!category)
+      return res.status(404).json({ message: "Category not found" });
+
+    // Delete image from Cloudinary if exists
+    if (category.image) {
+      const parts = category.image.split("/");
+      const publicIdWithExt = parts.slice(-1)[0];
+      const publicId = `busycart_categories/${publicIdWithExt.split(".")[0]}`;
+      await cloudinary.uploader.destroy(publicId);
+    }
+
+    // Delete category
+    await prisma.category.delete({ where: { id: id as string } });
+
+    return res.status(200).json({
+      success: true,
+      message: "Category deleted successfully",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Failed to delete category",
+      error: error.message,
+    });
+  }
+};
