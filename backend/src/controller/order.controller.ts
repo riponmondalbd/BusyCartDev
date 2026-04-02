@@ -67,6 +67,9 @@ export const createOrder = async (req: any, res: any) => {
         data: {
           userId,
           subtotal,
+          tax: taxAmount,
+          shipping: shippingAmount,
+          discount: discountAmount,
           total,
         },
       });

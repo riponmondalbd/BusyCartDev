@@ -156,6 +156,9 @@ model Order {
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   status         OrderStatus @default(CREATED)
   subtotal       Float
+  tax            Float       @default(0)
+  shipping       Float       @default(0)
+  discount       Float       @default(0)
   total          Float
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
