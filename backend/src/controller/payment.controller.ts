@@ -18,7 +18,7 @@ export const simulatePayment = async (req: any, res: any) => {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    if (order.status !== "PENDING") {
+    if (order.status !== "CREATED") {
       return res.status(400).json({ message: "Order is already paid" });
     }
 

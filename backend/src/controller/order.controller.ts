@@ -1,4 +1,6 @@
 import { prisma } from "../prisma/prisma";
+import { canTransition } from "../utils/orderStateMachine";
+
 
 // create order
 export const createOrder = async (req: any, res: any) => {
@@ -173,71 +175,34 @@ export const getAllOrders = async (req: any, res: any) => {
 // Admin super admin: Update order status
 export const updateOrderStatus = async (req: any, res: any) => {
   try {
-    const { id } = req.params;
+    const { id: orderId } = req.params;
     const { status } = req.body;
 
-    const allowedStatuses = [
-      "PENDING",
-      "PAID",
-      "SHIPPED",
-      "DELIVERED",
-      "CANCELLED",
-    ];
-    if (!allowedStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: `Invalid status. Allowed: ${allowedStatuses.join(", ")}`,
-      });
-    }
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
 
-    // Check if order exists
-    const order = await prisma.order.findUnique({ where: { id } });
     if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
+      return res.status(404).json({ message: "Order not found" });
     }
 
-    // Update status and handle payment record if needed
-    const updatedOrder = await prisma.$transaction(async (tx) => {
-      const orderUpdate = await tx.order.update({
-        where: { id },
-        data: { status },
+    if (!canTransition(order.status, status)) {
+      return res.status(400).json({
+        message: `Invalid transition from ${order.status} to ${status}`,
       });
+    }
 
-      if (status === "PAID") {
-        const existingPayment = await tx.payment.findFirst({
-          where: { orderId: id },
-        });
-
-        if (!existingPayment) {
-          await tx.payment.create({
-            data: {
-              orderId: id,
-              userId: order.userId,
-              amount: order.total,
-              method: "MANUAL",
-              status: "SUCCEEDED",
-              reference: `MAN-${Math.random()
-                .toString(36)
-                .substring(2, 10)
-                .toUpperCase()}`,
-            },
-          });
-        }
-      }
-
-      return orderUpdate;
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: { status },
     });
 
     return res.status(200).json({
       success: true,
-      message: "Order status updated",
       data: updatedOrder,
     });
   } catch (error: any) {
     return res.status(500).json({
-      success: false,
       message: "Failed to update order status",
       error: error.message,
     });
