@@ -1,5 +1,6 @@
 import { Router } from "express";
 import adminRoutes from "./admin.routes";
+import analyticsRoutes from "./analytics.routes";
 import authRoutes from "./auth.routes";
 import cartRoutes from "./cart.routes";
 import categoryRoutes from "./category.routes";
@@ -30,5 +31,6 @@ router.use("/order", orderRoutes);
 router.use("/payment", paymentRoutes);
 router.use("/coupon", couponRoutes);
 router.use("/refund", refundRoutes);
+router.use("/analytics", analyticsRoutes);
 
 export default router;
