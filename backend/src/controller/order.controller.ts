@@ -198,10 +198,36 @@ export const updateOrderStatus = async (req: any, res: any) => {
         .json({ success: false, message: "Order not found" });
     }
 
-    // Update status
-    const updatedOrder = await prisma.order.update({
-      where: { id },
-      data: { status },
+    // Update status and handle payment record if needed
+    const updatedOrder = await prisma.$transaction(async (tx) => {
+      const orderUpdate = await tx.order.update({
+        where: { id },
+        data: { status },
+      });
+
+      if (status === "PAID") {
+        const existingPayment = await tx.payment.findFirst({
+          where: { orderId: id },
+        });
+
+        if (!existingPayment) {
+          await tx.payment.create({
+            data: {
+              orderId: id,
+              userId: order.userId,
+              amount: order.total,
+              method: "MANUAL",
+              status: "PAID",
+              reference: `MAN-${Math.random()
+                .toString(36)
+                .substring(2, 10)
+                .toUpperCase()}`,
+            },
+          });
+        }
+      }
+
+      return orderUpdate;
     });
 
     return res.status(200).json({

@@ -9,6 +9,7 @@ import orderRoutes from "./order.routes";
 import paymentRoutes from "./payment.routes";
 import productRoutes from "./product.routes";
 import refreshTokenRoutes from "./refresh.router";
+import refundRoutes from "./refund.router";
 import superAdminRoutes from "./super.admin.routes";
 import userRoutes from "./user.routes";
 import wishlistRoutes from "./wishlist.routes";
@@ -28,5 +29,6 @@ router.use("/cart", cartRoutes);
 router.use("/order", orderRoutes);
 router.use("/payment", paymentRoutes);
 router.use("/coupon", couponRoutes);
+router.use("/refund", refundRoutes);
 
 export default router;
