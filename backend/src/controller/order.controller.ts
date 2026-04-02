@@ -29,13 +29,43 @@ export const createOrder = async (req: any, res: any) => {
       subtotal += item.product.price * item.quantity;
     }
 
+    // Apply coupon from cart if it exists
+    let discountAmount = 0;
+    if (cart.appliedCoupon) {
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: cart.appliedCoupon },
+      });
+      if (
+        coupon &&
+        new Date() <= coupon.expiresAt &&
+        (!coupon.minAmount || subtotal >= coupon.minAmount)
+      ) {
+        discountAmount =
+          coupon.type === "FIXED"
+            ? coupon.discount
+            : (subtotal * coupon.discount) / 100;
+      }
+    }
+
+    // ---- TAX & SHIPPING ----
+    const TAX_RATE = 0.1; // 10% tax
+    const SHIPPING_FEE = 20;
+    const FREE_SHIPPING_THRESHOLD = 500;
+
+    const discountedSubtotal = subtotal - discountAmount;
+    const taxAmount = discountedSubtotal * TAX_RATE;
+    const shippingAmount =
+      discountedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+
+    const total = discountedSubtotal + taxAmount + shippingAmount;
+
     // Create order transaction
     const order = await prisma.$transaction(async (tx) => {
       const newOrder = await tx.order.create({
         data: {
           userId,
           subtotal,
-          total: subtotal, // for now, no tax/shipping
+          total,
         },
       });
 
@@ -56,7 +86,11 @@ export const createOrder = async (req: any, res: any) => {
         });
       }
 
-      // Clear cart
+      // Clear cart items and remove coupon
+      await tx.cart.update({
+        where: { id: cart.id },
+        data: { appliedCoupon: null },
+      });
       await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
 
       return newOrder;
@@ -65,7 +99,16 @@ export const createOrder = async (req: any, res: any) => {
     return res.status(200).json({
       success: true,
       message: "Order created successfully",
-      data: order,
+      data: {
+        order,
+        breakdown: {
+          subtotal,
+          discountAmount,
+          taxAmount,
+          shippingAmount,
+          total,
+        },
+      },
     });
   } catch (error: any) {
     return res.status(500).json({

@@ -37,51 +37,38 @@ export const createCoupon = async (req: any, res: any) => {
   }
 };
 
-// apply coupon only for user
+// apply coupon to cart
 export const applyCoupon = async (req: any, res: any) => {
   try {
-    const { code, orderId } = req.body;
+    const { code } = req.body;
     const userId = (req.user as any).id;
 
-    // Find order
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
+    // Find cart
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+      include: { items: { include: { product: true } } },
     });
 
-    if (!order) {
-      console.log(`[Coupon Error] Order not found for orderId: ${orderId}`);
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: `Order not found with ID: ${orderId}`,
-        });
-    }
-
-    if (order.userId !== userId) {
-      console.log(
-        `[Coupon Error] User mismatch. Order UserId: ${order.userId}, Token UserId: ${userId}`,
-      );
+    if (!cart || cart.items.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Order does not belong to the authenticated user",
+        message: "Cart is empty or not found",
       });
     }
 
-    // Check if order already paid
-    if (order.status !== "PENDING") {
-      return res.status(400).json({
-        success: false,
-        message: "Cannot apply coupon on completed order",
-      });
-    }
+    // Calculate subtotal
+    const subtotal = cart.items.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0,
+    );
 
     // Find coupon
     const coupon = await prisma.coupon.findUnique({ where: { code } });
-    if (!coupon)
+    if (!coupon) {
       return res
         .status(404)
         .json({ success: false, message: "Coupon not found" });
+    }
 
     if (new Date() > coupon.expiresAt) {
       return res
@@ -89,36 +76,58 @@ export const applyCoupon = async (req: any, res: any) => {
         .json({ success: false, message: "Coupon expired" });
     }
 
-    if (coupon.minAmount && order.subtotal < coupon.minAmount) {
+    if (coupon.minAmount && subtotal < coupon.minAmount) {
       return res.status(400).json({
         success: false,
         message: `Minimum order amount ${coupon.minAmount} required`,
       });
     }
 
-    // Calculate discount
-    let discountAmount = 0;
-    if (coupon.type === "FIXED") discountAmount = coupon.discount;
-    if (coupon.type === "PERCENTAGE")
-      discountAmount = (order.subtotal * coupon.discount) / 100;
-
-    // Update order total
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        total: order.subtotal - discountAmount,
-      },
+    // Update cart
+    const updatedCart = await prisma.cart.update({
+      where: { id: cart.id },
+      data: { appliedCoupon: code },
     });
 
     return res.status(200).json({
       success: true,
-      message: "Coupon applied successfully",
-      data: { order: updatedOrder, discount: discountAmount, coupon },
+      message: "Coupon applied to cart successfully",
+      data: { cart: updatedCart, coupon },
     });
   } catch (error: any) {
     return res.status(500).json({
       success: false,
       message: "Failed to apply coupon",
+      error: error.message,
+    });
+  }
+};
+
+// remove coupon from cart
+export const removeCoupon = async (req: any, res: any) => {
+  try {
+    const userId = (req.user as any).id;
+
+    const cart = await prisma.cart.findUnique({ where: { userId } });
+    if (!cart) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Cart not found" });
+    }
+
+    await prisma.cart.update({
+      where: { id: cart.id },
+      data: { appliedCoupon: null },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Coupon removed from cart",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to remove coupon",
       error: error.message,
     });
   }

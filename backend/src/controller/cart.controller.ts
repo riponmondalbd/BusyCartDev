@@ -201,6 +201,9 @@ export const getMyCart = async (req: any, res: any) => {
         success: true,
         totalItems: 0,
         subtotal: 0,
+        discountAmount: 0,
+        total: 0,
+        appliedCoupon: null,
         items: [],
       });
     }
@@ -225,10 +228,42 @@ export const getMyCart = async (req: any, res: any) => {
       };
     });
 
+    let discountAmount = 0;
+    let appliedCoupon = null;
+
+    // Check if cart has a coupon natively attached
+    if (cart.appliedCoupon) {
+      const coupon = await prisma.coupon.findUnique({
+        where: { code: cart.appliedCoupon },
+      });
+
+      // Verify coupon is still valid
+      if (
+        coupon &&
+        new Date() <= coupon.expiresAt &&
+        (!coupon.minAmount || subtotal >= coupon.minAmount)
+      ) {
+        discountAmount =
+          coupon.type === "FIXED"
+            ? coupon.discount
+            : (subtotal * coupon.discount) / 100;
+        appliedCoupon = coupon;
+      } else {
+        // If it became invalid (expired, or subtotal dropped below minAmount), remove it from cart
+        await prisma.cart.update({
+          where: { id: cart.id },
+          data: { appliedCoupon: null },
+        });
+      }
+    }
+
     return res.status(200).json({
       success: true,
       totalItems,
       subtotal,
+      discountAmount,
+      total: subtotal - discountAmount,
+      appliedCoupon,
       items: formattedItems,
     });
   } catch (error: any) {

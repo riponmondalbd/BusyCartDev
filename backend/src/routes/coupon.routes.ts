@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { applyCoupon, createCoupon } from "../controller/coupon.controller";
+import { applyCoupon, createCoupon, removeCoupon } from "../controller/coupon.controller";
 import { protect } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/authorize";
 
@@ -12,5 +12,6 @@ router.post(
   createCoupon,
 );
 router.post("/apply", protect, applyCoupon);
+router.delete("/remove", protect, removeCoupon);
 
 export default router;
