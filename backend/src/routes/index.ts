@@ -12,6 +12,7 @@ import paymentRoutes from "./payment.routes";
 import productRoutes from "./product.routes";
 import refreshTokenRoutes from "./refresh.router";
 import refundRoutes from "./refund.router";
+import reviewRoutes from "./review.routes";
 import superAdminRoutes from "./super.admin.routes";
 import userRoutes from "./user.routes";
 import wishlistRoutes from "./wishlist.routes";
@@ -34,5 +35,6 @@ router.use("/coupon", couponRoutes);
 router.use("/refund", refundRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/invoice", invoiceRoutes);
+router.use("/review", reviewRoutes);
 
 export default router;

@@ -65,6 +65,8 @@ export const createProduct = async (req: Request, res: Response) => {
         ...(stock !== undefined && { stock: Number(stock) }),
         images: imageUrls,
         categoryId,
+        numReviews: 0,
+        averageRating: 0,
       },
     });
 
@@ -144,6 +146,7 @@ export const getAllProducts = async (req: any, res: any) => {
         orderBy,
         include: {
           category: true,
+          reviews: true,
         },
       }),
       prisma.product.count({ where }),
