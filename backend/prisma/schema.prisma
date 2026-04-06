@@ -1,5 +1,5 @@
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../src/generated/prisma"
 }
 
@@ -14,7 +14,7 @@ enum Role {
 }
 
 enum OrderStatus {
-  CREATED
+  PENDING
   PAID
   SHIPPED
   DELIVERED
@@ -33,10 +33,9 @@ enum PaymentStatus {
 }
 
 enum RefundStatus {
-  SUCCESS
-  PAID
+  PENDING
+  SUCCEEDED
   FAILED
-  REFUNDED
 }
 
 model User {
@@ -53,12 +52,14 @@ model User {
 
   refreshTokens RefreshToken[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  wishlists Wishlist[]
-  cart      Cart?
-  orders    Order[]
-  payments  Payment[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  wishlists    Wishlist[]
+  cart         Cart?
+  orders       Order[]
+  payments     Payment[]
+  reviews      Review[]
+  activityLogs ActivityLog[]
 }
 
 model RefreshToken {
@@ -110,6 +111,7 @@ model Product {
   wishlists  Wishlist[]
   cartItems  CartItem[]
   orderItems OrderItem[]
+  reviews    Review[]
 }
 
 model Wishlist {
@@ -154,7 +156,7 @@ model Order {
   id             String      @id @default(uuid())
   userId         String
   user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  status         OrderStatus @default(CREATED)
+  status         OrderStatus @default(PENDING)
   subtotal       Float
   tax            Float       @default(0)
   shipping       Float       @default(0)
@@ -210,7 +212,40 @@ model Refund {
   payment   Payment      @relation(fields: [paymentId], references: [id])
   amount    Float
   reason    String?
-  status    RefundStatus @default(SUCCESS)
+  status    RefundStatus @default(PENDING)
   reference String       @unique
   createdAt DateTime     @default(now())
+}
+
+model Review {
+  id        String  @id @default(uuid())
+  userId    String
+  productId String
+  rating    Int
+  comment   String?
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId])
+  @@index([productId])
+}
+
+model ActivityLog {
+  id         String  @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([entityType])
+  @@index([createdAt])
 }

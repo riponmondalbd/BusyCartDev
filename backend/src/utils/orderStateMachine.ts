@@ -5,10 +5,10 @@ export const canTransition = (
   newStatus: OrderStatus,
 ): boolean => {
   const transitions: Record<OrderStatus, OrderStatus[]> = {
-    CREATED: ["PAID", "CANCELED"],
+    PENDING: ["PAID", "CANCELED"],
     PAID: ["SHIPPED", "PARTIALLY_REFUNDED", "REFUNDED"],
     SHIPPED: ["DELIVERED"],
-    DELIVERED: [],
+    DELIVERED: ["DELIVERED"],
     PARTIALLY_REFUNDED: ["REFUNDED"],
     REFUNDED: [],
     CANCELED: [],

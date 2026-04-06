@@ -60,7 +60,7 @@ export const refundOrder = async (req: any, res: any) => {
           amount: payment!.amount,
           reason,
           reference: refundReference,
-          status: "SUCCESS",
+          status: "SUCCEEDED",
         },
       });
 

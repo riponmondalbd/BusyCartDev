@@ -1,7 +1,6 @@
 import { prisma } from "../prisma/prisma";
 import { canTransition } from "../utils/orderStateMachine";
 
-
 // create order
 export const createOrder = async (req: any, res: any) => {
   try {
@@ -181,24 +180,56 @@ export const updateOrderStatus = async (req: any, res: any) => {
     const { id: orderId } = req.params;
     const { status } = req.body;
 
+    // find order
     const order = await prisma.order.findUnique({
       where: { id: orderId },
+      include: { payments: true },
     });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // check valid transition
     if (!canTransition(order.status, status)) {
       return res.status(400).json({
         message: `Invalid transition from ${order.status} to ${status}`,
       });
     }
 
+    // update order status
     const updatedOrder = await prisma.order.update({
       where: { id: orderId },
       data: { status },
     });
+
+    //log activity
+    await prisma.activityLog.create({
+      data: {
+        userId: req.user.id,
+        action: "ORDER_STATUS_UPDATED",
+        entityId: orderId,
+        entityType: "Order",
+        metadata: {
+          from: order.status,
+          to: status,
+        },
+      },
+    });
+
+    // handle payment/refund implement
+    if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED") {
+      // adjust refunded amount
+      const refundAmount = order.payments
+        .filter((p: any) => p.status === "SUCCEEDED")
+        .reduce((sum: number, p: any) => sum + p.amount, 0);
+
+      // update order refunded amount
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { refundedAmount: refundAmount },
+      });
+    }
 
     return res.status(200).json({
       success: true,
