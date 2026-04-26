@@ -2,11 +2,13 @@ import cloudinary from "../config/cloudinary";
 import { prisma } from "../prisma/prisma";
 
 // super admin only
-// get all admins list - super admin only
+// get all staff members (Admins and Super Admins)
 export const getAllAdmins = async (req: any, res: any) => {
   try {
     const users = await prisma.user.findMany({
-      where: { role: "ADMIN" },
+      where: {
+        role: { in: ["ADMIN", "SUPER_ADMIN"] },
+      },
       select: {
         id: true,
         name: true,
@@ -15,15 +17,19 @@ export const getAllAdmins = async (req: any, res: any) => {
         imageUrl: true,
         createdAt: true,
       },
+      orderBy: { createdAt: "desc" },
     });
 
-    res.json(users);
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ success: false, message: "Something went wrong" });
   }
 };
 
-// get all users list - super admin only
+// get all standard users
 export const getAllUsers = async (req: any, res: any) => {
   try {
     const users = await prisma.user.findMany({
@@ -36,11 +42,15 @@ export const getAllUsers = async (req: any, res: any) => {
         imageUrl: true,
         createdAt: true,
       },
+      orderBy: { createdAt: "desc" },
     });
 
-    res.json(users);
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
   } catch (error) {
-    res.status(500).json({ message: "Something went wrong" });
+    res.status(500).json({ success: false, message: "Something went wrong" });
   }
 };
 
