@@ -16,6 +16,7 @@ export default function SingleProductPage() {
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
+  const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
@@ -59,9 +60,9 @@ export default function SingleProductPage() {
       // Simulate/Implement cart logic
       await fetchApi('/cart/add', {
         method: 'POST',
-        body: JSON.stringify({ productId: id, quantity: 1 }),
+        body: JSON.stringify({ productId: id, quantity: quantity }),
       });
-      alert('Module successfully integrated into your cart matrix.');
+      alert(`${quantity} Module(s) successfully integrated into your cart matrix.`);
     } catch (err: any) {
       if (err.message.includes('401')) {
         alert('Authentication required. Redirecting to terminal login.');
@@ -121,6 +122,29 @@ export default function SingleProductPage() {
                 style={{ width: '100%', height: '100%', objectFit: 'contain', padding: '2rem' }} 
                 alt={product.name} 
               />
+              
+              {/* Carousel Arrows */}
+              {product.images && product.images.length > 1 && (
+                <>
+                  <button 
+                    onClick={() => setActiveImage(prev => (prev === 0 ? product.images.length - 1 : prev - 1))}
+                    style={{ position: 'absolute', left: '1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: '0.3s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-color)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                  <button 
+                    onClick={() => setActiveImage(prev => (prev === product.images.length - 1 ? 0 : prev + 1))}
+                    style={{ position: 'absolute', right: '1rem', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', justifyContent: 'center', alignItems: 'center', transition: '0.3s' }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'var(--primary-color)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                </>
+              )}
+
               <div style={{ position: 'absolute', bottom: '2rem', left: '2rem', padding: '1rem', background: 'rgba(11,12,16,0.8)', backdropFilter: 'blur(10px)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
                 <p style={{ fontSize: '0.7rem', color: 'var(--primary-color)', fontWeight: 800, textTransform: 'uppercase', marginBottom: '0.25rem' }}>Visual State</p>
                 <p style={{ fontSize: '0.9rem', fontWeight: 700 }}>Holographic Render 4K</p>
@@ -158,6 +182,10 @@ export default function SingleProductPage() {
                 {product.category?.name || 'Unassigned Sector'}
               </span>
               <h1 style={{ fontSize: '4rem', fontWeight: 900, marginTop: '1rem', lineHeight: 1.1 }}>{product.name}</h1>
+              <div style={{ display: 'flex', gap: '2rem', marginTop: '1rem' }}>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 800 }}>SKU: <span style={{ color: 'var(--primary-color)' }}>{product.sku || `BC-${product.id?.slice(0, 8).toUpperCase()}`}</span></p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 800 }}>STATUS: <span style={{ color: product.stock > 0 ? 'var(--success-color)' : 'var(--error-color)' }}>{product.stock > 0 ? 'AVAILABLE' : 'OUT OF STOCK'}</span></p>
+              </div>
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', marginBottom: '3rem' }}>
@@ -199,31 +227,60 @@ export default function SingleProductPage() {
               </p>
             </div>
 
-            {/* Purchase Actions */}
-            <div style={{ display: 'flex', gap: '1.5rem', marginTop: 'auto' }}>
-              <button 
-                onClick={handleAddToCart}
-                disabled={addingToCart}
-                className="btn-primary" 
-                style={{ 
-                  flex: 1, padding: '1.5rem', fontSize: '1.25rem', borderRadius: '16px',
-                  display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem',
-                  boxShadow: '0 0 30px rgba(102,252,241,0.2)'
-                }}
-              >
-                <ShoppingCart size={24} /> {addingToCart ? 'INITIALIZING...' : 'ACQUIRE MODULE'}
-              </button>
-              <button 
-                onClick={toggleWishlist}
-                style={{ 
-                  width: '70px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', 
-                  border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: '0.3s',
-                  display: 'flex', justifyContent: 'center', alignItems: 'center',
-                  color: isWishlisted ? 'var(--error-color)' : 'var(--text-primary)'
-                }}
-              >
-                <Heart size={28} fill={isWishlisted ? 'var(--error-color)' : 'none'} />
-              </button>
+            {/* Quantity and Purchase Actions */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: 'auto' }}>
+              <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+                {/* Quantity Control */}
+                <div style={{ 
+                  display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', 
+                  borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', padding: '0.5rem'
+                }}>
+                  <button 
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                    style={{ width: '40px', height: '40px', border: 'none', background: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.5rem', fontWeight: 900 }}
+                  >
+                    -
+                  </button>
+                  <span style={{ width: '50px', textAlign: 'center', fontSize: '1.2rem', fontWeight: 800 }}>{quantity}</span>
+                  <button 
+                    onClick={() => setQuantity(q => q + 1)}
+                    style={{ width: '40px', height: '40px', border: 'none', background: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.25rem', fontWeight: 900 }}
+                  >
+                    +
+                  </button>
+                </div>
+
+                <button 
+                  onClick={handleAddToCart}
+                  disabled={addingToCart || product.stock === 0}
+                  className="btn-primary" 
+                  style={{ 
+                    flex: 1, padding: '1.5rem', fontSize: '1.25rem', borderRadius: '16px',
+                    display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem',
+                    boxShadow: '0 0 30px rgba(102,252,241,0.2)'
+                  }}
+                >
+                  <ShoppingCart size={24} /> {addingToCart ? 'INITIALIZING...' : 'ACQUIRE MODULE'}
+                </button>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <button 
+                  onClick={toggleWishlist}
+                  style={{ 
+                    flex: 1, height: '60px', borderRadius: '16px', background: 'rgba(255,255,255,0.02)', 
+                    border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', transition: '0.3s',
+                    display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.75rem',
+                    color: isWishlisted ? 'var(--error-color)' : 'var(--text-primary)', fontWeight: 700
+                  }}
+                >
+                  <Heart size={20} fill={isWishlisted ? 'var(--error-color)' : 'none'} /> 
+                  {isWishlisted ? 'IN COLLECTION' : 'ADD TO COLLECTION'}
+                </button>
+                <button style={{ flex: 1, borderRadius: '16px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer' }}>
+                  COMPARE SPECS
+                </button>
+              </div>
             </div>
 
             {/* Trust Badges */}
