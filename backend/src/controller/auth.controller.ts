@@ -111,3 +111,32 @@ export const logoutUser = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error logging out user" });
   }
 };
+// google auth callback
+export const googleCallback = async (req: any, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Google auth failed`);
+    }
+
+    const accessToken = generateAccessToken(user.id, user.role);
+    const refreshToken = generateRefreshToken(user.id);
+
+    // store refresh token to DB
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+    res.cookie("accessToken", accessToken, accessCookieOptions);
+
+    // redirect to frontend with token in query param
+    res.redirect(`${process.env.FRONTEND_URL}/login?token=${accessToken}`);
+  } catch (error) {
+    res.redirect(`${process.env.FRONTEND_URL}/login?error=Server error`);
+  }
+};
