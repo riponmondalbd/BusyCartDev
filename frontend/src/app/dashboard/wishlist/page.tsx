@@ -12,7 +12,7 @@ export default function WishlistPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetchApi('/wishlist/get-all-wishlists');
+        const res = await fetchApi('/wishlist/all');
         setWishlist(Array.isArray(res) ? res : res.data || []);
       } catch (err) {
         console.error(err);
@@ -23,10 +23,10 @@ export default function WishlistPage() {
     load();
   }, []);
 
-  const removeFromWishlist = async (id: string) => {
+  const removeFromWishlist = async (productId: string) => {
     try {
-      await fetchApi(`/wishlist/remove/${id}`, { method: 'DELETE' });
-      setWishlist(wishlist.filter(item => item.id !== id));
+      await fetchApi(`/wishlist/remove/${productId}`, { method: 'DELETE' });
+      setWishlist(wishlist.filter(item => item.productId !== productId));
     } catch (err) {
       alert('Failed to remove item');
     }
@@ -66,7 +66,7 @@ export default function WishlistPage() {
                     View
                   </Link>
                   <button 
-                    onClick={() => removeFromWishlist(item.id)}
+                    onClick={() => removeFromWishlist(item.productId)}
                     style={{ background: 'rgba(255,75,75,0.1)', border: '1px solid rgba(255,75,75,0.2)', color: 'var(--error-color)', borderRadius: '8px', padding: '0.5rem', cursor: 'pointer', transition: 'all 0.2s' }}
                     onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,75,75,0.2)'}
                     onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,75,75,0.1)'}
