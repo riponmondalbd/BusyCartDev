@@ -6,7 +6,9 @@ import { prisma } from "../prisma/prisma";
 export const getAllUsers = async (req: any, res: any) => {
   try {
     const users = await prisma.user.findMany({
-      where: { role: "USER" },
+      where: { 
+        role: { in: ["USER", "ADMIN"] } 
+      },
       select: {
         id: true,
         name: true,
@@ -15,6 +17,7 @@ export const getAllUsers = async (req: any, res: any) => {
         imageUrl: true,
         createdAt: true,
       },
+      orderBy: { createdAt: "desc" }
     });
 
     res.json(users);
@@ -96,17 +99,11 @@ export const updateUserRoleAdmin = async (req: any, res: any) => {
       });
     }
 
-    // Prevent promoting an Admin to Admin again
-    if (role === "ADMIN" && user.role === "ADMIN") {
-      return res.status(400).json({
-        message: "User is already an Admin",
-      });
-    }
-
-    // Prevent demoting a USER to USER again
-    if (role === "USER" && user.role === "USER") {
-      return res.status(400).json({
-        message: "User is already a regular User",
+    // If the role is already the same, just return success
+    if (user.role === role) {
+      return res.json({
+        message: `User is already a ${role}`,
+        user,
       });
     }
 

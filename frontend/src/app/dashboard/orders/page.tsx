@@ -40,7 +40,7 @@ export default function OrdersPage() {
     const reason = prompt('Reason for refund:');
     if (!reason) return;
     try {
-      await fetchApi('/refund/request', {
+      await fetchApi('/refund', {
         method: 'POST',
         body: JSON.stringify({ orderId, reason }),
       });
@@ -79,7 +79,7 @@ export default function OrdersPage() {
                   <h3 style={{ fontSize: '1.2rem', fontFamily: 'monospace', color: 'var(--primary-color)' }}>#{order.id.split('-')[0].toUpperCase()}</h3>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '1.5rem', fontWeight: 800 }}>${order.totalAmount}</p>
+                  <p style={{ fontSize: '1.5rem', fontWeight: 800 }}>${order.total}</p>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
                     {getStatusIcon(order.status)}
                     <span style={{ fontWeight: 600, fontSize: '0.9rem' }}>{order.status}</span>

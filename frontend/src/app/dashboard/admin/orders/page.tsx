@@ -15,7 +15,7 @@ export default function AdminOrdersPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetchApi('/admin/orders');
+        const res = await fetchApi('/order/all');
         setOrders(Array.isArray(res) ? res : res.data || []);
       } catch (err: any) {
         if (err.message?.includes('401') || err.message?.includes('403')) router.push('/dashboard');
@@ -28,7 +28,7 @@ export default function AdminOrdersPage() {
 
   const updateStatus = async (orderId: string, status: string) => {
     try {
-      await fetchApi(`/admin/orders/${orderId}`, {
+      await fetchApi(`/order/update-status/${orderId}`, {
         method: 'PUT',
         body: JSON.stringify({ status }),
       });
@@ -68,7 +68,7 @@ export default function AdminOrdersPage() {
                   </p>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <p style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>${order.totalAmount}</p>
+                  <p style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '0.5rem' }}>${order.total}</p>
                   <select
                     value={order.status}
                     onChange={e => updateStatus(order.id, e.target.value)}
@@ -78,9 +78,9 @@ export default function AdminOrdersPage() {
                   </select>
                 </div>
               </div>
-              {order.orderItems && order.orderItems.length > 0 && (
+              {order.items && order.items.length > 0 && (
                 <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-                  {order.orderItems.map((item: any) => (
+                  {order.items.map((item: any) => (
                     <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                       <span>{item.product?.name} × {item.quantity}</span>
                       <span>${item.price}</span>

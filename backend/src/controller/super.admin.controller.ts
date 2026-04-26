@@ -84,11 +84,11 @@ export const updateUserRole = async (req: any, res: any) => {
     }
 
     // Validate role (allowed roles to set)
-    const validRoles = ["ADMIN", "USER"];
+    const validRoles = ["ADMIN", "USER", "SUPER_ADMIN"];
     if (!validRoles.includes(role)) {
       return res
         .status(400)
-        .json({ message: "Invalid role. Only ADMIN or USER allowed" });
+        .json({ message: "Invalid role. Supported roles: ADMIN, USER, SUPER_ADMIN" });
     }
 
     // Find the user
@@ -109,17 +109,11 @@ export const updateUserRole = async (req: any, res: any) => {
         .json({ message: "Cannot change role of another SUPER_ADMIN" });
     }
 
-    // Prevent promoting an Admin to Admin again
-    if (role === "ADMIN" && user.role === "ADMIN") {
-      return res.status(400).json({
-        message: "User is already an Admin",
-      });
-    }
-
-    // Prevent demoting a USER to USER again
-    if (role === "USER" && user.role === "USER") {
-      return res.status(400).json({
-        message: "User is already a regular User",
+    // If the role is already the same, just return success
+    if (user.role === role) {
+      return res.json({
+        message: `User is already a ${role}`,
+        user,
       });
     }
 

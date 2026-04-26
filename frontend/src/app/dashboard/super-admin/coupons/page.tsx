@@ -10,7 +10,7 @@ export default function SuperAdminCouponsPage() {
   const [coupons, setCoupons] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ code: '', discountValue: '', discountType: 'PERCENTAGE', expiresAt: '', usageLimit: '' });
+  const [form, setForm] = useState({ code: '', discount: '', type: 'PERCENTAGE', expiresAt: '', minAmount: '' });
 
   useEffect(() => {
     const load = async () => {
@@ -29,10 +29,10 @@ export default function SuperAdminCouponsPage() {
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const payload = { ...form, discountValue: parseFloat(form.discountValue), usageLimit: form.usageLimit ? parseInt(form.usageLimit) : null };
+      const payload = { ...form, discount: parseFloat(form.discount), minAmount: form.minAmount ? parseFloat(form.minAmount) : 0 };
       const res = await fetchApi('/coupon/create', { method: 'POST', body: JSON.stringify(payload) });
       setCoupons([res.data || res, ...coupons]);
-      setForm({ code: '', discountValue: '', discountType: 'PERCENTAGE', expiresAt: '', usageLimit: '' });
+      setForm({ code: '', discount: '', type: 'PERCENTAGE', expiresAt: '', minAmount: '' });
       setShowForm(false);
     } catch (err: any) { alert(err.message); }
   };
@@ -69,12 +69,12 @@ export default function SuperAdminCouponsPage() {
                 <input type="text" className="input-field" placeholder="SUMMER20" value={form.code} onChange={e => setForm({ ...form, code: e.target.value.toUpperCase() })} required />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Discount Value</label>
-                <input type="number" className="input-field" placeholder="20" value={form.discountValue} onChange={e => setForm({ ...form, discountValue: e.target.value })} required />
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Discount</label>
+                <input type="number" className="input-field" placeholder="20" value={form.discount} onChange={e => setForm({ ...form, discount: e.target.value })} required />
               </div>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Type</label>
-                <select className="input-field" value={form.discountType} onChange={e => setForm({ ...form, discountType: e.target.value })}>
+                <select className="input-field" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
                   <option value="PERCENTAGE">Percentage (%)</option>
                   <option value="FIXED">Fixed Amount ($)</option>
                 </select>
@@ -84,8 +84,8 @@ export default function SuperAdminCouponsPage() {
                 <input type="datetime-local" className="input-field" value={form.expiresAt} onChange={e => setForm({ ...form, expiresAt: e.target.value })} />
               </div>
               <div>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Usage Limit</label>
-                <input type="number" className="input-field" placeholder="Unlimited" value={form.usageLimit} onChange={e => setForm({ ...form, usageLimit: e.target.value })} />
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Min Amount</label>
+                <input type="number" className="input-field" placeholder="0" value={form.minAmount} onChange={e => setForm({ ...form, minAmount: e.target.value })} />
               </div>
             </div>
             <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
@@ -116,10 +116,10 @@ export default function SuperAdminCouponsPage() {
               </div>
               <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
                 <span style={{ background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                  <Percent size={12} /> {c.discountValue}{c.discountType === 'PERCENTAGE' ? '%' : '$'} off
+                   {c.discount}{c.type === 'PERCENTAGE' ? '%' : '$'} off
                 </span>
                 <span style={{ background: 'rgba(255,255,255,0.05)', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.85rem' }}>
-                  Used: {c.usedCount || 0}{c.usageLimit ? `/${c.usageLimit}` : ''}
+                  Min: ${c.minAmount || 0}
                 </span>
               </div>
               {c.expiresAt && (

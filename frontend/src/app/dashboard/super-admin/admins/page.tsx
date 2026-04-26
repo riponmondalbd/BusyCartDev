@@ -15,8 +15,15 @@ export default function SuperAdminAdminsPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetchApi('/super-admin/users');
-        setUsers(Array.isArray(res) ? res : res.data || []);
+        const [usersRes, adminsRes] = await Promise.all([
+          fetchApi('/super/admin/users'),
+          fetchApi('/super/admin/admins')
+        ]);
+        const combined = [
+          ...(Array.isArray(usersRes) ? usersRes : usersRes.data || []),
+          ...(Array.isArray(adminsRes) ? adminsRes : adminsRes.data || [])
+        ];
+        setUsers(combined);
       } catch (err: any) {
         if (err.message?.includes('401') || err.message?.includes('403')) router.push('/dashboard');
       } finally {
@@ -28,7 +35,7 @@ export default function SuperAdminAdminsPage() {
 
   const updateRole = async (userId: string, role: string) => {
     try {
-      await fetchApi(`/super-admin/users/${userId}/role`, {
+      await fetchApi(`/super/admin/users/${userId}/role`, {
         method: 'PUT',
         body: JSON.stringify({ role }),
       });

@@ -24,6 +24,8 @@ export default function RefundsPage() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'SUCCEEDED': return 'var(--success-color)';
+      case 'FAILED': return 'var(--error-color)';
       case 'APPROVED': return 'var(--success-color)';
       case 'REJECTED': return 'var(--error-color)';
       case 'PENDING': return '#ffcc00';
@@ -60,8 +62,8 @@ export default function RefundsPage() {
                   gap: '0.5rem',
                   fontSize: '1rem'
                 }}>
-                  {refund.status === 'APPROVED' && <CheckCircle size={18} />}
-                  {refund.status === 'REJECTED' && <XCircle size={18} />}
+                  {(refund.status === 'APPROVED' || refund.status === 'SUCCEEDED') && <CheckCircle size={18} />}
+                  {(refund.status === 'REJECTED' || refund.status === 'FAILED') && <XCircle size={18} />}
                   {refund.status === 'PENDING' && <Clock size={18} />}
                   {refund.status}
                 </p>

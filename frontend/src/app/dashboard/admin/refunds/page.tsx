@@ -13,7 +13,7 @@ export default function AdminRefundsPage() {
   useEffect(() => {
     const load = async () => {
       try {
-        const res = await fetchApi('/admin/refund');
+        const res = await fetchApi('/refund/get-all-refunds');
         setRefunds(Array.isArray(res) ? res : res.data || []);
       } catch (err: any) {
         if (err.message?.includes('401') || err.message?.includes('403')) router.push('/dashboard');
@@ -36,8 +36,8 @@ export default function AdminRefundsPage() {
 
   const statusBadge = (status: string) => {
     const map: Record<string, { color: string; icon: any }> = {
-      APPROVED: { color: 'var(--success-color)', icon: CheckCircle },
-      REJECTED: { color: 'var(--error-color)', icon: XCircle },
+      SUCCEEDED: { color: 'var(--success-color)', icon: CheckCircle },
+      FAILED: { color: 'var(--error-color)', icon: XCircle },
       PENDING: { color: '#ffcc00', icon: Clock },
     };
     const cfg = map[status] || map.PENDING;

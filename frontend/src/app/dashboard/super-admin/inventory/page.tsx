@@ -45,10 +45,10 @@ export default function SuperAdminInventoryPage() {
     const payload = { ...form, price: parseFloat(form.price), stock: parseInt(form.stock), discount: parseFloat(form.discount || '0') };
     try {
       if (editingProduct) {
-        await fetchApi(`/super-admin/product/update/${editingProduct.id}`, { method: 'PUT', body: JSON.stringify(payload) });
+        await fetchApi(`/product/products/${editingProduct.id}`, { method: 'PUT', body: JSON.stringify(payload) });
         setProducts(products.map(p => p.id === editingProduct.id ? { ...p, ...payload } : p));
       } else {
-        const res = await fetchApi('/super-admin/product/create', { method: 'POST', body: JSON.stringify(payload) });
+        const res = await fetchApi('/product/create', { method: 'POST', body: JSON.stringify(payload) });
         setProducts([res.data || res, ...products]);
       }
       resetForm();
@@ -58,7 +58,7 @@ export default function SuperAdminInventoryPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this product from the inventory?')) return;
     try {
-      await fetchApi(`/super-admin/product/delete/${id}`, { method: 'DELETE' });
+      await fetchApi(`/product/products/${id}`, { method: 'DELETE' });
       setProducts(products.filter(p => p.id !== id));
     } catch (err: any) { alert(err.message); }
   };

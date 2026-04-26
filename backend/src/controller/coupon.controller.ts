@@ -129,3 +129,38 @@ export const removeCoupon = async (req: any, res: any) => {
     });
   }
 };
+
+// get all coupons
+export const getAllCoupons = async (req: any, res: any) => {
+  try {
+    const coupons = await prisma.coupon.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    return res.status(200).json({
+      success: true,
+      data: coupons,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch coupons",
+    });
+  }
+};
+
+// delete coupon
+export const deleteCoupon = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    await prisma.coupon.delete({ where: { id } });
+    return res.status(200).json({
+      success: true,
+      message: "Coupon deleted successfully",
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete coupon",
+    });
+  }
+};
