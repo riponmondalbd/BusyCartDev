@@ -28,7 +28,8 @@ export default function SingleProductPage() {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [processing, setProcessing] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
+  const [isBuying, setIsBuying] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
   useEffect(() => {
@@ -68,9 +69,12 @@ export default function SingleProductPage() {
     window.dispatchEvent(new CustomEvent('wishlist-update', { detail: next.length }));
   };
 
-  const handleAddToCart = async (showNotification = true) => {
+  const handleAddToCart = async (showNotification = true, isBuyAction = false) => {
     if (!id) return false;
-    setProcessing(true);
+    
+    if (isBuyAction) setIsBuying(true);
+    else setIsAdding(true);
+
     try {
       await fetchApi('/cart/add', {
         method: 'POST',
@@ -93,12 +97,13 @@ export default function SingleProductPage() {
       }
       return false;
     } finally {
-      setProcessing(false);
+      if (isBuyAction) setIsBuying(false);
+      else setIsAdding(false);
     }
   };
 
   const handleBuyNow = async () => {
-    const success = await handleAddToCart(false);
+    const success = await handleAddToCart(false, true);
     if (success) {
       router.push('/checkout');
     }
@@ -274,20 +279,20 @@ export default function SingleProductPage() {
 
               <div style={{ display: 'flex', gap: '1.5rem' }}>
                 <button 
-                  onClick={() => handleAddToCart(true)} 
-                  disabled={processing || product.stock === 0}
+                  onClick={() => handleAddToCart(true, false)} 
+                  disabled={isAdding || isBuying || product.stock === 0}
                   className="btn-primary" 
                   style={{ flex: 1, padding: '1.25rem', borderRadius: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', color: '#fff' }}
                 >
-                  <ShoppingCart size={20} style={{ marginRight: '0.5rem' }} /> ADD TO CART
+                  <ShoppingCart size={20} style={{ marginRight: '0.5rem' }} /> {isAdding ? 'ADDING...' : 'ADD TO CART'}
                 </button>
                 <button 
                   onClick={handleBuyNow} 
-                  disabled={processing || product.stock === 0}
+                  disabled={isAdding || isBuying || product.stock === 0}
                   className="btn-primary" 
                   style={{ flex: 1, padding: '1.25rem', borderRadius: '12px', boxShadow: '0 0 30px rgba(102,252,241,0.2)' }}
                 >
-                  <Zap size={20} style={{ marginRight: '0.5rem' }} /> {processing ? 'PREPARING...' : 'BUY NOW'}
+                  <Zap size={20} style={{ marginRight: '0.5rem' }} /> {isBuying ? 'PREPARING...' : 'BUY NOW'}
                 </button>
               </div>
             </div>
