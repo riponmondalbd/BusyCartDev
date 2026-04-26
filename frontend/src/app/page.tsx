@@ -16,6 +16,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 const sliderData = [
   {
@@ -52,14 +53,14 @@ export default function ElectroMarketplaceHome() {
     const token =
       typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (!token) {
-      alert("Authentication required. Redirecting to login terminal...");
+      toast.error("Authentication required. Redirecting to login terminal...");
       router.push("/login");
       return;
     }
     try {
       await toggleWishlist(id);
     } catch (err: any) {
-      alert(err.message || "Action failed");
+      toast.error(err.message || "Action failed");
     }
   };
 
