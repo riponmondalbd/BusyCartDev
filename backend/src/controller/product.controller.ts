@@ -211,7 +211,7 @@ export const getProductById = async (req: Request, res: Response) => {
 export const updateProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const { name, description, price, discount, stock } = req.body;
+    const { name, description, price, discount, stock, categoryId } = req.body;
 
     if (!id) {
       return res.status(400).json({
@@ -280,6 +280,7 @@ export const updateProduct = async (req: Request, res: Response) => {
         discount: discount ? Number(discount) : null,
         stock: Number(stock),
         images: imageUrls,
+        ...(categoryId && { categoryId }),
       },
     });
 

@@ -20,6 +20,7 @@ const userLinks = [
 
 const adminLinks = [
   { href: '/dashboard/admin/users',   label: 'User Database',     icon: Users },
+  { href: '/dashboard/super-admin/inventory', label: 'Inventory Architect', icon: Layers },
   { href: '/dashboard/admin/orders',  label: 'Order Matrix',       icon: Database },
   { href: '/dashboard/admin/refunds', label: 'Refund Processing',  icon: ArrowRightLeft },
 ];
@@ -49,6 +50,7 @@ function NavItem({ href, label, icon: Icon, active, color = 'var(--primary-color
         color: active ? color : 'var(--text-secondary)',
         transition: 'all 0.2s ease',
         cursor: 'pointer',
+        marginBottom: '4px'
       }}
         onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'var(--text-primary)'; } }}
         onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
@@ -65,7 +67,7 @@ function SectionLabel({ label, color = 'var(--text-secondary)' }: { label: strin
   return (
     <p style={{
       fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase',
-      letterSpacing: '1.5px', color, padding: '0 1rem', marginBottom: '0.5rem', marginTop: '0.25rem',
+      letterSpacing: '1.5px', color, padding: '0 1rem', marginBottom: '0.5rem', marginTop: '1.25rem',
       display: 'flex', alignItems: 'center', gap: '0.5rem'
     }}>
       <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: color, display: 'inline-block', boxShadow: `0 0 6px ${color}` }}></span>
@@ -116,9 +118,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const SidebarContent = () => (
-    <>
-      {/* User Badge */}
-      <div style={{ padding: '1rem', marginBottom: '1.5rem', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: 'var(--glass-border)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '1.5rem 0.75rem' }}>
+      {/* User Badge - Fixed Top */}
+      <div style={{ padding: '1rem', marginBottom: '1.5rem', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: 'var(--glass-border)', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
           <div style={{
             width: '42px', height: '42px', borderRadius: '50%', flexShrink: 0,
@@ -141,31 +143,32 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
       </div>
 
-      <NavItem href="/dashboard" label="Dashboard Overview" icon={LayoutDashboard} active={pathname === '/dashboard'} color="var(--primary-color)" />
+      {/* Scrollable Nav Area */}
+      <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }} className="custom-scrollbar">
+        <NavItem href="/dashboard" label="Dashboard Overview" icon={LayoutDashboard} active={pathname === '/dashboard'} color="var(--primary-color)" />
 
-      <div style={{ height: '1px', background: 'var(--border-color)', margin: '1rem 0.5rem' }} />
+        <div style={{ height: '1px', background: 'var(--border-color)', margin: '1rem 0.5rem' }} />
 
-      <SectionLabel label="My Account" color="var(--primary-color)" />
-      {userLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="var(--primary-color)" />)}
+        <SectionLabel label="My Account" color="var(--primary-color)" />
+        {userLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="var(--primary-color)" />)}
 
-      {isAdmin && (
-        <>
-          <div style={{ height: '1px', background: 'rgba(255,204,0,0.2)', margin: '1rem 0.5rem' }} />
-          <SectionLabel label="Admin Controls" color="#ffcc00" />
-          {adminLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="#ffcc00" />)}
-        </>
-      )}
+        {isAdmin && (
+          <>
+            <SectionLabel label="Admin Controls" color="#ffcc00" />
+            {adminLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="#ffcc00" />)}
+          </>
+        )}
 
-      {isSuperAdmin && (
-        <>
-          <div style={{ height: '1px', background: 'rgba(255,75,75,0.2)', margin: '1rem 0.5rem' }} />
-          <SectionLabel label="System Override" color="var(--error-color)" />
-          {superAdminLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="var(--error-color)" />)}
-        </>
-      )}
+        {isSuperAdmin && (
+          <>
+            <SectionLabel label="System Override" color="var(--error-color)" />
+            {superAdminLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="var(--error-color)" />)}
+          </>
+        )}
+      </div>
 
-      {/* Logout pinned to bottom */}
-      <div style={{ marginTop: 'auto', paddingTop: '1.5rem' }}>
+      {/* Logout - Fixed Bottom */}
+      <div style={{ marginTop: 'auto', paddingTop: '1.5rem', flexShrink: 0 }}>
         <div style={{ height: '1px', background: 'var(--border-color)', marginBottom: '1rem' }} />
         <button onClick={handleLogout} style={{
           display: 'flex', alignItems: 'center', gap: '0.875rem', width: '100%',
@@ -180,19 +183,29 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <span>System Logout</span>
         </button>
       </div>
-    </>
+      
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); borderRadius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+      `}</style>
+    </div>
   );
 
   return (
-    <div style={{ display: 'flex', height: 'calc(100vh - 70px)', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', minHeight: 'calc(100vh - 70px)', background: 'var(--bg-color)' }}>
       {/* Desktop Sidebar */}
       <aside style={{
         width: '260px', flexShrink: 0,
-        background: 'rgba(11, 12, 16, 0.8)',
-        backdropFilter: 'blur(12px)',
+        background: 'rgba(11, 12, 16, 0.95)',
+        backdropFilter: 'blur(16px)',
         borderRight: 'var(--glass-border)',
-        display: 'flex', flexDirection: 'column',
-        height: '100%', padding: '1.5rem 0.75rem',
+        height: 'calc(100vh - 70px)',
+        position: 'fixed',
+        top: '70px',
+        left: 0,
+        zIndex: 50
       }} className="dashboard-sidebar">
         <SidebarContent />
       </aside>
@@ -201,7 +214,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {sidebarOpen && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex' }}>
           <div onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} />
-          <aside style={{ position: 'relative', zIndex: 1, width: '260px', background: 'rgba(11, 12, 16, 1)', display: 'flex', flexDirection: 'column', padding: '1.5rem 0.75rem', height: '100%' }}>
+          <aside style={{ position: 'relative', zIndex: 1, width: '260px', background: 'rgba(11, 12, 16, 1)', height: '100%' }}>
             <SidebarContent />
           </aside>
           <button onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(0,0,0,0.6)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-primary)' }}>
@@ -216,7 +229,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </button>
 
       {/* Main content */}
-      <main style={{ flex: 1, overflowY: 'auto' }}>
+      <main style={{ flex: 1, marginLeft: '260px', width: 'calc(100% - 260px)' }}>
         {children}
       </main>
 
@@ -224,6 +237,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         @media (max-width: 768px) {
           .dashboard-sidebar { display: none !important; }
           .mobile-menu-btn { display: flex !important; }
+          main { margin-left: 0 !important; width: 100% !important; }
         }
       `}</style>
     </div>

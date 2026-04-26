@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { fetchApi } from '@/utils/api';
 
 export default function ProductsPage() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -15,12 +17,22 @@ export default function ProductsPage() {
     const fetchData = async () => {
       try {
         const [catsRes, prodsRes] = await Promise.all([
-          fetchApi('/category/all').catch(() => []),
-          fetchApi('/product/products').catch(() => [])
+          fetchApi('/category/all').catch(() => ({ data: [] })),
+          fetchApi('/product/products').catch(() => ({ data: [] }))
         ]);
         
-        setCategories(Array.isArray(catsRes) ? catsRes : catsRes.data || []);
-        setProducts(Array.isArray(prodsRes) ? prodsRes : prodsRes.data || []);
+        const cats = Array.isArray(catsRes) ? catsRes : catsRes.data || [];
+        const prods = Array.isArray(prodsRes) ? prodsRes : prodsRes.data || [];
+        
+        setCategories(cats);
+        setProducts(prods);
+
+        // Check for category slug in URL
+        const categorySlug = searchParams.get('category');
+        if (categorySlug) {
+          const cat = cats.find((c: any) => c.slug === categorySlug);
+          if (cat) setActiveCategory(cat.id);
+        }
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -29,7 +41,7 @@ export default function ProductsPage() {
     };
 
     fetchData();
-  }, []);
+  }, [searchParams]);
 
   const filteredProducts = products.filter(p => {
     const matchesCategory = activeCategory === 'all' || p.categoryId === activeCategory;
