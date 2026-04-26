@@ -27,6 +27,10 @@ export default function ProductsPage() {
         setCategories(cats);
         setProducts(prods);
 
+        // Check for search query in URL
+        const q = searchParams.get('search');
+        if (q) setSearchQuery(q);
+
         // Check for category slug in URL
         const categorySlug = searchParams.get('category');
         if (categorySlug) {

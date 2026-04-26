@@ -2,82 +2,116 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { fetchApi } from '@/utils/api';
+import { Heart, Trash2, ShoppingCart, ArrowLeft } from 'lucide-react';
 
 export default function WishlistPage() {
-  const router = useRouter();
-  const [wishlist, setWishlist] = useState<any[]>([]);
+  const [wishlistProducts, setWishlistProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadWishlist = async () => {
-    try {
-      const res = await fetchApi('/wishlist/all');
-      setWishlist(Array.isArray(res) ? res : res.data || []);
-    } catch (err: any) {
-      if (err.message.includes('401')) {
-        router.push('/login');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    loadWishlist();
+    const loadWishlistItems = async () => {
+      try {
+        const savedIds = JSON.parse(localStorage.getItem('wishlist') || '[]');
+        if (savedIds.length === 0) {
+          setWishlistProducts([]);
+          setLoading(false);
+          return;
+        }
+
+        // Fetch all products and filter locally (simplest for now)
+        const res = await fetchApi('/product/products');
+        const allProducts = Array.isArray(res) ? res : res.data || [];
+        
+        const filtered = allProducts.filter((p: any) => savedIds.includes(p.id));
+        setWishlistProducts(filtered);
+      } catch (err) {
+        console.error('Error loading wishlist:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadWishlistItems();
   }, []);
 
-  const handleRemove = async (productId: string) => {
-    try {
-      await fetchApi(`/wishlist/remove/${productId}`, { method: 'DELETE' });
-      setWishlist(wishlist.filter(item => item.product.id !== productId));
-    } catch (err) {
-      console.error(err);
-    }
+  const removeItem = (id: string) => {
+    const savedIds = JSON.parse(localStorage.getItem('wishlist') || '[]');
+    const nextIds = savedIds.filter((sid: string) => sid !== id);
+    localStorage.setItem('wishlist', JSON.stringify(nextIds));
+    setWishlistProducts(prev => prev.filter(p => p.id !== id));
+    
+    // Notify other components (Navbar)
+    window.dispatchEvent(new CustomEvent('wishlist-update', { detail: nextIds.length }));
   };
 
   if (loading) {
-    return <div className="container" style={{ padding: '4rem 0', textAlign: 'center', color: 'var(--primary-color)' }}>Loading Wishlist...</div>;
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh', flexDirection: 'column', gap: '1rem' }}>
+        <div style={{ width: '40px', height: '40px', border: '3px solid rgba(102,252,241,0.1)', borderTopColor: 'var(--primary-color)', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+        <p style={{ color: 'var(--text-secondary)' }}>Synchronizing Saved Modules...</p>
+        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      </div>
+    );
   }
 
   return (
-    <div className="container" style={{ padding: '3rem 0' }}>
-      <h1 style={{ fontSize: '2.5rem', color: 'var(--text-primary)', marginBottom: '2rem' }}>Saved Modules (Wishlist)</h1>
+    <div className="container" style={{ padding: '5rem 0' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4rem' }}>
+        <div>
+          <h1 style={{ fontSize: '3rem', fontWeight: 900, marginBottom: '0.5rem' }}>Saved Modules</h1>
+          <p style={{ color: 'var(--text-secondary)' }}>Your curated selection of futuristic hardware.</p>
+        </div>
+        <Link href="/products" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--primary-color)', fontWeight: 700 }}>
+          <ArrowLeft size={20} /> Back to Catalog
+        </Link>
+      </div>
 
-      {wishlist.length === 0 ? (
-        <div className="glass-panel" style={{ padding: '4rem', textAlign: 'center' }}>
-          <h2 style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>Your wishlist is empty.</h2>
-          <Link href="/products" className="btn-primary">Browse Modules</Link>
+      {wishlistProducts.length === 0 ? (
+        <div className="glass-panel" style={{ padding: '6rem', textAlign: 'center' }}>
+          <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0 auto 2rem' }}>
+            <Heart size={40} color="var(--text-secondary)" />
+          </div>
+          <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Your wishlist is empty</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem' }}>You haven't initialized any modules in your wishlist yet.</p>
+          <Link href="/products" className="btn-primary" style={{ padding: '1rem 3rem' }}>Explore Catalog</Link>
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '2rem' }}>
-          {wishlist.map((item) => {
-            const prod = item.product;
-            if (!prod) return null;
-            return (
-              <div key={item.id} className="glass-panel" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ height: '200px', background: 'rgba(255,255,255,0.02)', display: 'flex', justifyContent: 'center', alignItems: 'center', borderBottom: 'var(--glass-border)', position: 'relative' }}>
-                  <button onClick={() => handleRemove(prod.id)} style={{ position: 'absolute', top: '10px', right: '10px', background: 'rgba(0,0,0,0.5)', border: 'none', color: 'var(--error-color)', cursor: 'pointer', fontSize: '1.2rem', width: '30px', height: '30px', borderRadius: '50%' }}>
-                    &times;
-                  </button>
-                  {prod.images && prod.images[0] ? (
-                    <img src={prod.images[0]} alt={prod.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <span style={{ color: 'var(--text-secondary)' }}>No Image</span>
-                  )}
-                </div>
-                <div style={{ padding: '1.5rem', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                  <h3 style={{ fontSize: '1.2rem', marginBottom: '0.5rem', color: 'var(--text-primary)' }}>{prod.name}</h3>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                    <span style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--primary-color)' }}>${prod.price}</span>
-                    <Link href={`/products/${prod.id}`} className="btn-primary" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
-                      Inspect
-                    </Link>
-                  </div>
-                </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '2.5rem' }}>
+          {wishlistProducts.map((prod) => (
+            <div key={prod.id} className="product-card" style={{ padding: '1.5rem' }}>
+              <div className="product-image-wrapper" style={{ height: '220px', marginBottom: '1.5rem' }}>
+                <img src={prod.images?.[0]} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <button 
+                  onClick={() => removeItem(prod.id)}
+                  style={{ 
+                    position: 'absolute', top: '1rem', right: '1rem', 
+                    background: 'rgba(255,75,75,0.1)', border: '1px solid var(--error-color)',
+                    color: 'var(--error-color)', padding: '0.5rem', borderRadius: '8px', cursor: 'pointer'
+                  }}
+                >
+                  <Trash2 size={18} />
+                </button>
               </div>
-            );
-          })}
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+                <div>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 800, textTransform: 'uppercase' }}>{prod.category?.name || 'HARDWARE'}</p>
+                  <Link href={`/products/${prod.id}`} style={{ fontSize: '1.25rem', fontWeight: 700, margin: '0.5rem 0', display: 'block' }}>{prod.name}</Link>
+                </div>
+                <span style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--primary-color)' }}>${prod.price}</span>
+              </div>
+
+              <div style={{ display: 'flex', gap: '1rem' }}>
+                <Link href={`/products/${prod.id}`} className="btn-primary" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
+                  Inspect
+                </Link>
+                <button style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--primary-color)', padding: '0.75rem', borderRadius: '8px', cursor: 'pointer' }}>
+                  <ShoppingCart size={20} />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       )}
     </div>

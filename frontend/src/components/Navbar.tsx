@@ -1,14 +1,27 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Heart, User, Search, Menu, LayoutGrid } from 'lucide-react';
 
 export default function Navbar() {
+  const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [wishlistCount, setWishlistCount] = useState(0);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   useEffect(() => {
+    const handleWishlistUpdate = (e: any) => setWishlistCount(e.detail);
+    window.addEventListener('wishlist-update', handleWishlistUpdate);
+
     const checkAuth = () => {
       const token = localStorage.getItem('token');
       setIsLoggedIn(!!token);
@@ -16,7 +29,10 @@ export default function Navbar() {
 
     checkAuth();
     window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('wishlist-update', handleWishlistUpdate);
+    };
   }, []);
 
   return (
@@ -42,7 +58,7 @@ export default function Navbar() {
           </Link>
 
           {/* Search Bar (Electro Style) */}
-          <div style={{ flex: 1, position: 'relative' }}>
+          <form onSubmit={handleSearch} style={{ flex: 1, position: 'relative' }}>
             <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
                <input 
                  type="text" 
@@ -51,17 +67,17 @@ export default function Navbar() {
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
                />
-               <button style={{ background: 'var(--primary-color)', border: 'none', padding: '0 1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+               <button type="submit" style={{ background: 'var(--primary-color)', border: 'none', padding: '0 1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
                  <Search size={20} color="#000" />
                </button>
             </div>
-          </div>
+          </form>
 
           {/* Actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexShrink: 0 }}>
             <Link href="/wishlist" style={{ position: 'relative', color: 'var(--text-secondary)' }}>
               <Heart size={24} />
-              <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>0</span>
+              <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>{wishlistCount}</span>
             </Link>
             
             <Link href="/cart" style={{ position: 'relative', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>

@@ -212,17 +212,21 @@ a:hover {
 
 .product-card-actions {
   position: absolute;
-  right: -50px;
+  right: -80px;
   top: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  transition: right 0.3s ease;
-  z-index: 5;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
 }
 
 .product-card:hover .product-card-actions {
   right: 1rem;
+  opacity: 1;
+  pointer-events: all;
 }
 
 .action-btn {

@@ -35,16 +35,55 @@ export default function ElectroMarketplaceHome() {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSlider, setActiveSlider] = useState(0);
+  const [activeTab, setActiveTab] = useState('Trending');
+  const [wishlistedIds, setWishlistedIds] = useState<Set<string>>(new Set());
+
+  // Load wishlist from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('wishlist');
+    if (saved) {
+      try {
+        const ids = JSON.parse(saved);
+        const wishlistSet = new Set<string>(ids);
+        setWishlistedIds(wishlistSet);
+        window.dispatchEvent(new CustomEvent('wishlist-update', { detail: wishlistSet.size }));
+      } catch (err) {
+        console.error('Error loading wishlist:', err);
+      }
+    }
+  }, []);
+
+  const toggleWishlist = (id: string) => {
+    setWishlistedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      
+      // Persist to localStorage
+      localStorage.setItem('wishlist', JSON.stringify(Array.from(next)));
+      
+      // Dispatch event for Navbar update
+      window.dispatchEvent(new CustomEvent('wishlist-update', { detail: next.size }));
+      return next;
+    });
+  };
+
+  const filteredProducts = products.filter(p => {
+    if (activeTab === 'New Arrivals') return true; // Default sorted by backend usually
+    if (activeTab === 'Bestsellers') return p.price > 100; // Simulated logic
+    if (activeTab === 'Trending') return p.discount > 0 || p.price < 200; // Simulated logic
+    return true;
+  }).slice(0, 8);
 
   useEffect(() => {
     const load = async () => {
       try {
         const [catsRes, prodsRes] = await Promise.all([
-          fetchApi('/category/all').catch(() => ({ data: [] })),
-          fetchApi('/product/products').catch(() => ({ data: [] }))
+          fetchApi('/category/all').catch(() => []),
+          fetchApi('/product/products').catch(() => [])
         ]);
-        setCategories(catsRes.data || []);
-        setProducts(prodsRes.data || []);
+        setCategories(Array.isArray(catsRes) ? catsRes : catsRes.data || []);
+        setProducts(Array.isArray(prodsRes) ? prodsRes : prodsRes.data || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -80,14 +119,15 @@ export default function ElectroMarketplaceHome() {
           </aside>
 
           {/* Main Slider */}
-          <div style={{ flex: 1, position: 'relative', height: '500px', borderRadius: '16px', overflow: 'hidden' }}>
+          <div style={{ flex: 1, position: 'relative', height: '500px', borderRadius: '16px', overflow: 'hidden', background: '#000' }}>
             {sliderData.map((slide, i) => (
               <div key={i} style={{
                 position: 'absolute', inset: 0, opacity: i === activeSlider ? 1 : 0,
-                transition: 'opacity 1s ease', display: 'flex', alignItems: 'center'
+                transition: 'opacity 1s ease', display: 'flex', alignItems: 'center',
+                zIndex: i === activeSlider ? 1 : 0
               }}>
-                <div style={{ position: 'absolute', inset: 0, background: `url(${slide.image}) center/cover`, opacity: 0.6 }} />
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(11,12,16,0.9) 20%, transparent 80%)' }} />
+                <img src={slide.image} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.6 }} />
+                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(11,12,16,0.95) 20%, transparent 80%)' }} />
                 <div style={{ position: 'relative', zIndex: 2, padding: '4rem', maxWidth: '500px' }}>
                   <span style={{ color: slide.color, fontWeight: 800, letterSpacing: '2px', textTransform: 'uppercase', fontSize: '0.8rem' }}>{slide.tagline}</span>
                   <h1 style={{ fontSize: '3.5rem', fontWeight: 900, margin: '1rem 0', lineHeight: 1 }}>{slide.title}</h1>
@@ -161,7 +201,19 @@ export default function ElectroMarketplaceHome() {
                       <div style={{ height: '100%', width: '75%', background: 'var(--primary-color)' }} />
                     </div>
                   </div>
-                  <button className="btn-primary" style={{ width: '100%' }}>Acquire Now</button>
+                  <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
+                    <Link href={`/products/${products[0].id}`} className="btn-primary" style={{ flex: 1, textAlign: 'center' }}>Acquire Now</Link>
+                    <button 
+                      onClick={() => toggleWishlist(products[0].id)}
+                      style={{ 
+                        background: 'none', border: '1px solid var(--border-color)', 
+                        padding: '0.75rem', borderRadius: '8px', cursor: 'pointer',
+                        color: wishlistedIds.has(products[0].id) ? 'var(--error-color)' : 'var(--text-secondary)'
+                      }}
+                    >
+                      <Heart size={20} fill={wishlistedIds.has(products[0].id) ? 'var(--error-color)' : 'none'} />
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -169,31 +221,43 @@ export default function ElectroMarketplaceHome() {
             {/* Product Tabs/Grid */}
             <div>
               <div style={{ display: 'flex', gap: '2rem', borderBottom: '1px solid rgba(255,255,255,0.05)', marginBottom: '2rem' }}>
-                 {['Trending', 'Bestsellers', 'New Arrivals'].map((tab, i) => (
-                   <button key={tab} style={{ 
-                     background: 'none', border: 'none', padding: '1rem 0', 
-                     color: i === 0 ? 'var(--primary-color)' : 'var(--text-secondary)',
-                     fontWeight: 800, fontSize: '1rem', cursor: 'pointer',
-                     borderBottom: i === 0 ? '3px solid var(--primary-color)' : '3px solid transparent'
+                 {['Trending', 'Bestsellers', 'New Arrivals'].map((tab) => (
+                   <button key={tab} 
+                     onClick={() => setActiveTab(tab)}
+                     style={{ 
+                       background: 'none', border: 'none', padding: '1rem 0', 
+                       color: activeTab === tab ? 'var(--primary-color)' : 'var(--text-secondary)',
+                       fontWeight: 800, fontSize: '1rem', cursor: 'pointer',
+                       borderBottom: activeTab === tab ? '3px solid var(--primary-color)' : '3px solid transparent'
                    }}>{tab}</button>
                  ))}
               </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem' }}>
-                {products.slice(1, 7).map(prod => (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '2rem' }}>
+                {filteredProducts.map(prod => (
                   <div key={prod.id} className="product-card" style={{ padding: '1.25rem' }}>
-                     <div style={{ height: '160px', marginBottom: '1rem', position: 'relative' }}>
+                     <div className="product-image-wrapper" style={{ height: '160px', marginBottom: '1rem', background: 'rgba(255,255,255,0.02)', borderRadius: '8px' }}>
                         <img src={prod.images?.[0]} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        <div className="product-card-actions" style={{ top: '0.5rem' }}>
-                          <button className="action-btn" style={{ width: '32px', height: '32px' }}><Heart size={14} /></button>
-                          <button className="action-btn" style={{ width: '32px', height: '32px' }}><TrendingUp size={14} /></button>
-                        </div>
                      </div>
                      <p style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 800, marginBottom: '0.25rem' }}>{prod.category?.name}</p>
                      <Link href={`/products/${prod.id}`} style={{ fontWeight: 700, fontSize: '0.9rem', display: 'block', height: '2.5rem', overflow: 'hidden', marginBottom: '0.5rem' }}>{prod.name}</Link>
                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontWeight: 800, color: 'var(--primary-color)' }}>${prod.price}</span>
-                        <button style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--primary-color)', padding: '0.4rem', borderRadius: '4px', cursor: 'pointer' }}><ShoppingCart size={16} /></button>
-                     </div>
+                      <span style={{ fontWeight: 800, color: 'var(--primary-color)', fontSize: '1.1rem' }}>${prod.price}</span>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <button 
+                          onClick={() => toggleWishlist(prod.id)}
+                          style={{ 
+                            background: 'none', border: '1px solid var(--border-color)', 
+                            padding: '0.4rem', borderRadius: '4px', cursor: 'pointer',
+                            color: wishlistedIds.has(prod.id) ? 'var(--error-color)' : 'var(--text-secondary)'
+                          }}
+                        >
+                          <Heart size={16} fill={wishlistedIds.has(prod.id) ? 'var(--error-color)' : 'none'} />
+                        </button>
+                        <Link href={`/products/${prod.id}`} style={{ background: 'none', border: '1px solid var(--border-color)', color: 'var(--primary-color)', padding: '0.4rem', borderRadius: '4px', cursor: 'pointer' }}>
+                          <ShoppingCart size={16} />
+                        </Link>
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
