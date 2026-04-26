@@ -5,12 +5,9 @@ import {
   Box,
   ChevronLeft,
   ChevronRight,
-  Cpu,
-  Globe,
   Heart,
   Share2,
   ShoppingCart,
-  Timer,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
@@ -69,11 +66,18 @@ export default function SingleProductPage() {
     );
   };
 
+  const totalProduct = Number(product?.stock ?? 0);
+  const isOutOfStock = totalProduct <= 0;
   const handleAddToCart = async (
     showNotification = true,
     isBuyAction = false,
   ) => {
     if (!id) return false;
+
+    if (isOutOfStock) {
+      toast.error("Product is out of stock");
+      return false;
+    }
 
     if (isBuyAction) setIsBuying(true);
     else setIsAdding(true);
@@ -439,13 +443,12 @@ export default function SingleProductPage() {
                   STATUS:{" "}
                   <span
                     style={{
-                      color:
-                        product.stock > 0
-                          ? "var(--success-color)"
-                          : "var(--error-color)",
+                      color: isOutOfStock
+                        ? "var(--error-color)"
+                        : "var(--success-color)",
                     }}
                   >
-                    {product.stock > 0 ? "AVAILABLE" : "OUT OF STOCK"}
+                    {isOutOfStock ? "OUT OF STOCK" : "AVAILABLE"}
                   </span>
                 </p>
               </div>
@@ -490,57 +493,15 @@ export default function SingleProductPage() {
                 <p
                   style={{
                     fontSize: "0.8rem",
-                    color: "var(--success-color)",
+                    color: isOutOfStock
+                      ? "var(--error-color)"
+                      : "var(--success-color)",
                     fontWeight: 700,
                   }}
                 >
-                  IN STOCK & READY
+                  {isOutOfStock ? "OUT OF STOCK" : "IN STOCK & READY"}
                 </p>
               </div>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "1.5rem",
-                marginBottom: "3rem",
-              }}
-            >
-              {[
-                { icon: Cpu, label: "Processing", val: "Neural Core 9" },
-                { icon: Zap, label: "Efficiency", val: "A+++ Infinite" },
-                { icon: Globe, label: "Origin", val: "Neo-Tokyo" },
-                { icon: Timer, label: "Latency", val: "0.001ms Zero" },
-              ].map((spec, i) => (
-                <div
-                  key={i}
-                  className="glass-panel"
-                  style={{
-                    padding: "1.25rem",
-                    display: "flex",
-                    gap: "1rem",
-                    alignItems: "center",
-                  }}
-                >
-                  <spec.icon size={24} color="var(--primary-color)" />
-                  <div>
-                    <p
-                      style={{
-                        fontSize: "0.65rem",
-                        color: "var(--text-secondary)",
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                      }}
-                    >
-                      {spec.label}
-                    </p>
-                    <p style={{ fontSize: "1rem", fontWeight: 700 }}>
-                      {spec.val}
-                    </p>
-                  </div>
-                </div>
-              ))}
             </div>
 
             <div style={{ marginBottom: "3rem" }}>
@@ -592,13 +553,14 @@ export default function SingleProductPage() {
                   <button
                     type="button"
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={isOutOfStock}
                     style={{
                       width: "40px",
                       height: "40px",
                       border: "none",
                       background: "none",
-                      color: "#fff",
-                      cursor: "pointer",
+                      color: isOutOfStock ? "rgba(255,255,255,0.4)" : "#fff",
+                      cursor: isOutOfStock ? "not-allowed" : "pointer",
                       fontSize: "1.5rem",
                     }}
                   >
@@ -618,16 +580,17 @@ export default function SingleProductPage() {
                     type="button"
                     onClick={() =>
                       setQuantity((q) =>
-                        product.stock && q >= product.stock ? q : q + 1,
+                        totalProduct && q >= totalProduct ? q : q + 1,
                       )
                     }
+                    disabled={isOutOfStock}
                     style={{
                       width: "40px",
                       height: "40px",
                       border: "none",
                       background: "none",
-                      color: "#fff",
-                      cursor: "pointer",
+                      color: isOutOfStock ? "rgba(255,255,255,0.4)" : "#fff",
+                      cursor: isOutOfStock ? "not-allowed" : "pointer",
                       fontSize: "1.25rem",
                     }}
                   >
@@ -659,7 +622,7 @@ export default function SingleProductPage() {
               <div style={{ display: "flex", gap: "1.5rem" }}>
                 <button
                   onClick={() => handleAddToCart(true, false)}
-                  disabled={isAdding || isBuying || product.stock === 0}
+                  disabled={isAdding || isBuying || isOutOfStock}
                   className="btn-primary"
                   style={{
                     flex: 1,
@@ -675,7 +638,7 @@ export default function SingleProductPage() {
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  disabled={isAdding || isBuying || product.stock === 0}
+                  disabled={isAdding || isBuying || isOutOfStock}
                   className="btn-primary"
                   style={{
                     flex: 1,
