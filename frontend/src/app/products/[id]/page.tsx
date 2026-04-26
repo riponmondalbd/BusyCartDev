@@ -1,14 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { fetchApi } from '@/utils/api';
-import { 
-  ShoppingCart, Heart, ChevronLeft, ShieldCheck, 
-  Zap, Globe, Cpu, Timer, Share2, 
-  ArrowRight, CheckCircle2, Box
+import {
+  ArrowRight,
+  Box,
+  CheckCircle2,
+  ChevronLeft,
+  Cpu,
+  Globe,
+  Heart,
+  Share2,
+  ShieldCheck,
+  ShoppingCart,
+  Timer,
+  Zap
 } from 'lucide-react';
+import Link from 'next/link';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function SingleProductPage() {
   const { id } = useParams();
@@ -260,7 +269,7 @@ export default function SingleProductPage() {
                     boxShadow: '0 0 30px rgba(102,252,241,0.2)'
                   }}
                 >
-                  <ShoppingCart size={24} /> {addingToCart ? 'INITIALIZING...' : 'ACQUIRE MODULE'}
+                  <ShoppingCart size={24} /> {addingToCart ? 'INITIALIZING...' : 'BUY NOW'}
                 </button>
               </div>
 

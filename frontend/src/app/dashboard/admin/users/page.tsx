@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 import { fetchApi } from '@/utils/api';
-import { Users, Shield, Trash2, Mail } from 'lucide-react';
+import { Mail, Shield, Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 export default function AdminUsersPage() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function AdminUsersPage() {
   }, [router]);
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Permanently purge this user identity?')) return;
+    if (!confirm('This action will permanently delete this user. Are you sure?')) return;
     try {
       await fetchApi(`/admin/users/${id}`, { method: 'DELETE' });
       setUsers(users.filter(u => u.id !== id));
@@ -109,7 +109,7 @@ export default function AdminUsersPage() {
                   <td style={{ padding: '1rem 1.5rem' }}>
                     <button onClick={() => handleDelete(u.id)}
                       style={{ background: 'rgba(255,75,75,0.1)', border: '1px solid rgba(255,75,75,0.3)', color: 'var(--error-color)', borderRadius: '8px', padding: '0.4rem 0.8rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem' }}>
-                      <Trash2 size={14} /> Purge
+                      <Trash2 size={14} /> Delete
                     </button>
                   </td>
                 </tr>
