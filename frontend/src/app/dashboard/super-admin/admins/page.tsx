@@ -71,8 +71,14 @@ export default function SuperAdminAdminsPage() {
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                   <td style={{ padding: '1rem 1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: `linear-gradient(135deg, ${roleColor(u.role)}, var(--bg-color))`, border: `2px solid ${roleColor(u.role)}`, display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '0.8rem', fontWeight: 700, color: roleColor(u.role) }}>
-                        {u.name?.charAt(0).toUpperCase()}
+                      <div style={{ 
+                        width: '36px', height: '36px', borderRadius: '50%', 
+                        background: u.imageUrl ? `url(${u.imageUrl}) center/cover` : `linear-gradient(135deg, ${roleColor(u.role)}, var(--bg-color))`, 
+                        border: `2px solid ${roleColor(u.role)}`, 
+                        display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                        fontSize: '0.8rem', fontWeight: 700, color: roleColor(u.role) 
+                      }}>
+                        {!u.imageUrl && u.name?.charAt(0).toUpperCase()}
                       </div>
                       <span style={{ fontWeight: 500 }}>{u.name}</span>
                     </div>

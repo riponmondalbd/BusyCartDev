@@ -80,8 +80,13 @@ export default function AdminUsersPage() {
                   onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                   <td style={{ padding: '1rem 1.5rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', display: 'flex', justifyContent: 'center', alignItems: 'center', fontSize: '0.8rem', fontWeight: 700, color: '#0b0c10', flexShrink: 0 }}>
-                        {u.name?.charAt(0).toUpperCase()}
+                      <div style={{ 
+                        width: '36px', height: '36px', borderRadius: '50%', 
+                        background: u.imageUrl ? `url(${u.imageUrl}) center/cover` : 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))', 
+                        display: 'flex', justifyContent: 'center', alignItems: 'center', 
+                        fontSize: '0.8rem', fontWeight: 700, color: '#0b0c10', flexShrink: 0 
+                      }}>
+                        {!u.imageUrl && u.name?.charAt(0).toUpperCase()}
                       </div>
                       <span style={{ fontWeight: 500 }}>{u.name}</span>
                     </div>

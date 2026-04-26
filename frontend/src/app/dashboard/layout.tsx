@@ -122,13 +122,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
           <div style={{
             width: '42px', height: '42px', borderRadius: '50%', flexShrink: 0,
-            background: `linear-gradient(135deg, ${roleColor}, var(--bg-color))`,
+            background: profile?.imageUrl ? `url(${profile.imageUrl}) center/cover` : `linear-gradient(135deg, ${roleColor}, var(--bg-color))`,
             border: `2px solid ${roleColor}`,
             display: 'flex', justifyContent: 'center', alignItems: 'center',
             fontSize: '1rem', fontWeight: 700, color: roleColor,
             boxShadow: `0 0 12px color-mix(in srgb, ${roleColor} 30%, transparent)`
           }}>
-            {profile?.name?.charAt(0).toUpperCase()}
+            {!profile?.imageUrl && profile?.name?.charAt(0).toUpperCase()}
           </div>
           <div style={{ overflow: 'hidden' }}>
             <p style={{ fontWeight: 600, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile?.name}</p>
