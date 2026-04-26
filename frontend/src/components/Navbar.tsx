@@ -34,8 +34,8 @@ export default function Navbar() {
           <Link href="/cart" className="nav-link">Cart (0)</Link>
           
           {isLoggedIn ? (
-            <Link href="/profile" className="btn-primary" style={{ padding: '0.5rem 1rem' }}>
-              Profile
+            <Link href="/dashboard" className="btn-primary" style={{ padding: '0.5rem 1rem' }}>
+              Dashboard
             </Link>
           ) : (
             <Link href="/login" className="btn-primary" style={{ padding: '0.5rem 1rem' }}>

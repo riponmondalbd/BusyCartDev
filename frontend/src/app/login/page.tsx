@@ -26,7 +26,6 @@ export default function LoginPage() {
       if (data.token) {
         localStorage.setItem('token', data.token);
       }
-      // Assuming successful login returns some user info or token
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message || 'Failed to login. Please check your credentials.');
