@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { Request, Response } from "express";
 import { prisma } from "../prisma/prisma";
+import { accessCookieOptions, refreshCookieOptions } from "../utils/cookies";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -8,9 +9,15 @@ import {
 
 // register user
 export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
 
   try {
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
     // check if user already exists
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -25,7 +32,7 @@ export const registerUser = async (req: Request, res: Response) => {
 
     // create user
     const user = await prisma.user.create({
-      data: { name, email, password: hashedPassword, role },
+      data: { name, email, password: hashedPassword, role: "USER" },
     });
 
     res
@@ -41,6 +48,12 @@ export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
 
   try {
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
     const user = await prisma.user.findUnique({ where: { email } });
 
     // valid user check
@@ -67,12 +80,8 @@ export const loginUser = async (req: Request, res: Response) => {
     });
 
     //  Send refresh token as HTTP-only cookie
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+    res.cookie("accessToken", accessToken, accessCookieOptions);
 
     res.json({ message: "Login successful", token: accessToken });
   } catch (error) {
@@ -90,16 +99,13 @@ export const logoutUser = async (req: Request, res: Response) => {
     }
 
     // delete refresh token from DB
-    await prisma.refreshToken.delete({
+    await prisma.refreshToken.deleteMany({
       where: { token },
     });
 
     // clear refresh token cookie
-    res.clearCookie("refreshToken", {
-      httpOnly: true,
-      secure: false,
-      sameSite: "strict",
-    });
+    res.clearCookie("refreshToken", refreshCookieOptions);
+    res.clearCookie("accessToken", accessCookieOptions);
     res.json({ message: "Logout successful" });
   } catch (error) {
     res.status(500).json({ message: "Error logging out user" });

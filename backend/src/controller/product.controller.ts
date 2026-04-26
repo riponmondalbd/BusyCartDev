@@ -77,7 +77,6 @@ export const createProduct = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to create product",
-      error: error.message,
     });
   }
 };
@@ -169,7 +168,6 @@ export const getAllProducts = async (req: any, res: any) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch products",
-      error: (error as Error).message,
     });
   }
 };
@@ -205,7 +203,6 @@ export const getProductById = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       message: "Failed to get product",
-      error: error.message,
     });
   }
 };
@@ -293,7 +290,6 @@ export const updateProduct = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       message: "Failed to update product",
-      error: error.message,
     });
   }
 };
@@ -343,7 +339,6 @@ export const deleteProduct = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       message: "Failed to delete product",
-      error: error.message,
     });
   }
 };

@@ -46,7 +46,6 @@ export const getTopProducts = async (req: any, res: any) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch top products",
-      error: error.message,
     });
   }
 };
@@ -123,7 +122,6 @@ export const getRevenueAnalytics = async (req: any, res: any) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch revenue analytics",
-      error: error.message,
     });
   }
 };

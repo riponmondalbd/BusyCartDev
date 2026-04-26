@@ -87,7 +87,6 @@ export const refundOrder = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Refund failed",
-      error: error.message,
     });
   }
 };
@@ -110,7 +109,6 @@ export const getAllRefunds = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to fetch refunds",
-      error: error.message,
     });
   }
 };
@@ -139,7 +137,6 @@ export const getMyRefunds = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to fetch refunds",
-      error: error.message,
     });
   }
 };

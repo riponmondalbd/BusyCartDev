@@ -32,7 +32,6 @@ export const createCoupon = async (req: any, res: any) => {
     return res.status(500).json({
       success: false,
       message: "Failed to create coupon",
-      error: error.message,
     });
   }
 };
@@ -98,7 +97,6 @@ export const applyCoupon = async (req: any, res: any) => {
     return res.status(500).json({
       success: false,
       message: "Failed to apply coupon",
-      error: error.message,
     });
   }
 };
@@ -128,7 +126,6 @@ export const removeCoupon = async (req: any, res: any) => {
     return res.status(500).json({
       success: false,
       message: "Failed to remove coupon",
-      error: error.message,
     });
   }
 };

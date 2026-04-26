@@ -72,7 +72,6 @@ export const createCategory = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to create category",
-      error: error.message,
     });
   }
 };
@@ -100,7 +99,6 @@ export const getAllCategories = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       message: "Failed to fetch categories",
-      error: error.message,
     });
   }
 };
@@ -191,7 +189,6 @@ export const updateCategory = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to update category",
-      error: error.message,
     });
   }
 };
@@ -229,7 +226,6 @@ export const deleteCategory = async (req: Request, res: Response) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to delete category",
-      error: error.message,
     });
   }
 };

@@ -114,7 +114,8 @@ export const updateCartItem = async (req: any, res: any) => {
 
     if (!item) {
       return res.status(404).json({
-        message: "Cart item not found. Please ensure you are using the 'itemId' from your cart response.",
+        message:
+          "Cart item not found. Please ensure you are using the 'itemId' from your cart response.",
       });
     }
 
@@ -146,7 +147,6 @@ export const updateCartItem = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to update cart",
-      error: error.message,
     });
   }
 };
@@ -192,7 +192,6 @@ export const removeCartItem = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to remove item",
-      error: error.message,
     });
   }
 };
@@ -286,7 +285,6 @@ export const getMyCart = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to fetch cart",
-      error: error.message,
     });
   }
 };
@@ -315,7 +313,6 @@ export const clearCart = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to clear cart",
-      error: error.message,
     });
   }
 };

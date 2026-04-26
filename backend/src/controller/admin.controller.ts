@@ -124,7 +124,6 @@ export const updateUserRoleAdmin = async (req: any, res: any) => {
     console.error("Update user role error:", error);
     res.status(500).json({
       message: "Something went wrong",
-      error: error.message,
     });
   }
 };

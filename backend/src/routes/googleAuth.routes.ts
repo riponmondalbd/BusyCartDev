@@ -1,6 +1,11 @@
 import { Router } from "express";
-import jwt from "jsonwebtoken";
 import passport from "passport";
+import { prisma } from "../prisma/prisma";
+import { accessCookieOptions, refreshCookieOptions } from "../utils/cookies";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateTokens";
 
 const router = Router();
 
@@ -14,20 +19,25 @@ router.get(
 router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
-  (req: any, res: any) => {
+  async (req: any, res: any) => {
     const user = req.user;
 
-    const token = jwt.sign(
-      {
-        id: user.id,
-        role: user.role,
-      },
-      process.env.ACCESS_TOKEN_SECRET!,
-      { expiresIn: "1h" },
-    );
+    const accessToken = generateAccessToken(user.id, user.role);
+    const refreshToken = generateRefreshToken(user.id);
 
-    // redirect to frontend with token
-    res.redirect(`${process.env.FRONTEND_URL}/oauth-success?token=${token}`);
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    res.cookie("accessToken", accessToken, accessCookieOptions);
+    res.cookie("refreshToken", refreshToken, refreshCookieOptions);
+
+    // Redirect without embedding tokens in URL.
+    res.redirect(`${process.env.FRONTEND_URL}/oauth-success`);
   },
 );
 

@@ -31,9 +31,7 @@ export const addToWishlist = async (req: Request, res: Response) => {
 
     res.status(201).json({ success: true, wishlistItem });
   } catch (error: any) {
-    res
-      .status(500)
-      .json({ message: "Failed to add to wishlist", error: error.message });
+    res.status(500).json({ message: "Failed to add to wishlist" });
   }
 };
 
@@ -60,7 +58,6 @@ export const removeFromWishlist = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({
       message: "Failed to remove from wishlist",
-      error: error.message,
     });
   }
 };
@@ -82,8 +79,6 @@ export const getWishlist = async (req: Request, res: Response) => {
 
     res.status(200).json({ success: true, data: wishlist });
   } catch (error: any) {
-    res
-      .status(500)
-      .json({ message: "Failed to fetch wishlist", error: error.message });
+    res.status(500).json({ message: "Failed to fetch wishlist" });
   }
 };

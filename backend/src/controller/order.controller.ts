@@ -1,3 +1,4 @@
+import { appEnv } from "../config/env";
 import { prisma } from "../prisma/prisma";
 import { canTransition } from "../utils/orderStateMachine";
 
@@ -49,9 +50,9 @@ export const createOrder = async (req: any, res: any) => {
     }
 
     // ---- TAX & SHIPPING ----
-    const TAX_RATE = 0.1; // 10% tax
-    const SHIPPING_FEE = 20;
-    const FREE_SHIPPING_THRESHOLD = 500;
+    const TAX_RATE = appEnv.taxRate;
+    const SHIPPING_FEE = appEnv.shippingFee;
+    const FREE_SHIPPING_THRESHOLD = appEnv.freeShippingThreshold;
 
     const discountedSubtotal = subtotal - discountAmount;
     const taxAmount = discountedSubtotal * TAX_RATE;
@@ -73,7 +74,7 @@ export const createOrder = async (req: any, res: any) => {
         },
       });
 
-      // Create order items and deduct stock
+      // Create order items and deduct stock atomically to avoid overselling.
       for (let item of cart.items) {
         await tx.orderItem.create({
           data: {
@@ -84,10 +85,17 @@ export const createOrder = async (req: any, res: any) => {
           },
         });
 
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: item.product.stock - item.quantity },
+        const updated = await tx.product.updateMany({
+          where: {
+            id: item.productId,
+            stock: { gte: item.quantity },
+          },
+          data: { stock: { decrement: item.quantity } },
         });
+
+        if (updated.count === 0) {
+          throw new Error(`Insufficient stock for ${item.product.name}`);
+        }
       }
 
       // Clear cart items and remove coupon
@@ -117,7 +125,6 @@ export const createOrder = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to create order",
-      error: error.message,
     });
   }
 };
@@ -159,7 +166,6 @@ export const getMyOrders = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to fetch orders",
-      error: error.message,
     });
   }
 };
@@ -188,7 +194,6 @@ export const getAllOrders = async (req: any, res: any) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch orders",
-      error: error.message,
     });
   }
 };
@@ -257,7 +262,6 @@ export const updateOrderStatus = async (req: any, res: any) => {
   } catch (error: any) {
     return res.status(500).json({
       message: "Failed to update order status",
-      error: error.message,
     });
   }
 };
