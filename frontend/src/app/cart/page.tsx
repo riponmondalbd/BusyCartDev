@@ -14,10 +14,17 @@ export default function CartPage() {
   const [couponSuccess, setCouponSuccess] = useState(false);
   const [placingOrder, setPlacingOrder] = useState(false);
 
-  const loadCart = async () => {
+  const loadCart = async (isInitial = false) => {
     try {
       const res = await fetchApi('/cart/my-cart');
-      setCart(res.data || res);
+      const data = res.data || res;
+      setCart(data);
+      
+      // Sync coupon code if one is already applied in the backend
+      if (data.appliedCoupon?.code) {
+        setCouponCode(data.appliedCoupon.code);
+        setCouponSuccess(true);
+      }
     } catch (err: any) {
       if (err.message.includes('401')) {
         router.push('/login');
@@ -25,34 +32,66 @@ export default function CartPage() {
         console.error('Cart load error:', err);
       }
     } finally {
-      setLoading(false);
+      if (isInitial) setLoading(false);
     }
   };
 
   useEffect(() => {
-    loadCart();
+    loadCart(true);
   }, []);
 
   const handleUpdateQuantity = async (itemId: string, currentQty: number, change: number) => {
     const newQty = currentQty + change;
     if (newQty < 1) return;
-    
+
+    // 1. Optimistic UI Update
+    const previousCart = { ...cart };
+    const updatedItems = cart.items.map((item: any) => {
+      if (item.itemId === itemId) {
+        const diff = newQty - item.quantity;
+        return { ...item, quantity: newQty, itemTotal: Number(item.price) * newQty };
+      }
+      return item;
+    });
+
+    const newSubtotal = updatedItems.reduce((acc: number, item: any) => acc + item.itemTotal, 0);
+    const discount = cart.discountAmount || 0;
+
+    setCart({
+      ...cart,
+      items: updatedItems,
+      subtotal: newSubtotal,
+      total: newSubtotal - discount,
+      totalItems: updatedItems.reduce((acc: number, item: any) => acc + item.quantity, 0)
+    });
+
+    // 2. Background API call
     try {
       await fetchApi(`/cart/update/${itemId}`, {
         method: 'PUT',
         body: JSON.stringify({ quantity: newQty })
       });
+      // Silent reload to sync any backend-calculated discounts/taxes
       loadCart();
     } catch (err: any) {
+      // Revert if failed
+      setCart(previousCart);
       alert(err.message || 'Failed to update quantity');
     }
   };
 
   const handleRemoveItem = async (itemId: string) => {
+    const previousCart = { ...cart };
+    setCart({
+      ...cart,
+      items: cart.items.filter((i: any) => i.itemId !== itemId)
+    });
+
     try {
       await fetchApi(`/cart/remove/${itemId}`, { method: 'DELETE' });
       loadCart();
     } catch (err: any) {
+      setCart(previousCart);
       alert(err.message || 'Failed to remove item');
     }
   };
@@ -61,6 +100,8 @@ export default function CartPage() {
     try {
       await fetchApi('/cart/clear', { method: 'DELETE' });
       setCart(null);
+      setCouponCode('');
+      setCouponSuccess(false);
     } catch (err: any) {
       alert(err.message || 'Failed to clear cart');
     }
@@ -84,10 +125,7 @@ export default function CartPage() {
   const handleCheckout = async () => {
     setPlacingOrder(true);
     try {
-      // 1. Create order
       const order = await fetchApi('/order/create', { method: 'POST' });
-      
-      // 2. Simulate payment
       if (order && (order.id || order.data?.id)) {
         const orderId = order.id || order.data?.id;
         await fetchApi('/payment/simulate', {
@@ -95,9 +133,8 @@ export default function CartPage() {
           body: JSON.stringify({ orderId, method: "Stripe Simulation" })
         });
       }
-      
       alert('Order Confirmed & Payment Processed Successfully!');
-      router.push('/profile');
+      router.push('/dashboard');
     } catch (err: any) {
       alert(err.message || 'Checkout failed');
     } finally {
@@ -123,7 +160,6 @@ export default function CartPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '3rem', alignItems: 'flex-start' }}>
           
-          {/* Cart Items */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={handleClearCart} style={{ background: 'transparent', border: 'none', color: 'var(--error-color)', cursor: 'pointer', fontSize: '0.9rem' }}>
@@ -139,7 +175,7 @@ export default function CartPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{item.name || 'Unknown Module'}</h3>
-                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>${item.price}</p>
+                  <p style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>${Number(item.price).toFixed(2)}</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid var(--border-color)', borderRadius: '30px', padding: '0.25rem 0.5rem' }}>
                   <button 
@@ -164,6 +200,9 @@ export default function CartPage() {
                     +
                   </button>
                 </div>
+                <div style={{ minWidth: '80px', textAlign: 'right' }}>
+                  <p style={{ fontSize: '0.9rem', fontWeight: 700 }}>${Number(item.itemTotal).toFixed(2)}</p>
+                </div>
                 <button onClick={() => handleRemoveItem(item.itemId)} style={{ background: 'none', border: 'none', color: 'var(--error-color)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.5rem' }}>
                   &times;
                 </button>
@@ -171,7 +210,6 @@ export default function CartPage() {
             ))}
           </div>
 
-          {/* Checkout Summary */}
           <div className="glass-panel" style={{ padding: '2rem' }}>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>Order Summary</h2>
             
