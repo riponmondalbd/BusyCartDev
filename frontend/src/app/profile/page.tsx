@@ -142,6 +142,18 @@ export default function ProfilePage() {
               </div>
             )}
           </div>
+
+          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem', marginTop: '2rem' }}>
+            <h3 style={{ fontSize: '1.2rem', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>Dashboards & Logs</h3>
+            <div style={{ display: 'flex', gap: '1.5rem' }}>
+              <button onClick={() => router.push('/orders')} className="btn-primary" style={{ padding: '1rem', flex: 1, textAlign: 'center' }}>
+                Order History Logs
+              </button>
+              <button onClick={() => router.push('/refunds')} className="btn-primary" style={{ padding: '1rem', flex: 1, textAlign: 'center', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', borderColor: 'var(--border-color)' }}>
+                Refund Status
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
