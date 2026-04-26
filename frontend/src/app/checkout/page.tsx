@@ -69,9 +69,9 @@ export default function CheckoutPage() {
 
   if (loading) return <div className="container" style={{ padding: '5rem', textAlign: 'center' }}>Initializing Secure Gateway...</div>;
 
-  const subtotal = cart?.totalAmount || 0;
+  const subtotal = cart?.subtotal || 0;
   const discount = cart?.discountAmount || 0;
-  const total = subtotal - discount;
+  const total = cart?.total || 0;
 
   return (
     <div className="container" style={{ padding: '4rem 0' }}>
@@ -123,9 +123,9 @@ export default function CheckoutPage() {
             <h3 style={{ fontSize: '1.25rem', marginBottom: '1.5rem' }}>ORDER SUMMARY</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                {cart.items.map((item: any) => (
-                 <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
-                   <span style={{ color: 'var(--text-secondary)' }}>{item.quantity}x {item.product.name}</span>
-                   <span>${(item.price * item.quantity).toFixed(2)}</span>
+                 <div key={item.itemId} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>
+                   <span style={{ color: 'var(--text-secondary)' }}>{item.quantity}x {item.name}</span>
+                   <span>${Number(item.itemTotal || 0).toFixed(2)}</span>
                  </div>
                ))}
             </div>

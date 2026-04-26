@@ -228,9 +228,11 @@ export const getMyCart = async (req: any, res: any) => {
     let totalItems = 0;
 
     const formattedItems = cart.items.map((item) => {
-      const itemTotal = item.product.price * item.quantity;
+      const price = Number(item.product.price || 0);
+      const quantity = Number(item.quantity || 0);
+      const itemTotal = price * quantity;
       subtotal += itemTotal;
-      totalItems += item.quantity;
+      totalItems += quantity;
 
       return {
         itemId: item.id,

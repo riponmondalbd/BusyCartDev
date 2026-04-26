@@ -244,9 +244,21 @@ export default function SingleProductPage() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: 'auto' }}>
               <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
                 <div style={{ display: 'flex', alignItems: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', padding: '0.5rem' }}>
-                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} style={{ width: '40px', height: '40px', border: 'none', background: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.5rem' }}>-</button>
+                  <button 
+                    type="button"
+                    onClick={() => setQuantity(q => Math.max(1, q - 1))} 
+                    style={{ width: '40px', height: '40px', border: 'none', background: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.5rem' }}
+                  >
+                    -
+                  </button>
                   <span style={{ width: '50px', textAlign: 'center', fontSize: '1.2rem', fontWeight: 800 }}>{quantity}</span>
-                  <button onClick={() => setQuantity(q => q + 1)} style={{ width: '40px', height: '40px', border: 'none', background: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.25rem' }}>+</button>
+                  <button 
+                    type="button"
+                    onClick={() => setQuantity(q => (product.stock && q >= product.stock ? q : q + 1))} 
+                    style={{ width: '40px', height: '40px', border: 'none', background: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.25rem' }}
+                  >
+                    +
+                  </button>
                 </div>
                 <div style={{ flex: 1, textAlign: 'right' }}>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 800 }}>ESTIMATED TOTAL</p>

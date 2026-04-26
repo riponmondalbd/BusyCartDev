@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { fetchApi } from '@/utils/api';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { fetchApi } from '@/utils/api';
+import { useEffect, useState } from 'react';
 
 export default function CartPage() {
   const router = useRouter();
@@ -43,8 +43,8 @@ export default function CartPage() {
         body: JSON.stringify({ quantity: newQty })
       });
       loadCart();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      alert(err.message || 'Failed to update quantity');
     }
   };
 
@@ -52,8 +52,8 @@ export default function CartPage() {
     try {
       await fetchApi(`/cart/remove/${itemId}`, { method: 'DELETE' });
       loadCart();
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      alert(err.message || 'Failed to remove item');
     }
   };
 
@@ -61,8 +61,8 @@ export default function CartPage() {
     try {
       await fetchApi('/cart/clear', { method: 'DELETE' });
       setCart(null);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      alert(err.message || 'Failed to clear cart');
     }
   };
 
@@ -127,26 +127,44 @@ export default function CartPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
             <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
               <button onClick={handleClearCart} style={{ background: 'transparent', border: 'none', color: 'var(--error-color)', cursor: 'pointer', fontSize: '0.9rem' }}>
-                Clear Matrix [X]
+                Clear Cart [X]
               </button>
             </div>
             {items.map((item: any, idx: number) => (
-              <div key={item.id || `cart-item-${idx}`} className="glass-panel" style={{ display: 'flex', gap: '1.5rem', padding: '1.5rem', alignItems: 'center' }}>
+              <div key={item.itemId || `cart-item-${idx}`} className="glass-panel" style={{ display: 'flex', gap: '1.5rem', padding: '1.5rem', alignItems: 'center' }}>
                 <div style={{ width: '80px', height: '80px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', overflow: 'hidden' }}>
-                   {item.product?.images?.[0] && (
-                     <img src={item.product.images[0]} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                   {item.image && (
+                     <img src={item.image} alt={item.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                    )}
                 </div>
                 <div style={{ flex: 1 }}>
-                  <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{item.product?.name || 'Unknown Module'}</h3>
+                  <h3 style={{ fontSize: '1.1rem', marginBottom: '0.25rem' }}>{item.name || 'Unknown Module'}</h3>
                   <p style={{ color: 'var(--primary-color)', fontWeight: 'bold' }}>${item.price}</p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', border: '1px solid var(--border-color)', borderRadius: '30px', padding: '0.25rem 0.5rem' }}>
-                  <button onClick={() => handleUpdateQuantity(item.id, item.quantity, -1)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0 0.5rem' }}>-</button>
-                  <span>{item.quantity}</span>
-                  <button onClick={() => handleUpdateQuantity(item.id, item.quantity, 1)} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0 0.5rem' }}>+</button>
+                  <button 
+                    type="button"
+                    onClick={() => handleUpdateQuantity(item.itemId, item.quantity, -1)} 
+                    style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0 0.5rem' }}
+                  >
+                    -
+                  </button>
+                  <span style={{ fontWeight: 800 }}>{item.quantity}</span>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      if (item.stock && item.quantity >= item.stock) {
+                        alert(`Only ${item.stock} units available in the matrix.`);
+                        return;
+                      }
+                      handleUpdateQuantity(item.itemId, item.quantity, 1);
+                    }} 
+                    style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '0 0.5rem' }}
+                  >
+                    +
+                  </button>
                 </div>
-                <button onClick={() => handleRemoveItem(item.id)} style={{ background: 'none', border: 'none', color: 'var(--error-color)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.5rem' }}>
+                <button onClick={() => handleRemoveItem(item.itemId)} style={{ background: 'none', border: 'none', color: 'var(--error-color)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.5rem' }}>
                   &times;
                 </button>
               </div>
@@ -159,20 +177,20 @@ export default function CartPage() {
             
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', color: 'var(--text-secondary)' }}>
               <span>Subtotal</span>
-              <span>${cart?.totalAmount || 0}</span>
+              <span>${Number(cart?.subtotal || 0).toFixed(2)}</span>
             </div>
             
             {cart?.discountAmount > 0 && (
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', color: 'var(--success-color)' }}>
                 <span>Discount Applied</span>
-                <span>-${cart.discountAmount}</span>
+                <span>-${Number(cart.discountAmount).toFixed(2)}</span>
               </div>
             )}
 
             <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border-color)', fontSize: '1.25rem', fontWeight: 'bold' }}>
               <span>Total Compute</span>
               <span style={{ color: 'var(--primary-color)' }}>
-                ${(cart?.totalAmount || 0) - (cart?.discountAmount || 0)}
+                ${Number(cart?.total || 0).toFixed(2)}
               </span>
             </div>
 
