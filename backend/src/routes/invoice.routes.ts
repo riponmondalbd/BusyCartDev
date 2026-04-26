@@ -8,7 +8,7 @@ const router = Router();
 router.get(
   "/generate/:orderId",
   protect,
-  authorize("ADMIN", "SUPER_ADMIN"),
+  authorize("USER", "ADMIN", "SUPER_ADMIN"),
   generateInvoice,
 );
 

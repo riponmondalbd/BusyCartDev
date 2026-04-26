@@ -1,6 +1,8 @@
 "use client";
 
+import { env } from "@/config/env";
 import { fetchApi } from "@/utils/api";
+import { getToken } from "@/utils/auth";
 import {
   CheckCircle,
   Clock,
@@ -32,20 +34,36 @@ export default function OrdersPage() {
 
   const downloadInvoice = async (orderId: string) => {
     try {
-      const res = await fetch(
-        `http://localhost:5000/api/invoice/generate/${orderId}`,
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-        },
-      );
+      const token = getToken();
+      if (!token) {
+        toast.error("Please log in to download invoices");
+        return;
+      }
+
+      const res = await fetch(`${env.API_URL}/invoice/generate/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.message || "Failed to download invoice");
+      }
+
+      const contentType = res.headers.get("content-type") || "";
+      if (!contentType.includes("application/pdf")) {
+        throw new Error("Invalid invoice response from server");
+      }
+
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = `invoice-${orderId.slice(0, 8)}.pdf`;
       a.click();
-    } catch (err) {
-      toast.error("Failed to download invoice");
+      window.URL.revokeObjectURL(url);
+      toast.success("Invoice downloaded");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to download invoice");
     }
   };
 
