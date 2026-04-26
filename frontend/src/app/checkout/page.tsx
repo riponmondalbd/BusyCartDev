@@ -47,27 +47,45 @@ export default function CheckoutPage() {
     setProcessing(true);
     try {
       // 1. Create order
-      const order = await fetchApi("/order/create", {
+      const orderRes = await fetchApi("/order/create", {
         method: "POST",
         body: JSON.stringify({
           shippingAddress: `${address}, ${city}, ${zip}`,
         }),
       });
 
-      const orderId = order.id || order.data?.id;
+      console.log("Order response:", orderRes);
+      const orderId =
+        orderRes?.data?.order?.id || orderRes?.data?.id || orderRes?.id;
+
+      if (!orderId) {
+        toast.error("Failed to create order: No order ID received");
+        console.error("Order response structure:", orderRes);
+        return;
+      }
+
+      console.log(
+        "Placing payment for orderId:",
+        orderId,
+        "method:",
+        paymentMethod,
+      );
 
       // 2. Simulate payment or confirm COD
-      await fetchApi("/payment/simulate", {
+      const paymentRes = await fetchApi("/payment/simulate", {
         method: "POST",
         body: JSON.stringify({ orderId, method: paymentMethod }),
       });
+
+      console.log("Payment response:", paymentRes);
 
       toast.success(
         "TRANSACTION SUCCESSFUL. Order dispatched to the logistics matrix.",
       );
       router.push("/dashboard"); // or /profile
     } catch (err: any) {
-      toast.error(err.message || "Transaction failed");
+      console.error("Checkout error:", err);
+      toast.error(err.message || err?.error || "Transaction failed");
     } finally {
       setProcessing(false);
     }
