@@ -16,6 +16,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState('');
   const [city, setCity] = useState('');
   const [zip, setZip] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('Stripe Simulation');
 
   useEffect(() => {
     const loadData = async () => {
@@ -52,10 +53,10 @@ export default function CheckoutPage() {
       
       const orderId = order.id || order.data?.id;
       
-      // 2. Simulate payment
+      // 2. Simulate payment or confirm COD
       await fetchApi('/payment/simulate', {
         method: 'POST',
-        body: JSON.stringify({ orderId, method: "Stripe Simulation" })
+        body: JSON.stringify({ orderId, method: paymentMethod })
       });
       
       alert('TRANSACTION SUCCESSFUL. Order dispatched to the logistics matrix.');
@@ -68,6 +69,7 @@ export default function CheckoutPage() {
   };
 
   if (loading) return <div className="container" style={{ padding: '5rem', textAlign: 'center' }}>Initializing Secure Gateway...</div>;
+  if (!cart) return null;
 
   const subtotal = cart?.subtotal || 0;
   const discount = cart?.discountAmount || 0;
@@ -108,12 +110,30 @@ export default function CheckoutPage() {
           <h3 style={{ fontSize: '1.5rem', marginTop: '4rem', marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
             <CreditCard size={20} color="var(--primary-color)" /> 02. PAYMENT PROTOCOL
           </h3>
-          <div style={{ padding: '1.5rem', border: '1px solid var(--primary-color)', borderRadius: '12px', background: 'rgba(102,252,241,0.05)', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-             <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: '5px solid var(--primary-color)' }} />
-             <div>
-               <p style={{ fontWeight: 800 }}>Stripe Simulation (Futuristic Edition)</p>
-               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Instant verification, no latency, zero transaction fees.</p>
-             </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Stripe Option */}
+            <div 
+              onClick={() => setPaymentMethod('Stripe Simulation')}
+              style={{ padding: '1.5rem', border: `1px solid ${paymentMethod === 'Stripe Simulation' ? 'var(--primary-color)' : 'var(--border-color)'}`, borderRadius: '12px', background: paymentMethod === 'Stripe Simulation' ? 'rgba(102,252,241,0.05)' : 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: '0.3s' }}
+            >
+               <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `5px solid ${paymentMethod === 'Stripe Simulation' ? 'var(--primary-color)' : 'var(--border-color)'}` }} />
+               <div>
+                 <p style={{ fontWeight: 800 }}>Stripe Simulation (Futuristic Edition)</p>
+                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Instant verification, no latency, zero transaction fees.</p>
+               </div>
+            </div>
+
+            {/* Cash Option */}
+            <div 
+              onClick={() => setPaymentMethod('Cash on Delivery')}
+              style={{ padding: '1.5rem', border: `1px solid ${paymentMethod === 'Cash on Delivery' ? 'var(--primary-color)' : 'var(--border-color)'}`, borderRadius: '12px', background: paymentMethod === 'Cash on Delivery' ? 'rgba(102,252,241,0.05)' : 'rgba(255,255,255,0.02)', display: 'flex', alignItems: 'center', gap: '1rem', cursor: 'pointer', transition: '0.3s' }}
+            >
+               <div style={{ width: '20px', height: '20px', borderRadius: '50%', border: `5px solid ${paymentMethod === 'Cash on Delivery' ? 'var(--primary-color)' : 'var(--border-color)'}` }} />
+               <div>
+                 <p style={{ fontWeight: 800 }}>Physical Currency (Cash on Delivery)</p>
+                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Pay via secure physical exchange upon safe arrival of goods.</p>
+               </div>
+            </div>
           </div>
         </div>
 

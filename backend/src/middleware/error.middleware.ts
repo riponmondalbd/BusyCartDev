@@ -2,15 +2,19 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../utils/AppError";
 
 export const errorHandler = (
-  err: any,
+  err: Error | AppError,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
-  let { statusCode, message } = err;
+  let statusCode = 500;
+  let message = "Internal Server Error";
 
-  if (!statusCode) {
-    statusCode = 500;
+  if (err instanceof AppError) {
+    statusCode = err.statusCode;
+    message = err.message;
+  } else if (err instanceof Error) {
+    message = err.message;
   }
 
   const response = {

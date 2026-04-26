@@ -26,13 +26,15 @@ app.use(
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow all origins in development for easier troubleshooting
-      if (!appEnv.isProduction || !origin) {
+      // Allow requests without origin (mobile apps, Postman, etc.)
+      if (!origin) {
         return callback(null, true);
       }
+      // Check if origin is in allowed list
       if (appEnv.corsOrigins.includes(origin)) {
         return callback(null, true);
       }
+      // Reject requests from disallowed origins
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,

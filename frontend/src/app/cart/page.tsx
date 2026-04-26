@@ -23,7 +23,7 @@ export default function CartPage() {
       // Notify Navbar of cart update
       window.dispatchEvent(new CustomEvent('cart-update', { detail: data }));
     } catch (err: any) {
-      if (err.message.includes('401')) {
+      if (err.message?.includes('401') || err.message?.includes('Unauthorized')) {
         router.push('/login');
       } else {
         console.error('Cart load error:', err);
@@ -60,7 +60,6 @@ export default function CartPage() {
     const previousCart = { ...cart };
     const updatedItems = cart.items.map((item: any) => {
       if (item.itemId === itemId) {
-        const diff = newQty - item.quantity;
         return { ...item, quantity: newQty, itemTotal: Number(item.price) * newQty };
       }
       return item;
@@ -68,14 +67,17 @@ export default function CartPage() {
 
     const newSubtotal = updatedItems.reduce((acc: number, item: any) => acc + item.itemTotal, 0);
     const discount = cart.discountAmount || 0;
-
-    setCart({
+    
+    const nextCart = {
       ...cart,
       items: updatedItems,
       subtotal: newSubtotal,
       total: newSubtotal - discount,
       totalItems: updatedItems.reduce((acc: number, item: any) => acc + item.quantity, 0)
-    });
+    };
+
+    setCart(nextCart);
+    window.dispatchEvent(new CustomEvent('cart-update', { detail: nextCart }));
 
     // 2. Background API call
     try {
@@ -83,27 +85,38 @@ export default function CartPage() {
         method: 'PUT',
         body: JSON.stringify({ quantity: newQty })
       });
-      // Silent reload to sync any backend-calculated discounts/taxes
-      loadCart();
+      // We no longer call loadCart() here to prevent race conditions during rapid clicks
     } catch (err: any) {
       // Revert if failed
       setCart(previousCart);
+      window.dispatchEvent(new CustomEvent('cart-update', { detail: previousCart }));
       alert(err.message || 'Failed to update quantity');
     }
   };
 
   const handleRemoveItem = async (itemId: string) => {
     const previousCart = { ...cart };
-    setCart({
+    const updatedItems = cart.items.filter((i: any) => i.itemId !== itemId);
+    
+    const newSubtotal = updatedItems.reduce((acc: number, item: any) => acc + item.itemTotal, 0);
+    const discount = cart.discountAmount || 0;
+
+    const nextCart = {
       ...cart,
-      items: cart.items.filter((i: any) => i.itemId !== itemId)
-    });
+      items: updatedItems,
+      subtotal: newSubtotal,
+      total: newSubtotal - discount,
+      totalItems: updatedItems.reduce((acc: number, item: any) => acc + item.quantity, 0)
+    };
+
+    setCart(nextCart);
+    window.dispatchEvent(new CustomEvent('cart-update', { detail: nextCart }));
 
     try {
       await fetchApi(`/cart/remove/${itemId}`, { method: 'DELETE' });
-      loadCart();
     } catch (err: any) {
       setCart(previousCart);
+      window.dispatchEvent(new CustomEvent('cart-update', { detail: previousCart }));
       alert(err.message || 'Failed to remove item');
     }
   };
@@ -134,24 +147,8 @@ export default function CartPage() {
     }
   };
 
-  const handleCheckout = async () => {
-    setPlacingOrder(true);
-    try {
-      const order = await fetchApi('/order/create', { method: 'POST' });
-      if (order && (order.id || order.data?.id)) {
-        const orderId = order.id || order.data?.id;
-        await fetchApi('/payment/simulate', {
-          method: 'POST',
-          body: JSON.stringify({ orderId, method: "Stripe Simulation" })
-        });
-      }
-      alert('Order Confirmed & Payment Processed Successfully!');
-      router.push('/dashboard');
-    } catch (err: any) {
-      alert(err.message || 'Checkout failed');
-    } finally {
-      setPlacingOrder(false);
-    }
+  const handleCheckout = () => {
+    router.push('/checkout');
   };
 
   if (loading) {

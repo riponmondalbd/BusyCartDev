@@ -25,6 +25,10 @@ export const simulatePayment = async (req: any, res: any) => {
     // Simulate payment reference
     const reference = `PAY-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
 
+    const isCOD = method === 'Cash on Delivery';
+    const paymentStatus = isCOD ? "CREATED" : "SUCCEEDED";
+    const orderStatus = isCOD ? "PENDING" : "PAID";
+
     // create payment
     const payment = await prisma.payment.create({
       data: {
@@ -32,7 +36,7 @@ export const simulatePayment = async (req: any, res: any) => {
         userId,
         amount: order.total,
         method,
-        status: "SUCCEEDED",
+        status: paymentStatus,
         reference,
       },
     });
@@ -43,7 +47,7 @@ export const simulatePayment = async (req: any, res: any) => {
         id: orderId,
       },
       data: {
-        status: "PAID",
+        status: orderStatus,
       },
     });
 
