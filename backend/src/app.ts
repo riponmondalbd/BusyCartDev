@@ -25,10 +25,19 @@ app.use(
 
 app.use(
   cors({
-    origin: appEnv.corsOrigins,
+    origin: (origin, callback) => {
+      // Allow all origins in development for easier troubleshooting
+      if (!appEnv.isProduction || !origin) {
+        return callback(null, true);
+      }
+      if (appEnv.corsOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      return callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cookie"],
   }),
 );
 

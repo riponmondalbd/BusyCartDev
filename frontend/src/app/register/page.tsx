@@ -23,7 +23,7 @@ export default function RegisterPage() {
         method: 'POST',
         body: JSON.stringify({ name, email, password }),
       });
-      // After registration, usually redirect to login or automatically log them in
+      // After registration, redirect to login
       router.push('/login');
     } catch (err: any) {
       setError(err.message || 'Failed to register. Please try again.');

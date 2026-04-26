@@ -14,7 +14,7 @@ export const registerUser = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
 
   try {
     if (!email || !password) {
