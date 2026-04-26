@@ -130,8 +130,8 @@ export default function CartPage() {
                 Clear Matrix [X]
               </button>
             </div>
-            {items.map((item: any) => (
-              <div key={item.id} className="glass-panel" style={{ display: 'flex', gap: '1.5rem', padding: '1.5rem', alignItems: 'center' }}>
+            {items.map((item: any, idx: number) => (
+              <div key={item.id || `cart-item-${idx}`} className="glass-panel" style={{ display: 'flex', gap: '1.5rem', padding: '1.5rem', alignItems: 'center' }}>
                 <div style={{ width: '80px', height: '80px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', overflow: 'hidden' }}>
                    {item.product?.images?.[0] && (
                      <img src={item.product.images[0]} alt={item.product.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />

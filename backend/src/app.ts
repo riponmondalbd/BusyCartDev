@@ -5,7 +5,9 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { appEnv } from "./config/env";
 import passport from "./config/passport";
+import { errorHandler } from "./middleware/error.middleware";
 import router from "./routes";
+import { AppError } from "./utils/AppError";
 
 // install express app
 const app = express();
@@ -50,5 +52,13 @@ app.get("/", (req, res) => {
 
 // add routes
 app.use("/api", router);
+
+// 404 handler
+app.use((req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+});
+
+// global error handler
+app.use(errorHandler);
 
 export default app;

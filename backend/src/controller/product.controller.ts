@@ -1,29 +1,28 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import cloudinary from "../config/cloudinary";
 import { prisma } from "../prisma/prisma";
+import { AppError } from "../utils/AppError";
 
 // create product - admin and super admin only
-export const createProduct = async (req: Request, res: Response) => {
+export const createProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { name, description, price, discount, stock, categoryId } = req.body;
 
     // Basic validation
     if (!name || !price || stock === undefined || !categoryId) {
-      return res.status(400).json({
-        message: "Name, price, stock and categoryId are required",
-      });
+      throw new AppError("Name, price, stock and categoryId are required", 400);
     }
 
     if (!req.files || !(req.files instanceof Array) || req.files.length === 0) {
-      return res.status(400).json({
-        message: "At least one product image is required",
-      });
+      throw new AppError("At least one product image is required", 400);
     }
 
     if (req.files.length > 5) {
-      return res.status(400).json({
-        message: "Maximum 5 images allowed",
-      });
+      throw new AppError("Maximum 5 images allowed", 400);
     }
 
     const imageUrls: string[] = [];
@@ -50,9 +49,7 @@ export const createProduct = async (req: Request, res: Response) => {
     // Optional validation
     if (discount !== undefined && price !== undefined) {
       if (Number(discount) >= Number(price)) {
-        return res.status(400).json({
-          message: "Discount must be less than price",
-        });
+        throw new AppError("Discount must be less than price", 400);
       }
     }
 
@@ -75,14 +72,16 @@ export const createProduct = async (req: Request, res: Response) => {
       product: newProduct,
     });
   } catch (error: any) {
-    return res.status(500).json({
-      message: "Failed to create product",
-    });
+    next(error);
   }
 };
 
 // get all products with pagination and filters
-export const getAllProducts = async (req: any, res: any) => {
+export const getAllProducts = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const {
       page = "1",
@@ -94,8 +93,8 @@ export const getAllProducts = async (req: any, res: any) => {
       sort,
     } = req.query;
 
-    const pageNumber = parseInt(page);
-    const limitNumber = parseInt(limit);
+    const pageNumber = parseInt(page as string);
+    const limitNumber = parseInt(limit as string);
     const skip = (pageNumber - 1) * limitNumber;
 
     // Filtering conditions
@@ -106,7 +105,7 @@ export const getAllProducts = async (req: any, res: any) => {
     // Search by name
     if (search) {
       where.name = {
-        contains: search,
+        contains: search as string,
         mode: "insensitive",
       };
     }
@@ -115,7 +114,7 @@ export const getAllProducts = async (req: any, res: any) => {
     if (category) {
       where.category = {
         is: {
-          slug: category,
+          slug: category as string,
         },
       };
     }
@@ -145,7 +144,7 @@ export const getAllProducts = async (req: any, res: any) => {
         orderBy,
         include: {
           category: true,
-          reviews: true,
+          // Removed reviews: true to avoid heavy payloads, summary fields exist in product
         },
       }),
       prisma.product.count({ where }),
@@ -164,23 +163,21 @@ export const getAllProducts = async (req: any, res: any) => {
       data: products,
     });
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch products",
-    });
+    next(error);
   }
 };
 
 // get single product
-export const getProductById = async (req: Request, res: Response) => {
+export const getProductById = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({
-        message: "Product id is required",
-      });
+      throw new AppError("Product id is required", 400);
     }
 
     const product = await prisma.product.findUnique({
@@ -191,9 +188,7 @@ export const getProductById = async (req: Request, res: Response) => {
     });
 
     if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-      });
+      throw new AppError("Product not found", 404);
     }
 
     res.status(200).json({
@@ -201,22 +196,22 @@ export const getProductById = async (req: Request, res: Response) => {
       product,
     });
   } catch (error: any) {
-    res.status(500).json({
-      message: "Failed to get product",
-    });
+    next(error);
   }
 };
 
 // update product - admin and super admin only
-export const updateProduct = async (req: Request, res: Response) => {
+export const updateProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const { name, description, price, discount, stock, categoryId } = req.body;
 
     if (!id) {
-      return res.status(400).json({
-        message: "Product id is required",
-      });
+      throw new AppError("Product id is required", 400);
     }
 
     const product = await prisma.product.findUnique({
@@ -224,29 +219,18 @@ export const updateProduct = async (req: Request, res: Response) => {
     });
 
     if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-      });
+      throw new AppError("Product not found", 404);
     }
 
     let imageUrls = product.images; // default: keep old images
 
     // If new images uploaded
     if (req.files && (req.files as Express.Multer.File[]).length > 0) {
-      //  Delete old images from Cloudinary
-      for (const url of product.images) {
-        // Extract public_id from URL
-        const parts = url.split("/");
-        const publicIdWithExtension = parts.slice(-1)[0]; // last part
-        const publicId = `busycart_products/${publicIdWithExtension.split(".")[0]}`;
-        try {
-          await cloudinary.uploader.destroy(publicId);
-        } catch (err) {
-          console.error("Failed to delete Cloudinary image:", err);
-        }
-      }
+      // Note: In soft-delete architecture, we might keep old images in Cloudinary
+      // for historical order display (invoices). If explicit replacement is needed,
+      // we would delete them here. Keeping them for now.
 
-      //  Upload new images
+      // Upload new images
       imageUrls = [];
       for (const file of req.files as Express.Multer.File[]) {
         const uploadResult: any = await new Promise((resolve, reject) => {
@@ -266,19 +250,17 @@ export const updateProduct = async (req: Request, res: Response) => {
     // Optional validation
     if (discount !== undefined && price !== undefined) {
       if (Number(discount) >= Number(price)) {
-        return res.status(400).json({
-          message: "Discount must be less than price",
-        });
+        throw new AppError("Discount must be less than price", 400);
       }
     }
     const updatedProduct = await prisma.product.update({
       where: { id: id as string },
       data: {
-        name,
-        description,
-        price: Number(price),
-        discount: discount ? Number(discount) : null,
-        stock: Number(stock),
+        ...(name && { name }),
+        ...(description && { description }),
+        ...(price !== undefined && { price: Number(price) }),
+        ...(discount !== undefined && { discount: Number(discount) }),
+        ...(stock !== undefined && { stock: Number(stock) }),
         images: imageUrls,
         ...(categoryId && { categoryId }),
       },
@@ -289,21 +271,21 @@ export const updateProduct = async (req: Request, res: Response) => {
       product: updatedProduct,
     });
   } catch (error: any) {
-    res.status(500).json({
-      message: "Failed to update product",
-    });
+    next(error);
   }
 };
 
 // delete product - admin and super admin only
-export const deleteProduct = async (req: Request, res: Response) => {
+export const deleteProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
 
     if (!id) {
-      return res.status(400).json({
-        message: "Product id is required",
-      });
+      throw new AppError("Product id is required", 400);
     }
     // find product
     const product = await prisma.product.findUnique({
@@ -311,35 +293,20 @@ export const deleteProduct = async (req: Request, res: Response) => {
     });
 
     if (!product) {
-      return res.status(404).json({
-        message: "Product not found",
-      });
+      throw new AppError("Product not found", 404);
     }
 
-    // Delete images from Cloudinary
-    for (const url of product.images) {
-      const parts = url.split("/");
-      const publicIdWithExtension = parts.slice(-1)[0];
-      const publicId = `busycart_products/${publicIdWithExtension.split(".")[0]}`;
-      try {
-        await cloudinary.uploader.destroy(publicId);
-      } catch (err) {
-        console.error("Failed to delete Cloudinary image:", err);
-      }
-    }
-
-    // Delete product from database
-    await prisma.product.delete({
+    // Soft delete product from database to maintain historical order data
+    await prisma.product.update({
       where: { id: id as string },
+      data: { isDeleted: true },
     });
 
     res.status(200).json({
       success: true,
-      message: "Product deleted successfully",
+      message: "Product soft-deleted successfully",
     });
   } catch (error: any) {
-    res.status(500).json({
-      message: "Failed to delete product",
-    });
+    next(error);
   }
 };

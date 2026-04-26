@@ -9,6 +9,11 @@ import {
 import { protect } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/authorize";
 import upload from "../middleware/upload";
+import { validate } from "../middleware/validate";
+import {
+  createProductSchema,
+  updateProductSchema,
+} from "../validations/product.validation";
 
 const router = Router();
 
@@ -17,6 +22,7 @@ router.post(
   protect,
   authorize("ADMIN", "SUPER_ADMIN"),
   upload.array("images", 5),
+  validate(createProductSchema),
   createProduct,
 );
 router.get("/products", getAllProducts);
@@ -26,6 +32,7 @@ router.put(
   protect,
   authorize("ADMIN", "SUPER_ADMIN"),
   upload.array("images", 5),
+  validate(updateProductSchema),
   updateProduct,
 );
 router.delete(
@@ -36,5 +43,3 @@ router.delete(
 );
 
 export default router;
-
-// GET http://localhost:5000/api/products?page=2&limit=5&search=phone&minPrice=100&maxPrice=500&sort=price_desc

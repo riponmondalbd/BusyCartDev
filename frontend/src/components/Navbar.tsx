@@ -4,10 +4,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Heart, User, Search, Menu, LayoutGrid } from 'lucide-react';
+import { fetchApi } from '@/utils/api';
 
 export default function Navbar() {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
 
@@ -22,9 +24,21 @@ export default function Navbar() {
     const handleWishlistUpdate = (e: any) => setWishlistCount(e.detail);
     window.addEventListener('wishlist-update', handleWishlistUpdate);
 
-    const checkAuth = () => {
+    const checkAuth = async () => {
       const token = localStorage.getItem('token');
       setIsLoggedIn(!!token);
+      
+      if (token) {
+        try {
+          const res = await fetchApi('/user/profile');
+          setUser(res.data || res);
+        } catch (err) {
+          console.error('Failed to fetch user profile', err);
+          // If token is invalid, clear it
+          localStorage.removeItem('token');
+          setIsLoggedIn(false);
+        }
+      }
     };
 
     checkAuth();
@@ -92,12 +106,22 @@ export default function Navbar() {
             </Link>
 
             {isLoggedIn ? (
-              <Link href="/dashboard" className="btn-primary" style={{ padding: '0.6rem 1.25rem', borderRadius: '8px', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <User size={18} /> Dashboard
-              </Link>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <Link href="/dashboard" style={{ 
+                  width: '45px', height: '45px', borderRadius: '50%', overflow: 'hidden', 
+                  border: '2px solid var(--primary-color)', background: 'rgba(255,255,255,0.05)',
+                  display: 'flex', justifyContent: 'center', alignItems: 'center'
+                }}>
+                  {user?.imageUrl ? (
+                    <img src={user.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <User size={24} color="var(--primary-color)" />
+                  )}
+                </Link>
+              </div>
             ) : (
-              <Link href="/login" className="btn-primary" style={{ padding: '0.6rem 1.25rem', borderRadius: '8px' }}>
-                Login / Register
+              <Link href="/login" className="btn-primary" style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', fontWeight: 700 }}>
+                LOGIN / REGISTER
               </Link>
             )}
           </div>

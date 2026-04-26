@@ -194,16 +194,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: 'calc(100vh - 70px)', background: 'var(--bg-color)' }}>
+    <div style={{ display: 'flex', minHeight: 'calc(100vh - 185px)', background: 'var(--bg-color)' }}>
       {/* Desktop Sidebar */}
       <aside style={{
         width: '260px', flexShrink: 0,
         background: 'rgba(11, 12, 16, 0.95)',
         backdropFilter: 'blur(16px)',
         borderRight: 'var(--glass-border)',
-        height: 'calc(100vh - 70px)',
+        height: 'calc(100vh - 185px)',
         position: 'fixed',
-        top: '70px',
+        top: '185px',
         left: 0,
         zIndex: 50
       }} className="dashboard-sidebar">

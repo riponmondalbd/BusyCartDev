@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { prisma } from "../prisma/prisma";
+import { AppError } from "../utils/AppError";
 import { accessCookieOptions, refreshCookieOptions } from "../utils/cookies";
 import {
   generateAccessToken,
@@ -8,14 +9,16 @@ import {
 } from "../utils/generateTokens";
 
 // register user
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const { name, email, password } = req.body;
 
   try {
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+      throw new AppError("Email and password are required", 400);
     }
 
     // check if user already exists
@@ -24,7 +27,7 @@ export const registerUser = async (req: Request, res: Response) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      throw new AppError("User already exists", 400);
     }
 
     // hash password
@@ -39,31 +42,40 @@ export const registerUser = async (req: Request, res: Response) => {
       .status(201)
       .json({ message: "User registered successfully", id: user.id });
   } catch (error) {
-    res.status(500).json({ message: "Error registering user" });
+    next(error);
   }
 };
 
 // login user
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const { email, password } = req.body;
 
   try {
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+      throw new AppError("Email and password are required", 400);
     }
 
     const user = await prisma.user.findUnique({ where: { email } });
 
     // valid user check
     if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      throw new AppError("Invalid credentials", 400);
     }
 
-    const isMatched = await bcrypt.compare(password, user.password!);
+    if (!user.password) {
+      throw new AppError(
+        "This account was registered using Google. Please use Google Login.",
+        400,
+      );
+    }
+
+    const isMatched = await bcrypt.compare(password, user.password);
     if (!isMatched) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      throw new AppError("Invalid credentials", 400);
     }
 
     //  generate tokens
@@ -85,17 +97,21 @@ export const loginUser = async (req: Request, res: Response) => {
 
     res.json({ message: "Login successful", token: accessToken });
   } catch (error) {
-    res.status(500).json({ message: "Error logging in user" });
+    next(error);
   }
 };
 
 // logout user
-export const logoutUser = async (req: Request, res: Response) => {
+export const logoutUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const token = req.cookies?.refreshToken;
 
     if (!token) {
-      return res.status(400).json({ message: "No refresh token found" });
+      throw new AppError("No refresh token found", 400);
     }
 
     // delete refresh token from DB
@@ -108,15 +124,18 @@ export const logoutUser = async (req: Request, res: Response) => {
     res.clearCookie("accessToken", accessCookieOptions);
     res.json({ message: "Logout successful" });
   } catch (error) {
-    res.status(500).json({ message: "Error logging out user" });
+    next(error);
   }
 };
+
 // google auth callback
 export const googleCallback = async (req: any, res: Response) => {
   try {
     const user = req.user;
     if (!user) {
-      return res.redirect(`${process.env.FRONTEND_URL}/login?error=Google auth failed`);
+      return res.redirect(
+        `${process.env.FRONTEND_URL}/login?error=Google auth failed`,
+      );
     }
 
     const accessToken = generateAccessToken(user.id, user.role);

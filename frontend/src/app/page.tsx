@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { fetchApi } from '@/utils/api';
+import { useWishlist } from '@/store/WishlistContext';
 import { 
   ShoppingBag, Zap, ShieldCheck, Globe, 
   ChevronLeft, ChevronRight, ArrowRight, 
@@ -31,47 +33,33 @@ const sliderData = [
 ];
 
 export default function ElectroMarketplaceHome() {
+  const router = useRouter();
   const [categories, setCategories] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSlider, setActiveSlider] = useState(0);
   const [activeTab, setActiveTab] = useState('Trending');
-  const [wishlistedIds, setWishlistedIds] = useState<Set<string>>(new Set());
+  
+  const { wishlistedIds, toggleWishlist } = useWishlist();
 
-  // Load wishlist from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('wishlist');
-    if (saved) {
-      try {
-        const ids = JSON.parse(saved);
-        const wishlistSet = new Set<string>(ids);
-        setWishlistedIds(wishlistSet);
-        window.dispatchEvent(new CustomEvent('wishlist-update', { detail: wishlistSet.size }));
-      } catch (err) {
-        console.error('Error loading wishlist:', err);
-      }
+  const handleToggleWishlist = async (id: string) => {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    if (!token) {
+      alert('Authentication required. Redirecting to login terminal...');
+      router.push('/login');
+      return;
     }
-  }, []);
-
-  const toggleWishlist = (id: string) => {
-    setWishlistedIds(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      
-      // Persist to localStorage
-      localStorage.setItem('wishlist', JSON.stringify(Array.from(next)));
-      
-      // Dispatch event for Navbar update
-      window.dispatchEvent(new CustomEvent('wishlist-update', { detail: next.size }));
-      return next;
-    });
+    try {
+      await toggleWishlist(id);
+    } catch (err: any) {
+      alert(err.message || 'Action failed');
+    }
   };
 
   const filteredProducts = products.filter(p => {
-    if (activeTab === 'New Arrivals') return true; // Default sorted by backend usually
-    if (activeTab === 'Bestsellers') return p.price > 100; // Simulated logic
-    if (activeTab === 'Trending') return p.discount > 0 || p.price < 200; // Simulated logic
+    if (activeTab === 'New Arrivals') return true;
+    if (activeTab === 'Bestsellers') return p.price > 100;
+    if (activeTab === 'Trending') return p.discount > 0 || p.price < 200;
     return true;
   }).slice(0, 8);
 
@@ -204,7 +192,7 @@ export default function ElectroMarketplaceHome() {
                   <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
                     <Link href={`/products/${products[0].id}`} className="btn-primary" style={{ flex: 1, textAlign: 'center' }}>Acquire Now</Link>
                     <button 
-                      onClick={() => toggleWishlist(products[0].id)}
+                      onClick={() => handleToggleWishlist(products[0].id)}
                       style={{ 
                         background: 'none', border: '1px solid var(--border-color)', 
                         padding: '0.75rem', borderRadius: '8px', cursor: 'pointer',
@@ -244,7 +232,7 @@ export default function ElectroMarketplaceHome() {
                       <span style={{ fontWeight: 800, color: 'var(--primary-color)', fontSize: '1.1rem' }}>${prod.price}</span>
                       <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button 
-                          onClick={() => toggleWishlist(prod.id)}
+                          onClick={() => handleToggleWishlist(prod.id)}
                           style={{ 
                             background: 'none', border: '1px solid var(--border-color)', 
                             padding: '0.4rem', borderRadius: '4px', cursor: 'pointer',

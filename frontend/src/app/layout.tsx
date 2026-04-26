@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { WishlistProvider } from "@/store/WishlistContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,11 +20,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
-        <main className="main-content">
-          {children}
-        </main>
-        <Footer />
+        <WishlistProvider>
+          <Navbar />
+          <main className="main-content">
+            {children}
+          </main>
+          <Footer />
+        </WishlistProvider>
       </body>
     </html>
   );
