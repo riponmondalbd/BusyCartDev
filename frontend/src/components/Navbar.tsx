@@ -12,6 +12,8 @@ export default function Navbar() {
   const [user, setUser] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
+  const [cartTotal, setCartTotal] = useState(0);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +26,25 @@ export default function Navbar() {
     const handleWishlistUpdate = (e: any) => setWishlistCount(e.detail);
     window.addEventListener('wishlist-update', handleWishlistUpdate);
 
+    const handleCartUpdate = (e: any) => {
+      if (e.detail) {
+        setCartCount(e.detail.totalItems || 0);
+        setCartTotal(e.detail.total || 0);
+      }
+    };
+    window.addEventListener('cart-update', handleCartUpdate);
+
+    const fetchCartData = async () => {
+      const cartRes = await fetchApi('/cart/my-cart').catch(() => null);
+      if (cartRes) {
+        const data = cartRes.data || cartRes;
+        setCartCount(data.totalItems || 0);
+        setCartTotal(data.total || 0);
+      }
+    };
+
+    window.addEventListener('cart-refresh', fetchCartData);
+
     const checkAuth = async () => {
       const token = localStorage.getItem('token');
       setIsLoggedIn(!!token);
@@ -32,12 +53,16 @@ export default function Navbar() {
         try {
           const res = await fetchApi('/user/profile');
           setUser(res.data || res);
+          await fetchCartData();
         } catch (err) {
           console.error('Failed to fetch user profile', err);
           // If token is invalid, clear it
           localStorage.removeItem('token');
           setIsLoggedIn(false);
         }
+      } else {
+        setCartCount(0);
+        setCartTotal(0);
       }
     };
 
@@ -46,6 +71,8 @@ export default function Navbar() {
     return () => {
       window.removeEventListener('storage', checkAuth);
       window.removeEventListener('wishlist-update', handleWishlistUpdate);
+      window.removeEventListener('cart-update', handleCartUpdate);
+      window.removeEventListener('cart-refresh', fetchCartData);
     };
   }, []);
 
@@ -97,11 +124,11 @@ export default function Navbar() {
             <Link href="/cart" style={{ position: 'relative', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <div style={{ position: 'relative' }}>
                 <ShoppingCart size={24} />
-                <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>0</span>
+                <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>{cartCount}</span>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column' }}>
                 <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.6 }}>My Cart</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary-color)' }}>$0.00</span>
+                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary-color)' }}>${Number(cartTotal).toFixed(2)}</span>
               </div>
             </Link>
 

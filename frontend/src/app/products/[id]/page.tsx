@@ -76,6 +76,10 @@ export default function SingleProductPage() {
         method: 'POST',
         body: JSON.stringify({ productId: id, quantity }),
       });
+      
+      // Notify Navbar to update cart counts
+      window.dispatchEvent(new CustomEvent('cart-refresh'));
+
       if (showNotification) {
         alert(`${quantity} Module(s) successfully integrated into your cart matrix.`);
       }

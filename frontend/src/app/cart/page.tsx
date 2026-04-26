@@ -20,11 +20,8 @@ export default function CartPage() {
       const data = res.data || res;
       setCart(data);
       
-      // Sync coupon code if one is already applied in the backend
-      if (data.appliedCoupon?.code) {
-        setCouponCode(data.appliedCoupon.code);
-        setCouponSuccess(true);
-      }
+      // Notify Navbar of cart update
+      window.dispatchEvent(new CustomEvent('cart-update', { detail: data }));
     } catch (err: any) {
       if (err.message.includes('401')) {
         router.push('/login');
@@ -37,7 +34,22 @@ export default function CartPage() {
   };
 
   useEffect(() => {
-    loadCart(true);
+    const initCart = async () => {
+      // Clear coupon on entry to ensure "not by default"
+      try {
+        await fetchApi('/coupon/remove', { method: 'DELETE' });
+      } catch (err) {
+        // Ignore if no coupon was there
+      }
+      loadCart(true);
+    };
+
+    initCart();
+    
+    // Ensure coupon is removed when navigating away
+    return () => {
+      fetchApi('/coupon/remove', { method: 'DELETE' }).catch(() => {});
+    };
   }, []);
 
   const handleUpdateQuantity = async (itemId: string, currentQty: number, change: number) => {
