@@ -77,12 +77,18 @@ export default function Footer() {
           <div>
             <h4 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 800, marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>User Console</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {['Dashboard', 'My Wishlist', 'Shopping Cart', 'Track Order', 'Help Center'].map((link) => (
-                <li key={link}>
-                  <Link href={`/${link.toLowerCase().replace(' ', '-')}`} style={{ color: 'var(--text-secondary)', transition: '0.2s', fontSize: '0.95rem' }}
+              {[
+                { name: 'Dashboard', url: '/dashboard' },
+                { name: 'My Wishlist', url: '/wishlist' },
+                { name: 'Shopping Cart', url: '/cart' },
+                { name: 'Track Order', url: '/track-order' },
+                { name: 'Help Center', url: '/help' }
+              ].map((item) => (
+                <li key={item.name}>
+                  <Link href={item.url} style={{ color: 'var(--text-secondary)', transition: '0.2s', fontSize: '0.95rem' }}
                         onMouseEnter={e => e.currentTarget.style.color = 'var(--primary-color)'}
                         onMouseLeave={e => e.currentTarget.style.color = 'var(--text-secondary)'}>
-                    {link}
+                    {item.name}
                   </Link>
                 </li>
               ))}
