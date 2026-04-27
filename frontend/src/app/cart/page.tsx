@@ -1,10 +1,12 @@
 "use client";
 
 import { fetchApi } from "@/utils/api";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Skeleton from "@/components/Skeleton";
 
 export default function CartPage() {
   const router = useRouter();
@@ -181,15 +183,16 @@ export default function CartPage() {
 
   if (loading) {
     return (
-      <div
-        className="container"
-        style={{
-          padding: "4rem 0",
-          textAlign: "center",
-          color: "var(--primary-color)",
-        }}
-      >
-        Accessing Cart Matrix...
+      <div className="container" style={{ padding: "3rem 0" }}>
+        <Skeleton width="300px" height="40px" style={{ marginBottom: "2rem" }} />
+        <div style={{ display: "grid", gridTemplateColumns: "2.5fr 1fr", gap: "2rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            {Array(3).fill(0).map((_, i) => (
+              <Skeleton key={i} height="120px" borderRadius="12px" />
+            ))}
+          </div>
+          <Skeleton height="400px" borderRadius="12px" />
+        </div>
       </div>
     );
   }
@@ -271,15 +274,16 @@ export default function CartPage() {
                   }}
                 >
                   {item.image && (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
+                    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                      <Image
+                        src={item.image}
+                        alt={item.name}
+                        fill
+                        style={{
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
                   )}
                 </div>
                 <div style={{ flex: 1 }}>
@@ -310,6 +314,7 @@ export default function CartPage() {
                     onClick={() =>
                       handleUpdateQuantity(item.itemId, item.quantity, -1)
                     }
+                    aria-label="Decrease quantity"
                     style={{
                       background: "none",
                       border: "none",
@@ -332,6 +337,7 @@ export default function CartPage() {
                       }
                       handleUpdateQuantity(item.itemId, item.quantity, 1);
                     }}
+                    aria-label="Increase quantity"
                     style={{
                       background: "none",
                       border: "none",
@@ -350,6 +356,7 @@ export default function CartPage() {
                 </div>
                 <button
                   onClick={() => handleRemoveItem(item.itemId)}
+                  aria-label={`Remove ${item.name} from cart`}
                   style={{
                     background: "none",
                     border: "none",
@@ -437,6 +444,7 @@ export default function CartPage() {
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
                   placeholder="Enter code"
+                  aria-label="Promo code"
                 />
                 <button
                   onClick={applyCoupon}

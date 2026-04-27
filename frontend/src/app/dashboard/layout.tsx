@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Skeleton from "@/components/Skeleton";
 
 const userLinks = [
   { href: "/dashboard/profile", label: "Identity Profile", icon: UserCircle },
@@ -208,27 +209,23 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "70vh",
-          flexDirection: "column",
-          gap: "1rem",
-        }}
-      >
-        <div
-          style={{
-            width: "44px",
-            height: "44px",
-            border: "3px solid rgba(102,252,241,0.1)",
-            borderTopColor: "var(--primary-color)",
-            borderRadius: "50%",
-            animation: "spin 0.8s linear infinite",
-          }}
-        />
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div style={{ display: "flex", minHeight: "100vh", background: "var(--bg-color)" }}>
+        <aside style={{ width: "260px", borderRight: "var(--glass-border)", padding: "1.5rem" }} className="hidden-mobile">
+          <Skeleton height="80px" borderRadius="12px" style={{ marginBottom: "2rem" }} />
+          <Skeleton height="30px" width="60%" style={{ marginBottom: "1rem" }} />
+          {Array(6).fill(0).map((_, i) => (
+            <Skeleton key={i} height="40px" style={{ marginBottom: "0.5rem" }} borderRadius="8px" />
+          ))}
+        </aside>
+        <main style={{ flex: 1, padding: "2.5rem" }}>
+          <Skeleton height="150px" borderRadius="16px" style={{ marginBottom: "2.5rem" }} />
+          <Skeleton height="30px" width="200px" style={{ marginBottom: "1.5rem" }} />
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "1.5rem" }}>
+            {Array(6).fill(0).map((_, i) => (
+              <Skeleton key={i} height="120px" borderRadius="12px" />
+            ))}
+          </div>
+        </main>
       </div>
     );
   }

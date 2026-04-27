@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Skeleton from "@/components/Skeleton";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -91,15 +92,22 @@ export default function CheckoutPage() {
     }
   };
 
-  if (loading)
+  if (loading) {
     return (
-      <div
-        className="container"
-        style={{ padding: "5rem", textAlign: "center" }}
-      >
-        Initializing Secure Gateway...
+      <div className="container" style={{ padding: "4rem 0" }}>
+        <Skeleton width="400px" height="50px" style={{ marginBottom: "3rem" }} />
+        <div style={{ display: "grid", gridTemplateColumns: "1.5fr 1fr", gap: "3rem" }}>
+          <div>
+            <Skeleton height="300px" borderRadius="16px" style={{ marginBottom: "2rem" }} />
+            <Skeleton height="200px" borderRadius="16px" />
+          </div>
+          <div>
+            <Skeleton height="400px" borderRadius="16px" />
+          </div>
+        </div>
       </div>
     );
+  }
   if (!cart) return null;
 
   const subtotal = cart?.subtotal || 0;
@@ -162,6 +170,7 @@ export default function CheckoutPage() {
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
                 placeholder="Neo-Tokyo, Sector 7..."
+                aria-label="Street Address"
               />
             </div>
             <div
@@ -188,6 +197,7 @@ export default function CheckoutPage() {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="Cyber City"
+                  aria-label="City"
                 />
               </div>
               <div>
@@ -207,6 +217,7 @@ export default function CheckoutPage() {
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
                   placeholder="10001"
+                  aria-label="Zip Code"
                 />
               </div>
             </div>

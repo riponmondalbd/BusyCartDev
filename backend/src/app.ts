@@ -1,3 +1,4 @@
+import compression from "compression";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
@@ -13,6 +14,7 @@ import { AppError } from "./utils/AppError";
 const app = express();
 
 // middleware
+app.use(compression());
 if (appEnv.isProduction) {
   app.set("trust proxy", 1);
 }

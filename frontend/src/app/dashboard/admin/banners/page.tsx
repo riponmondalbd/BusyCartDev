@@ -14,6 +14,8 @@ import {
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Swal from "sweetalert2";
+import Image from "next/image";
+import Skeleton from "@/components/Skeleton";
 
 type Banner = {
   id: string;
@@ -287,7 +289,22 @@ export default function BannerManagementPage() {
       ) : (
         <div style={{ display: "grid", gap: "1rem" }}>
           {loading ? (
-            <div style={{ textAlign: "center", padding: "4rem" }}>Recalibrating Banner Database...</div>
+            <div style={{ display: "grid", gap: "1rem" }}>
+              {Array(3).fill(0).map((_, i) => (
+                <div key={i} className="glass-panel" style={{ padding: "1.25rem", display: "flex", alignItems: "center", gap: "2rem" }}>
+                  <Skeleton width="120px" height="70px" borderRadius="8px" />
+                  <div style={{ flex: 1 }}>
+                    <Skeleton width="200px" height="20px" style={{ marginBottom: "0.5rem" }} />
+                    <Skeleton width="150px" height="15px" />
+                  </div>
+                  <div style={{ display: "flex", gap: "0.5rem" }}>
+                    <Skeleton width="35px" height="35px" borderRadius="6px" />
+                    <Skeleton width="35px" height="35px" borderRadius="6px" />
+                    <Skeleton width="35px" height="35px" borderRadius="6px" />
+                  </div>
+                </div>
+              ))}
+            </div>
           ) : banners.length === 0 ? (
             <div className="glass-panel" style={{ padding: "4rem", textAlign: "center", color: "var(--text-secondary)" }}>
               <ImageIcon size={48} style={{ opacity: 0.2, marginBottom: "1rem" }} />
@@ -303,8 +320,8 @@ export default function BannerManagementPage() {
                 borderLeft: `4px solid ${banner.isActive ? banner.color : '#333'}`,
                 opacity: banner.isActive ? 1 : 0.6
               }}>
-                <div style={{ width: "120px", height: "70px", borderRadius: "8px", overflow: "hidden", background: "#000", flexShrink: 0 }}>
-                  <img src={banner.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                <div style={{ width: "120px", height: "70px", borderRadius: "8px", overflow: "hidden", background: "#000", flexShrink: 0, position: "relative" }}>
+                  <Image src={banner.image} alt={banner.title} fill style={{ objectFit: "cover" }} />
                 </div>
                 
                 <div style={{ flex: 1 }}>
@@ -321,19 +338,25 @@ export default function BannerManagementPage() {
                 </div>
 
                 <div style={{ display: "flex", gap: "0.5rem" }}>
-                  <a href={banner.link} target="_blank" rel="noreferrer" style={{ 
-                    padding: "0.5rem", borderRadius: "6px", background: "rgba(255,255,255,0.05)", color: "var(--text-secondary)"
-                  }}>
+                  <a href={banner.link} target="_blank" rel="noreferrer" 
+                    aria-label="View link destination"
+                    style={{ 
+                      padding: "0.5rem", borderRadius: "6px", background: "rgba(255,255,255,0.05)", color: "var(--text-secondary)"
+                    }}>
                     <ExternalLink size={18} />
                   </a>
-                  <button onClick={() => handleEdit(banner)} style={{ 
-                    padding: "0.5rem", borderRadius: "6px", background: "rgba(102,252,241,0.1)", color: "var(--primary-color)", border: "none", cursor: "pointer"
-                  }}>
+                  <button onClick={() => handleEdit(banner)} 
+                    aria-label="Edit banner"
+                    style={{ 
+                      padding: "0.5rem", borderRadius: "6px", background: "rgba(102,252,241,0.1)", color: "var(--primary-color)", border: "none", cursor: "pointer"
+                    }}>
                     <Edit2 size={18} />
                   </button>
-                  <button onClick={() => handleDelete(banner.id)} style={{ 
-                    padding: "0.5rem", borderRadius: "6px", background: "rgba(255,75,75,0.1)", color: "var(--error-color)", border: "none", cursor: "pointer"
-                  }}>
+                  <button onClick={() => handleDelete(banner.id)} 
+                    aria-label="Delete banner"
+                    style={{ 
+                      padding: "0.5rem", borderRadius: "6px", background: "rgba(255,75,75,0.1)", color: "var(--error-color)", border: "none", cursor: "pointer"
+                    }}>
                     <Trash2 size={18} />
                   </button>
                 </div>

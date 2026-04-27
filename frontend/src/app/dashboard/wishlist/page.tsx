@@ -5,6 +5,8 @@ import { Heart, PackageSearch, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Image from "next/image";
+import Skeleton from "@/components/Skeleton";
 
 export default function WishlistPage() {
   const [wishlist, setWishlist] = useState<any[]>([]);
@@ -47,15 +49,18 @@ export default function WishlistPage() {
       </div>
 
       {loading ? (
-        <div
-          className="glass-panel"
-          style={{
-            padding: "4rem",
-            textAlign: "center",
-            color: "var(--primary-color)",
-          }}
-        >
-          Accessing storage matrix...
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "1.5rem" }}>
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="glass-panel" style={{ padding: "1.25rem" }}>
+              <Skeleton height="180px" borderRadius="8px" style={{ marginBottom: "1rem" }} />
+              <Skeleton width="60%" height="20px" style={{ marginBottom: "0.5rem" }} />
+              <Skeleton width="40%" height="15px" style={{ marginBottom: "1.5rem" }} />
+              <div style={{ display: "flex", gap: "0.75rem" }}>
+                <Skeleton height="35px" style={{ flex: 1 }} borderRadius="8px" />
+                <Skeleton width="35px" height="35px" borderRadius="8px" />
+              </div>
+            </div>
+          ))}
         </div>
       ) : wishlist.length === 0 ? (
         <div
@@ -103,15 +108,16 @@ export default function WishlistPage() {
                 }}
               >
                 {item.product?.images?.[0] ? (
-                  <img
-                    src={item.product.images[0]}
-                    alt={item.product.name}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
+                  <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                    <Image
+                      src={item.product.images[0]}
+                      alt={item.product.name}
+                      fill
+                      style={{
+                        objectFit: "cover",
+                      }}
+                    />
+                  </div>
                 ) : (
                   <Heart size={40} color="var(--border-color)" />
                 )}
@@ -156,6 +162,7 @@ export default function WishlistPage() {
                   </Link>
                   <button
                     onClick={() => removeFromWishlist(item.productId)}
+                    aria-label={`Remove ${item.product?.name} from wishlist`}
                     style={{
                       background: "rgba(255,75,75,0.1)",
                       border: "1px solid rgba(255,75,75,0.2)",

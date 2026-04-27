@@ -4,6 +4,8 @@ import { fetchApi } from "@/utils/api";
 import { Clock3, PlusCircle, RotateCcw, Sparkles } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Image from "next/image";
+import Skeleton from "@/components/Skeleton";
 
 type ProductSummary = {
   id: string;
@@ -175,7 +177,13 @@ export default function DealOfDayAdminPage() {
             <Sparkles size={22} color="var(--primary-color)" />
           </div>
 
-          {currentDeal ? (
+          {loading ? (
+            <div style={{ display: "grid", gap: "0.75rem" }}>
+              <Skeleton height="20px" width="100%" />
+              <Skeleton height="20px" width="100%" />
+              <Skeleton height="20px" width="100%" />
+            </div>
+          ) : currentDeal ? (
             <div style={{ display: "grid", gap: "0.75rem" }}>
               <div
                 style={{
@@ -238,12 +246,14 @@ export default function DealOfDayAdminPage() {
                   type="text"
                   className="input-field"
                   placeholder="Search product by name"
+                  aria-label="Search product"
                   value={productSearch}
                   onChange={(event) => setProductSearch(event.target.value)}
                   style={{ marginBottom: "0.6rem" }}
                 />
                 <select
                   className="input-field"
+                  aria-label="Select product"
                   value={form.productId}
                   onChange={(event) =>
                     setForm({ ...form, productId: event.target.value })
@@ -263,6 +273,7 @@ export default function DealOfDayAdminPage() {
                 <input
                   type="datetime-local"
                   className="input-field"
+                  aria-label="Countdown ends at"
                   value={form.endsAt}
                   onChange={(event) =>
                     setForm({ ...form, endsAt: event.target.value })
@@ -295,15 +306,16 @@ export default function DealOfDayAdminPage() {
                   }}
                 >
                   {selectedProduct.images?.[0] ? (
-                    <img
-                      src={selectedProduct.images[0]}
-                      alt={selectedProduct.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
+                    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                      <Image
+                        src={selectedProduct.images[0]}
+                        alt={selectedProduct.name}
+                        fill
+                        style={{
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
                   ) : null}
                 </div>
                 <div>

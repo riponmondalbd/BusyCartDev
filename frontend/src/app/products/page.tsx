@@ -1,9 +1,10 @@
 "use client";
 
-import { fetchApi } from "@/utils/api";
+import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import Skeleton from "@/components/Skeleton";
 
 type CategorySummary = {
   id: string;
@@ -343,14 +344,18 @@ export default function ProductsPage() {
                   gap: "2rem",
                 }}
               >
-                {Array(6)
+                {Array(8)
                   .fill(0)
                   .map((_, i) => (
-                    <div
-                      key={i}
-                      className="glass-panel"
-                      style={{ height: "350px" }}
-                    ></div>
+                    <div key={i} className="glass-panel" style={{ padding: "1.25rem", height: "350px" }}>
+                       <Skeleton height="180px" borderRadius="8px" style={{ marginBottom: "1rem" }} />
+                       <Skeleton height="15px" width="40%" style={{ marginBottom: "0.5rem" }} />
+                       <Skeleton height="25px" width="80%" style={{ marginBottom: "1rem" }} />
+                       <div style={{ display: "flex", justifyContent: "space-between", marginTop: "auto" }}>
+                          <Skeleton height="25px" width="30%" />
+                          <Skeleton height="25px" width="30%" borderRadius="6px" />
+                       </div>
+                    </div>
                   ))}
               </div>
             ) : sortedProducts.length > 0 ? (
@@ -396,19 +401,17 @@ export default function ProductsPage() {
                         }}
                       >
                         {prod.images && prod.images[0] ? (
-                          <img
-                            src={prod.images[0]}
-                            alt={prod.name}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                              opacity: 0.85,
-                              transition: "0.5s"
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
-                            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
-                          />
+                          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                            <Image
+                              src={prod.images[0]}
+                              alt={prod.name}
+                              fill
+                              style={{
+                                objectFit: "cover",
+                                opacity: 0.85,
+                              }}
+                            />
+                          </div>
                         ) : (
                           <span style={{ color: "var(--text-secondary)", fontSize: "0.7rem" }}>DATA_MISSING</span>
                         )}
@@ -493,25 +496,18 @@ export default function ProductsPage() {
                       background:
                         currentPage === 1
                           ? "rgba(255,255,255,0.05)"
-                          : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                          : "var(--primary-color)",
                       color:
-                        currentPage === 1 ? "rgba(255,255,255,0.4)" : "white",
-                      border:
-                        currentPage === 1
-                          ? "1px solid rgba(255,255,255,0.1)"
-                          : "1px solid rgba(255,255,255,0.2)",
+                        currentPage === 1 ? "rgba(255,255,255,0.4)" : "var(--bg-color)",
+                      border: "none",
                       borderRadius: "8px",
                       cursor: currentPage === 1 ? "not-allowed" : "pointer",
                       fontSize: "0.95rem",
-                      fontWeight: 600,
+                      fontWeight: 800,
                       transition: "all 0.3s ease",
-                      boxShadow:
-                        currentPage === 1
-                          ? "none"
-                          : "0 4px 15px rgba(99, 102, 241, 0.3)",
                     }}
                   >
-                    ← Previous
+                    ← PREVIOUS
                   </button>
 
                   <div
@@ -529,26 +525,19 @@ export default function ProductsPage() {
                           padding: "0.5rem 0.85rem",
                           background:
                             currentPage === i + 1
-                              ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
+                              ? "var(--primary-color)"
                               : "rgba(255,255,255,0.08)",
                           color:
                             currentPage === i + 1
-                              ? "white"
+                              ? "var(--bg-color)"
                               : "rgba(255,255,255,0.6)",
-                          border:
-                            currentPage === i + 1
-                              ? "1px solid rgba(255,255,255,0.3)"
-                              : "1px solid rgba(255,255,255,0.1)",
+                          border: "none",
                           borderRadius: "6px",
                           cursor: "pointer",
                           fontSize: "0.9rem",
-                          fontWeight: currentPage === i + 1 ? "bold" : "500",
+                          fontWeight: "bold",
                           transition: "all 0.3s ease",
                           minWidth: "36px",
-                          boxShadow:
-                            currentPage === i + 1
-                              ? "0 4px 12px rgba(99, 102, 241, 0.3)"
-                              : "none",
                         }}
                       >
                         {i + 1}
@@ -566,28 +555,21 @@ export default function ProductsPage() {
                       background:
                         currentPage === totalPages
                           ? "rgba(255,255,255,0.05)"
-                          : "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                          : "var(--primary-color)",
                       color:
                         currentPage === totalPages
                           ? "rgba(255,255,255,0.4)"
-                          : "white",
-                      border:
-                        currentPage === totalPages
-                          ? "1px solid rgba(255,255,255,0.1)"
-                          : "1px solid rgba(255,255,255,0.2)",
+                          : "var(--bg-color)",
+                      border: "none",
                       borderRadius: "8px",
                       cursor:
                         currentPage === totalPages ? "not-allowed" : "pointer",
                       fontSize: "0.95rem",
-                      fontWeight: 600,
+                      fontWeight: 800,
                       transition: "all 0.3s ease",
-                      boxShadow:
-                        currentPage === totalPages
-                          ? "none"
-                          : "0 4px 15px rgba(99, 102, 241, 0.3)",
                     }}
                   >
-                    Next →
+                    NEXT →
                   </button>
                 </div>
 

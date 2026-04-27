@@ -10,10 +10,12 @@ import {
   ShoppingCart,
   Zap,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Skeleton from "@/components/Skeleton";
 
 export default function SingleProductPage() {
   const params = useParams();
@@ -135,36 +137,28 @@ export default function SingleProductPage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "80vh",
-          flexDirection: "column",
-          gap: "1.5rem",
-        }}
-      >
-        <div
-          style={{
-            width: "60px",
-            height: "60px",
-            border: "4px solid rgba(102,252,241,0.1)",
-            borderTopColor: "var(--primary-color)",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <p
-          style={{
-            color: "var(--primary-color)",
-            fontWeight: 800,
-            letterSpacing: "2px",
-          }}
-        >
-          DECRYPTING PRODUCT DATA...
-        </p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="container" style={{ paddingTop: "8rem" }}>
+        <div className="product-detail-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "3rem" }}>
+          <div>
+            <Skeleton height="600px" borderRadius="24px" />
+            <div style={{ display: "flex", gap: "1.25rem", marginTop: "1.5rem" }}>
+              <Skeleton width="100px" height="100px" borderRadius="16px" />
+              <Skeleton width="100px" height="100px" borderRadius="16px" />
+              <Skeleton width="100px" height="100px" borderRadius="16px" />
+            </div>
+          </div>
+          <div>
+            <Skeleton width="150px" height="30px" borderRadius="30px" style={{ marginBottom: "1rem" }} />
+            <Skeleton height="60px" style={{ marginBottom: "1rem" }} />
+            <Skeleton width="200px" height="20px" style={{ marginBottom: "2rem" }} />
+            <Skeleton height="40px" width="200px" style={{ marginBottom: "3rem" }} />
+            <Skeleton height="150px" style={{ marginBottom: "3rem" }} />
+            <div style={{ display: "flex", gap: "1.5rem" }}>
+              <Skeleton height="50px" borderRadius="12px" style={{ flex: 1 }} />
+              <Skeleton height="50px" borderRadius="12px" style={{ flex: 1 }} />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -282,16 +276,17 @@ export default function SingleProductPage() {
               }}
             >
               {images.length > 0 && (
-                <img
-                  src={images[activeImage]}
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "contain",
-                    padding: "2rem",
-                  }}
-                  alt={product.name}
-                />
+                <div style={{ position: "relative", width: "100%", height: "100%", padding: "2rem" }}>
+                  <Image
+                    src={images[activeImage]}
+                    alt={product.name}
+                    fill
+                    style={{
+                      objectFit: "contain",
+                    }}
+                    priority
+                  />
+                </div>
               )}
 
               {images.length > 1 && (
@@ -399,14 +394,16 @@ export default function SingleProductPage() {
                       padding: "0.5rem",
                     }}
                   >
-                    <img
-                      src={img}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
-                    />
+                    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                      <Image
+                        src={img}
+                        alt={`${product.name} thumbnail ${idx}`}
+                        fill
+                        style={{
+                          objectFit: "contain",
+                        }}
+                      />
+                    </div>
                   </button>
                 ))}
               </div>
@@ -687,8 +684,8 @@ export default function SingleProductPage() {
                 <Link key={prod.id} href={`/products/${prod.id}`} className="glass-panel" style={{ padding: "1.5rem", transition: "0.3s", display: "flex", flexDirection: "column" }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}>
-                  <div style={{ height: "180px", marginBottom: "1.5rem", background: "rgba(255,255,255,0.02)", borderRadius: "12px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <img src={prod.images?.[0]} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "1rem" }} />
+                  <div style={{ height: "180px", marginBottom: "1.5rem", background: "rgba(255,255,255,0.02)", borderRadius: "12px", display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}>
+                    <Image src={prod.images?.[0] || "/placeholder.jpg"} alt={prod.name} fill style={{ objectFit: "contain", padding: "1rem" }} />
                   </div>
                   <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.5rem" }}>{prod.name}</h4>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
@@ -713,8 +710,8 @@ export default function SingleProductPage() {
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "2.5rem" }}>
                 {topSellingRelated.map((prod) => (
                   <div key={prod.id} style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
-                    <Link href={`/products/${prod.id}`} style={{ width: "80px", height: "80px", flexShrink: 0, background: "rgba(255,255,255,0.05)", borderRadius: "12px", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <img src={prod.images?.[0]} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "0.5rem" }} />
+                    <Link href={`/products/${prod.id}`} style={{ width: "80px", height: "80px", flexShrink: 0, background: "rgba(255,255,255,0.05)", borderRadius: "12px", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}>
+                      <Image src={prod.images?.[0] || "/placeholder.jpg"} alt={prod.name} fill style={{ objectFit: "contain", padding: "0.5rem" }} />
                     </Link>
                     <div>
                       <Link href={`/products/${prod.id}`} style={{ fontWeight: 700, fontSize: "0.95rem", display: "block", marginBottom: "0.25rem" }}>{prod.name}</Link>

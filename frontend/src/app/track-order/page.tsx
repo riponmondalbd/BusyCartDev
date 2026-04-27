@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { fetchApi } from '@/utils/api';
 import { Search, Package, Truck, CheckCircle, Clock, AlertCircle, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 const statusSteps = ['PENDING', 'PAID', 'SHIPPED', 'DELIVERED'];
@@ -59,6 +60,7 @@ export default function TrackOrderPage() {
               placeholder="Enter Order ID (e.g. 550e8400-e29b...)" 
               value={orderId}
               onChange={(e) => setOrderId(e.target.value)}
+              aria-label="Order Tracking ID"
               style={{ 
                 width: '100%', padding: '1rem 1.5rem 1rem 3rem', borderRadius: '12px', 
                 background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', 
@@ -140,8 +142,8 @@ export default function TrackOrderPage() {
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                   {order.items.map((item: any) => (
                     <div key={item.id} style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                      <div style={{ width: '50px', height: '50px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', overflow: 'hidden' }}>
-                        <img src={item.product.images?.[0]} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                      <div style={{ width: '50px', height: '50px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
+                        <Image src={item.product.images?.[0] || "/placeholder.jpg"} alt={item.product.name} fill style={{ objectFit: 'contain' }} />
                       </div>
                       <div style={{ flex: 1 }}>
                         <p style={{ fontSize: '0.9rem', fontWeight: 700 }}>{item.product.name}</p>

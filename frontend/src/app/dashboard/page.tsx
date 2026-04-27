@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { fetchApi } from '@/utils/api';
+import Skeleton from "@/components/Skeleton";
 import { 
   Package, Heart, RefreshCw, UserCircle, 
   Users, Database, Layers, Tag 
@@ -26,7 +27,7 @@ export default function DashboardOverview() {
     load();
   }, []);
 
-  if (loading) return null;
+  // if (loading) return null; // Removed to use internal skeletons
 
   const role = profile?.role || 'USER';
   const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
@@ -59,9 +60,13 @@ export default function DashboardOverview() {
           <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '0.75rem' }}>
             System <span style={{ color: roleColor }}>Dashboard</span>
           </h1>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px' }}>
-            Welcome back, {profile?.name}. Your identity has been verified. Access all system terminals via the navigation sidebar.
-          </p>
+          {loading ? (
+            <Skeleton width="400px" height="20px" />
+          ) : (
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.1rem', maxWidth: '600px' }}>
+              Welcome back, {profile?.name}. Your identity has been verified. Access all system terminals via the navigation sidebar.
+            </p>
+          )}
         </div>
       </div>
 
@@ -71,28 +76,37 @@ export default function DashboardOverview() {
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1.5rem' }}>
-        {stats.map((item) => (
-          <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
-            <div className="glass-panel" style={{ 
-              padding: '2rem', textAlign: 'center', borderTop: `2px solid ${item.color}`, 
-              transition: 'all 0.3s ease', cursor: 'pointer' 
-            }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translateY(-5px)';
-                e.currentTarget.style.boxShadow = `0 10px 30px color-mix(in srgb, ${item.color} 15%, transparent)`;
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = 'none';
-                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
-              }}
-            >
-              <item.icon size={32} color={item.color} style={{ marginBottom: '1rem' }} />
-              <p style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem' }}>{item.label}</p>
+        {loading ? (
+          Array(6).fill(0).map((_, i) => (
+            <div key={i} className="glass-panel" style={{ padding: '2rem' }}>
+              <Skeleton width="32px" height="32px" circle style={{ margin: "0 auto 1rem" }} />
+              <Skeleton width="60%" height="15px" style={{ margin: "0 auto" }} />
             </div>
-          </Link>
-        ))}
+          ))
+        ) : (
+          stats.map((item) => (
+            <Link key={item.href} href={item.href} style={{ textDecoration: 'none' }}>
+              <div className="glass-panel" style={{ 
+                padding: '2rem', textAlign: 'center', borderTop: `2px solid ${item.color}`, 
+                transition: 'all 0.3s ease', cursor: 'pointer' 
+              }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = `0 10px 30px color-mix(in srgb, ${item.color} 15%, transparent)`;
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = 'none';
+                  e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)';
+                }}
+              >
+                <item.icon size={32} color={item.color} style={{ marginBottom: '1rem' }} />
+                <p style={{ color: 'var(--text-primary)', fontWeight: 600, fontSize: '1rem' }}>{item.label}</p>
+              </div>
+            </Link>
+          ))
+        )}
       </div>
     </div>
   );

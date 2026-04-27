@@ -1,9 +1,10 @@
 'use client';
 
+import { ShoppingCart, Heart, User, Search, Menu, XCircle, ArrowRight } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Heart, User, Search, Menu, LayoutGrid, XCircle } from 'lucide-react';
 import { fetchApi } from '@/utils/api';
 
 export default function Navbar() {
@@ -25,9 +26,7 @@ export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // ... existing event listeners ...
     const handleWishlistUpdate = (e: any) => {
-      // Defer state update to next tick to avoid "update during render" errors
       setTimeout(() => {
         setWishlistCount(e.detail);
       }, 0);
@@ -106,6 +105,7 @@ export default function Navbar() {
               className="show-mobile" 
               onClick={() => setMobileMenuOpen(true)}
               style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', padding: 0 }}
+              aria-label="Open mobile menu"
             >
               <Menu size={24} />
             </button>
@@ -116,7 +116,7 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Modernized Search Bar - Desktop Only */}
+          {/* Search Bar */}
           <form 
             className="hidden-mobile" 
             onSubmit={handleSearch} 
@@ -166,6 +166,7 @@ export default function Navbar() {
                />
                <button 
                  type="submit" 
+                 aria-label="Search"
                  style={{ 
                    background: 'var(--primary-color)', 
                    border: 'none', 
@@ -179,8 +180,6 @@ export default function Navbar() {
                    transition: '0.2s',
                    boxShadow: '0 0 10px rgba(102,252,241,0.2)'
                  }}
-                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
-                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
                >
                  <ArrowRight size={14} color="#000" />
                </button>
@@ -189,12 +188,12 @@ export default function Navbar() {
 
           {/* Actions */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-            <Link href="/wishlist" className="hidden-mobile" style={{ position: 'relative', color: 'var(--text-secondary)' }}>
+            <Link href="/wishlist" className="hidden-mobile" style={{ position: 'relative', color: 'var(--text-secondary)' }} aria-label="View wishlist">
               <Heart size={22} />
               {wishlistCount > 0 && <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>{wishlistCount}</span>}
             </Link>
             
-            <Link href="/cart" style={{ position: 'relative', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <Link href="/cart" style={{ position: 'relative', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }} aria-label="View shopping cart">
               <div style={{ position: 'relative' }}>
                 <ShoppingCart size={22} />
                 {cartCount > 0 && <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>{cartCount}</span>}
@@ -209,10 +208,10 @@ export default function Navbar() {
               <Link href="/dashboard" style={{ 
                 width: '38px', height: '38px', borderRadius: '50%', overflow: 'hidden', 
                 border: '2px solid var(--primary-color)', background: 'rgba(255,255,255,0.05)',
-                display: 'flex', justifyContent: 'center', alignItems: 'center'
-              }}>
+                display: 'flex', justifyContent: 'center', alignItems: 'center', position: 'relative'
+              }} aria-label="Go to dashboard">
                 {user?.imageUrl ? (
-                  <img src={user.imageUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <Image src={user.imageUrl} alt="User Avatar" fill style={{ objectFit: 'cover' }} />
                 ) : (
                   <User size={20} color="var(--primary-color)" />
                 )}
@@ -258,7 +257,7 @@ export default function Navbar() {
               <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
                 Busy<span>Cart</span>
               </Link>
-              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#fff' }}>
+              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#fff' }} aria-label="Close menu">
                 <XCircle size={24} />
               </button>
             </div>
@@ -272,7 +271,7 @@ export default function Navbar() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
-                  <button type="submit" style={{ background: 'var(--primary-color)', border: 'none', padding: '0 1rem' }}>
+                  <button type="submit" style={{ background: 'var(--primary-color)', border: 'none', padding: '0 1rem' }} aria-label="Submit search">
                     <Search size={18} color="#000" />
                   </button>
                </div>
@@ -301,5 +300,3 @@ export default function Navbar() {
     </header>
   );
 }
-
-import { ArrowRight } from 'lucide-react';

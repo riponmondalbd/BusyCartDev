@@ -13,6 +13,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import Skeleton from "@/components/Skeleton";
+import toast from "react-hot-toast";
 
 export default function InventoryHub() {
   const router = useRouter();
@@ -463,7 +466,21 @@ export default function InventoryHub() {
               gap: "1.5rem",
             }}
           >
-            {products.map((p) => (
+            {loading ? (
+              Array(8).fill(0).map((_, i) => (
+                <div key={i} className="glass-panel" style={{ overflow: "hidden" }}>
+                  <Skeleton height="180px" />
+                  <div style={{ padding: "1.25rem" }}>
+                    <Skeleton width="70%" height="20px" style={{ marginBottom: "0.5rem" }} />
+                    <Skeleton width="100%" height="15px" style={{ marginBottom: "1rem" }} />
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <Skeleton height="35px" style={{ flex: 1 }} borderRadius="8px" />
+                      <Skeleton height="35px" style={{ flex: 1 }} borderRadius="8px" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : products.map((p) => (
               <div
                 key={p.id}
                 className="glass-panel"
@@ -477,15 +494,16 @@ export default function InventoryHub() {
                   }}
                 >
                   {p.images?.[0] ? (
-                    <img
-                      src={p.images[0]}
-                      alt={p.name}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
+                    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                      <Image
+                        src={p.images[0]}
+                        alt={p.name}
+                        fill
+                        style={{
+                          objectFit: "cover",
+                        }}
+                      />
+                    </div>
                   ) : (
                     <ImageIcon
                       size={40}
@@ -528,45 +546,47 @@ export default function InventoryHub() {
                     </span>
                   </div>
                   <div style={{ display: "flex", gap: "0.5rem" }}>
-                    <button
-                      onClick={() => {
-                        setEditingProduct(p);
-                        setProductForm({
-                          name: p.name,
-                          description: p.description || "",
-                          price: p.price.toString(),
-                          stock: p.stock.toString(),
-                          categoryId: p.categoryId,
-                          discount: p.discount?.toString() || "",
-                        });
-                        setShowProductForm(true);
-                      }}
-                      style={{
-                        flex: 1,
-                        padding: "0.6rem",
-                        borderRadius: "8px",
-                        border: "1px solid var(--border-color)",
-                        background: "rgba(255,255,255,0.03)",
-                        color: "var(--text-primary)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => deleteProduct(p.id)}
-                      style={{
-                        flex: 1,
-                        padding: "0.6rem",
-                        borderRadius: "8px",
-                        border: "1px solid rgba(255,75,75,0.3)",
-                        background: "rgba(255,75,75,0.05)",
-                        color: "var(--error-color)",
-                        cursor: "pointer",
-                      }}
-                    >
-                      <Trash2 size={14} />
-                    </button>
+                      <button
+                        onClick={() => {
+                          setEditingProduct(p);
+                          setProductForm({
+                            name: p.name,
+                            description: p.description || "",
+                            price: p.price.toString(),
+                            stock: p.stock.toString(),
+                            categoryId: p.categoryId,
+                            discount: p.discount?.toString() || "",
+                          });
+                          setShowProductForm(true);
+                        }}
+                        aria-label={`Edit ${p.name}`}
+                        style={{
+                          flex: 1,
+                          padding: "0.6rem",
+                          borderRadius: "8px",
+                          border: "1px solid var(--border-color)",
+                          background: "rgba(255,255,255,0.03)",
+                          color: "var(--text-primary)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => deleteProduct(p.id)}
+                        aria-label={`Delete ${p.name}`}
+                        style={{
+                          flex: 1,
+                          padding: "0.6rem",
+                          borderRadius: "8px",
+                          border: "1px solid rgba(255,75,75,0.3)",
+                          background: "rgba(255,75,75,0.05)",
+                          color: "var(--error-color)",
+                          cursor: "pointer",
+                        }}
+                      >
+                        <Trash2 size={14} />
+                      </button>
                   </div>
                 </div>
               </div>

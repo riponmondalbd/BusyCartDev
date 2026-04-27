@@ -44,16 +44,17 @@ export default function Footer() {
             </p>
             <div style={{ display: 'flex', gap: '1rem' }}>
               {[
-                { Icon: Globe, url: 'https://riponmondalbd.vercel.app/' },
-                { Icon: Terminal, url: 'https://github.com/riponmondalbd' },
-                { Icon: Cpu, url: 'https://www.linkedin.com/in/riponmondalbd/' },
-                { Icon: MessageSquare, url: 'https://wa.me/8801956149980' }
+                { Icon: Globe, url: 'https://riponmondalbd.vercel.app/', label: 'Website' },
+                { Icon: Terminal, url: 'https://github.com/riponmondalbd', label: 'GitHub' },
+                { Icon: Cpu, url: 'https://www.linkedin.com/in/riponmondalbd/', label: 'LinkedIn' },
+                { Icon: MessageSquare, url: 'https://wa.me/8801956149980', label: 'WhatsApp' }
               ].map((item, i) => (
                 <a 
                   key={i} 
                   href={item.url} 
                   target="_blank"
                   rel="noopener noreferrer"
+                  aria-label={item.label}
                   style={{ 
                     width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', 
                     display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)',
@@ -112,11 +113,11 @@ export default function Footer() {
             <h4 style={{ color: '#fff', fontSize: '1.1rem', fontWeight: 800, marginBottom: '2rem', textTransform: 'uppercase', letterSpacing: '1px' }}>Stay Integrated</h4>
             <p style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', marginBottom: '1.5rem' }}>Subscribe for latest hardware drops and neural updates.</p>
             <div style={{ position: 'relative', marginBottom: '2rem' }}>
-              <input type="text" placeholder="Email Address..." style={{ 
+              <input type="text" placeholder="Email Address..." aria-label="Newsletter email" style={{ 
                 width: '100%', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--border-color)', 
                 borderRadius: '8px', padding: '0.8rem 1rem', color: '#fff', outline: 'none' 
               }} />
-              <button style={{ position: 'absolute', right: '5px', top: '5px', bottom: '5px', background: 'var(--primary-color)', border: 'none', borderRadius: '6px', padding: '0 1rem', cursor: 'pointer' }}>
+              <button aria-label="Subscribe to newsletter" style={{ position: 'absolute', right: '5px', top: '5px', bottom: '5px', background: 'var(--primary-color)', border: 'none', borderRadius: '6px', padding: '0 1rem', cursor: 'pointer' }}>
                 <ArrowRight size={18} color="#000" />
               </button>
             </div>

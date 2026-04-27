@@ -20,10 +20,12 @@ import {
   CloudLightning,
   Workflow
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Skeleton from "@/components/Skeleton";
 
 const sliderData = [
   {
@@ -257,30 +259,38 @@ export default function ElectroMarketplaceHome() {
                 <LayoutGrid size={20} /> BROWSE SECTORS
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
-                {categories.slice(0, 8).map((cat) => (
-                  <Link
-                    key={cat.id}
-                    href={`/products?category=${cat.slug}`}
-                    style={{
-                      padding: "0.875rem 1.5rem",
-                      fontSize: "0.9rem",
-                      color: "var(--text-secondary)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      transition: "0.2s",
-                      borderBottom: "1px solid rgba(255,255,255,0.02)",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = "var(--primary-color)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.color = "var(--text-secondary)")
-                    }
-                  >
-                    {cat.name} <ChevronRight size={14} />
-                  </Link>
-                ))}
+                {categories.length > 0 ? (
+                  categories.slice(0, 8).map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={`/products?category=${cat.slug}`}
+                      style={{
+                        padding: "0.875rem 1.5rem",
+                        fontSize: "0.9rem",
+                        color: "var(--text-secondary)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        transition: "0.2s",
+                        borderBottom: "1px solid rgba(255,255,255,0.02)",
+                      }}
+                      onMouseEnter={(e) =>
+                        (e.currentTarget.style.color = "var(--primary-color)")
+                      }
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.color = "var(--text-secondary)")
+                      }
+                    >
+                      {cat.name} <ChevronRight size={14} />
+                    </Link>
+                  ))
+                ) : (
+                  Array(8).fill(0).map((_, i) => (
+                    <div key={i} style={{ padding: "0.875rem 1.5rem" }}>
+                      <Skeleton width="80%" height="15px" />
+                    </div>
+                  ))
+                )}
               </div>
             </aside>
 
@@ -298,104 +308,100 @@ export default function ElectroMarketplaceHome() {
                 zIndex: 5
               }}
             >
-              {banners.length > 0 ? (
-                banners.map((slide, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      opacity: i === activeSlider ? 1 : 0,
-                      transition: "opacity 1s ease",
-                      display: "flex",
-                      alignItems: "center",
-                      zIndex: i === activeSlider ? 1 : 0,
-                    }}
-                  >
-                    <img
-                      src={slide.image}
-                      alt="Slider"
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        opacity: 0.6,
-                      }}
-                    />
-                    <div
-                      style={{
-                        position: "absolute",
-                        inset: 0,
-                        background:
-                          "linear-gradient(90deg, rgba(11,12,16,0.95) 40%, rgba(11,12,16,0.4) 70%, transparent 100%)",
-                        zIndex: 1
-                      }}
-                    />
-                    <div
-                      className="slider-content"
-                      style={{
-                        position: "relative",
-                        zIndex: 10,
-                        padding: "2.5rem",
-                        maxWidth: "600px",
-                      }}
-                    >
-                      <span
-                        style={{
-                          color: slide.color || "var(--primary-color)",
-                          fontWeight: 800,
-                          letterSpacing: "2px",
-                          textTransform: "uppercase",
-                          fontSize: "0.75rem",
-                        }}
-                      >
-                        {slide.tagline}
-                      </span>
-                      <h1
-                        className="responsive-title"
-                        style={{
-                          fontSize: "clamp(1.8rem, 5vw, 3.5rem)",
-                          fontWeight: 900,
-                          margin: "0.75rem 0",
-                          lineHeight: 1.1,
-                          color: "#fff"
-                        }}
-                      >
-                        {slide.title}
-                      </h1>
-                      <p
-                        style={{
-                          color: "var(--text-secondary)",
-                          marginBottom: "1.5rem",
-                          fontSize: "0.95rem",
-                          lineHeight: 1.6
-                        }}
-                      >
-                        {slide.desc}
-                      </p>
-                      <Link
-                        href={slide.link || "/products"}
-                        className="btn-primary"
-                        style={{
-                          background: slide.color || "var(--primary-color)",
-                          color: "#000",
-                          border: "none",
-                          padding: "0.8rem 2rem",
-                          display: "inline-block"
-                        }}
-                      >
-                        Initialize Order
-                      </Link>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--primary-color)", fontWeight: 800 }}>
-                   INITIALIZING BANNER ARRAY...
-                </div>
-              )}
+               {banners.length > 0 ? (
+                 banners.map((slide, i) => (
+                   <div
+                     key={i}
+                     style={{
+                       position: "absolute",
+                       inset: 0,
+                       opacity: i === activeSlider ? 1 : 0,
+                       transition: "opacity 1s ease",
+                       display: "flex",
+                       alignItems: "center",
+                       zIndex: i === activeSlider ? 1 : 0,
+                     }}
+                   >
+                     <Image
+                       src={slide.image}
+                       alt={slide.title}
+                       fill
+                       style={{
+                         objectFit: "cover",
+                         opacity: 0.6,
+                       }}
+                       priority={i === 0}
+                     />
+                     <div
+                       style={{
+                         position: "absolute",
+                         inset: 0,
+                         background:
+                           "linear-gradient(90deg, rgba(11,12,16,0.95) 40%, rgba(11,12,16,0.4) 70%, transparent 100%)",
+                         zIndex: 1
+                       }}
+                     />
+                     <div
+                       className="slider-content"
+                       style={{
+                         position: "relative",
+                         zIndex: 10,
+                         padding: "2.5rem",
+                         maxWidth: "600px",
+                       }}
+                     >
+                       <span
+                         style={{
+                           color: slide.color || "var(--primary-color)",
+                           fontWeight: 800,
+                           letterSpacing: "2px",
+                           textTransform: "uppercase",
+                           fontSize: "0.75rem",
+                         }}
+                       >
+                         {slide.tagline}
+                       </span>
+                       <h1
+                         className="responsive-title"
+                         style={{
+                           fontSize: "clamp(1.8rem, 5vw, 3.5rem)",
+                           fontWeight: 900,
+                           margin: "0.75rem 0",
+                           lineHeight: 1.1,
+                           color: "#fff"
+                         }}
+                       >
+                         {slide.title}
+                       </h1>
+                       <p
+                         style={{
+                           color: "var(--text-secondary)",
+                           marginBottom: "1.5rem",
+                           fontSize: "0.95rem",
+                           lineHeight: 1.6
+                         }}
+                       >
+                         {slide.desc}
+                       </p>
+                       <Link
+                         href={slide.link || "/products"}
+                         className="btn-primary"
+                         style={{
+                           background: slide.color || "var(--primary-color)",
+                           color: "#000",
+                           border: "none",
+                           padding: "0.8rem 2rem",
+                           display: "inline-block"
+                         }}
+                       >
+                         Initialize Order
+                       </Link>
+                     </div>
+                   </div>
+                 ))
+               ) : (
+                 <Skeleton height="100%" borderRadius="16px" />
+               )}
 
               {/* Dots */}
               {banners.length > 1 && (
@@ -592,15 +598,16 @@ export default function ElectroMarketplaceHome() {
               </div>
               {dealProduct ? (
                 <div style={{ textAlign: "center" }}>
-                  <img
-                    src={dealProduct.images?.[0]}
-                    style={{
-                      width: "100%",
-                      height: "200px",
-                      objectFit: "contain",
-                      marginBottom: "1.5rem",
-                    }}
-                  />
+                  <div style={{ position: "relative", width: "100%", height: "200px", marginBottom: "1.5rem" }}>
+                    <Image
+                      src={dealProduct.images?.[0] || "/placeholder.jpg"}
+                      alt={dealProduct.name}
+                      fill
+                      style={{
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
                   <Link
                     href={`/products/${dealProduct.id}`}
                     style={{
@@ -713,6 +720,16 @@ export default function ElectroMarketplaceHome() {
                     </button>
                   </div>
                 </div>
+              ) : loading ? (
+                <div style={{ textAlign: "center" }}>
+                   <Skeleton height="200px" borderRadius="12px" style={{ marginBottom: "1.5rem" }} />
+                   <Skeleton width="80%" height="20px" style={{ margin: "0 auto 1rem" }} />
+                   <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginBottom: "1.5rem" }}>
+                      <Skeleton width="60px" height="25px" />
+                      <Skeleton width="60px" height="25px" />
+                   </div>
+                   <Skeleton width="100%" height="45px" borderRadius="8px" />
+                </div>
               ) : (
                 <div
                   className="glass-panel"
@@ -809,14 +826,16 @@ export default function ElectroMarketplaceHome() {
                         borderRadius: "8px",
                       }}
                     >
-                      <img
-                        src={prod.images?.[0]}
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "contain",
-                        }}
-                      />
+                      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                        <Image
+                          src={prod.images?.[0] || "/placeholder.jpg"}
+                          alt={prod.name}
+                          fill
+                          style={{
+                            objectFit: "contain",
+                          }}
+                        />
+                      </div>
                     </div>
                     <p
                       style={{
@@ -924,50 +943,52 @@ export default function ElectroMarketplaceHome() {
               gap: "2rem",
             }}
           >
-            {categories.map((cat) => (
-              <Link
-                key={cat.id}
-                href={`/products?category=${cat.slug}`}
-                className="category-card"
-                style={{
-                  padding: "2rem 1.5rem",
-                  textAlign: "center",
-                  transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                  background: "rgba(255,255,255,0.02)",
-                  borderRadius: "16px",
-                  border: "1px solid rgba(255,255,255,0.05)",
-                  display: "block",
-                  position: "relative",
-                  overflow: "hidden"
-                }}
-              >
-                <div
+            {categories.length > 0 ? (
+              categories.map((cat) => (
+                <Link
+                  key={cat.id}
+                  href={`/products?category=${cat.slug}`}
+                  className="category-card"
                   style={{
-                    width: "70px",
-                    height: "70px",
-                    margin: "0 auto 1.5rem",
-                    background: `url(${cat.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=200&q=80'}) center/cover`,
-                    borderRadius: "50%",
-                    border: "2px solid rgba(255,255,255,0.1)",
-                    boxShadow: "0 0 20px rgba(0,0,0,0.5)"
+                    padding: "2rem 1.5rem",
+                    textAlign: "center",
+                    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                    background: "rgba(255,255,255,0.02)",
+                    borderRadius: "16px",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    display: "block",
+                    position: "relative",
+                    overflow: "hidden"
                   }}
-                />
-                <h4 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "0.25rem" }}>
-                  {cat.name}
-                </h4>
-                <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", opacity: 0.6 }}>
-                  Module Access
-                </p>
-                <style>{`
-                  .category-card:hover {
-                    transform: translateY(-10px);
-                    background: rgba(102,252,241,0.05) !important;
-                    border-color: var(--primary-color) !important;
-                    box-shadow: 0 10px 30px rgba(102,252,241,0.1);
-                  }
-                `}</style>
-              </Link>
-            ))}
+                >
+                  <div
+                    style={{
+                      width: "70px",
+                      height: "70px",
+                      margin: "0 auto 1.5rem",
+                      background: `url(${cat.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=200&q=80'}) center/cover`,
+                      borderRadius: "50%",
+                      border: "2px solid rgba(255,255,255,0.1)",
+                      boxShadow: "0 0 20px rgba(0,0,0,0.5)"
+                    }}
+                  />
+                  <h4 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "0.25rem" }}>
+                    {cat.name}
+                  </h4>
+                  <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", opacity: 0.6 }}>
+                    Module Access
+                  </p>
+                </Link>
+              ))
+            ) : (
+              Array(10).fill(0).map((_, i) => (
+                <div key={i} className="glass-panel" style={{ padding: "2rem 1.5rem", textAlign: "center" }}>
+                  <Skeleton width="70px" height="70px" circle style={{ margin: "0 auto 1.5rem" }} />
+                  <Skeleton width="60%" height="15px" style={{ margin: "0 auto 0.5rem" }} />
+                  <Skeleton width="40%" height="10px" style={{ margin: "0 auto" }} />
+                </div>
+              ))
+            )}
           </div>
         </div>
       </section>

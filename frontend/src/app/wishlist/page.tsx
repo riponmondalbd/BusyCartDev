@@ -2,9 +2,11 @@
 
 import { fetchApi } from "@/utils/api";
 import { ArrowLeft, Heart, Lock, ShoppingCart, Trash2 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import Skeleton from "@/components/Skeleton";
 
 export default function WishlistPage() {
   const router = useRouter();
@@ -61,30 +63,27 @@ export default function WishlistPage() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "60vh",
-          flexDirection: "column",
-          gap: "1rem",
-        }}
-      >
-        <div
-          style={{
-            width: "40px",
-            height: "40px",
-            border: "3px solid rgba(102,252,241,0.1)",
-            borderTopColor: "var(--primary-color)",
-            borderRadius: "50%",
-            animation: "spin 1s linear infinite",
-          }}
-        />
-        <p style={{ color: "var(--text-secondary)" }}>
-          Decrypting Secure Wishlist...
-        </p>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <div className="container" style={{ padding: "5rem 0" }}>
+        <Skeleton width="300px" height="40px" style={{ marginBottom: "1rem" }} />
+        <Skeleton width="200px" height="20px" style={{ marginBottom: "4rem" }} />
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "2.5rem" }}>
+          {Array(4).fill(0).map((_, i) => (
+            <div key={i} className="product-card" style={{ padding: "1.5rem" }}>
+              <Skeleton height="220px" borderRadius="8px" style={{ marginBottom: "1.5rem" }} />
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
+                <div style={{ flex: 1 }}>
+                  <Skeleton width="40%" height="10px" style={{ marginBottom: "0.5rem" }} />
+                  <Skeleton width="80%" height="25px" />
+                </div>
+                <Skeleton width="60px" height="25px" />
+              </div>
+              <div style={{ display: "flex", gap: "1rem" }}>
+                <Skeleton height="40px" style={{ flex: 1 }} borderRadius="8px" />
+                <Skeleton width="45px" height="40px" borderRadius="8px" />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -232,16 +231,19 @@ export default function WishlistPage() {
                     borderRadius: "8px",
                   }}
                 >
-                  <img
-                    src={prod.images?.[0]}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "contain",
-                    }}
-                  />
+                  <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                    <Image
+                      src={prod.images?.[0] || "/placeholder.jpg"}
+                      alt={prod.name}
+                      fill
+                      style={{
+                        objectFit: "contain",
+                      }}
+                    />
+                  </div>
                   <button
                     onClick={() => removeItem(prod.id)}
+                    aria-label={`Remove ${prod.name} from wishlist`}
                     style={{
                       position: "absolute",
                       top: "1rem",
@@ -252,6 +254,7 @@ export default function WishlistPage() {
                       padding: "0.5rem",
                       borderRadius: "8px",
                       cursor: "pointer",
+                      zIndex: 5
                     }}
                   >
                     <Trash2 size={18} />
@@ -309,6 +312,7 @@ export default function WishlistPage() {
                     Buy Now
                   </Link>
                   <button
+                    aria-label="Add to cart"
                     style={{
                       background: "none",
                       border: "1px solid var(--border-color)",
