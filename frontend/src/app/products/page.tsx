@@ -668,6 +668,7 @@ function ProductsPageContent() {
                     alignItems: "center",
                     gap: "1rem",
                     marginTop: "2rem",
+                    flexWrap: "wrap",
                   }}
                 >
                   <button
@@ -699,6 +700,8 @@ function ProductsPageContent() {
                       display: "flex",
                       gap: "0.5rem",
                       alignItems: "center",
+                      justifyContent: "center",
+                      flexWrap: "wrap",
                     }}
                   >
                     {Array.from({ length: totalPages }).map((_, i) => (
