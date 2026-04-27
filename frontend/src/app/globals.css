@@ -196,7 +196,7 @@ select.input-field option {
 }
 
 @media (max-width: 600px) {
-  .product-grid-5 { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+  .product-grid-5 { grid-template-columns: repeat(1, 1fr); }
 }
 
 /* Hover Spin Utility */
