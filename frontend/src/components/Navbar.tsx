@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { ShoppingCart, Heart, User, Search, Menu, LayoutGrid } from 'lucide-react';
+import { ShoppingCart, Heart, User, Search, Menu, LayoutGrid, XCircle } from 'lucide-react';
 import { fetchApi } from '@/utils/api';
 
 export default function Navbar() {
@@ -111,18 +111,73 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Search Bar - Desktop Only */}
-          <form className="hidden-mobile" onSubmit={handleSearch} style={{ flex: 1, maxWidth: '600px', position: 'relative' }}>
-            <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+          {/* Modernized Search Bar - Desktop Only */}
+          <form 
+            className="hidden-mobile" 
+            onSubmit={handleSearch} 
+            style={{ 
+              flex: 1, 
+              maxWidth: '100%', 
+              position: 'relative',
+              margin: '0 3rem'
+            }}
+          >
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              width: '100%',
+              background: 'rgba(255,255,255,0.03)', 
+              borderRadius: '50px', 
+              border: '1px solid rgba(255,255,255,0.1)', 
+              padding: '2px 6px 2px 1.25rem',
+              transition: 'all 0.3s ease',
+              boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.2)'
+            }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(102,252,241,0.3)'}
+            onMouseLeave={e => {
+              if (document.activeElement !== e.currentTarget.querySelector('input')) {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)';
+              }
+            }}
+            >
+               <Search size={16} color="var(--text-secondary)" style={{ opacity: 0.6 }} />
                <input 
                  type="text" 
-                 placeholder="Search for hardware..." 
-                 style={{ flex: 1, background: 'none', border: 'none', color: '#fff', padding: '0.6rem 1rem', outline: 'none', fontSize: '0.9rem' }}
+                 placeholder="Initialize hardware query..." 
+                 style={{ 
+                   flex: 1, 
+                   background: 'none', 
+                   border: 'none', 
+                   color: '#fff', 
+                   padding: '0.6rem 0.75rem', 
+                   outline: 'none', 
+                   fontSize: '0.85rem',
+                   letterSpacing: '0.5px'
+                 }}
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
+                 onFocus={e => (e.currentTarget.parentElement!.style.borderColor = 'var(--primary-color)')}
+                 onBlur={e => (e.currentTarget.parentElement!.style.borderColor = 'rgba(255,255,255,0.1)')}
                />
-               <button type="submit" style={{ background: 'var(--primary-color)', border: 'none', padding: '0 1.25rem', cursor: 'pointer' }}>
-                 <Search size={18} color="#000" />
+               <button 
+                 type="submit" 
+                 style={{ 
+                   background: 'var(--primary-color)', 
+                   border: 'none', 
+                   width: '32px',
+                   height: '32px',
+                   borderRadius: '50%',
+                   display: 'flex',
+                   alignItems: 'center',
+                   justifyContent: 'center',
+                   cursor: 'pointer',
+                   transition: '0.2s',
+                   boxShadow: '0 0 10px rgba(102,252,241,0.2)'
+                 }}
+                 onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.1)'}
+                 onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+               >
+                 <ArrowRight size={14} color="#000" />
                </button>
             </div>
           </form>
@@ -242,4 +297,4 @@ export default function Navbar() {
   );
 }
 
-import { XCircle } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
