@@ -180,23 +180,47 @@ export default function AdminRefundsPage() {
                 <p
                   style={{
                     color: "var(--text-secondary)",
-                    marginBottom: "0.5rem",
+                    fontSize: "0.85rem",
+                    marginBottom: "1rem",
                   }}
                 >
-                  <strong style={{ color: "var(--text-primary)" }}>
-                    Reason:
-                  </strong>{" "}
-                  {r.reason}
+                  <strong style={{ color: "var(--primary-color)" }}>User:</strong>{" "}
+                  {r.order?.user?.name || "Anonymous"} ({r.order?.user?.email}) ·
+                  Submitted:{" "}
+                  {r.createdAt ? new Date(r.createdAt).toLocaleString() : "—"}
                 </p>
+
+                <div 
+                  style={{ 
+                    background: "rgba(0,0,0,0.2)", 
+                    padding: "1rem", 
+                    borderRadius: "8px",
+                    border: "1px solid rgba(255,255,255,0.05)",
+                    marginBottom: "1rem"
+                  }}
+                >
+                  <p style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-secondary)", marginBottom: "0.5rem", textTransform: "uppercase" }}>
+                    Order Manifest (${r.order?.total})
+                  </p>
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+                    {r.order?.items?.map((item: any, idx: number) => (
+                      <p key={idx} style={{ fontSize: "0.85rem", color: "var(--text-primary)" }}>
+                        <span style={{ color: "var(--primary-color)" }}>{item.quantity}x</span> {item.product?.name}
+                      </p>
+                    ))}
+                  </div>
+                </div>
+
                 <p
                   style={{
                     color: "var(--text-secondary)",
-                    fontSize: "0.85rem",
+                    marginBottom: "0.5rem",
                   }}
                 >
-                  User: {r.user?.name || r.user?.email || "Unknown"} ·
-                  Submitted:{" "}
-                  {r.createdAt ? new Date(r.createdAt).toLocaleString() : "—"}
+                  <strong style={{ color: "var(--error-color)" }}>
+                    Reason:
+                  </strong>{" "}
+                  {r.reason}
                 </p>
               </div>
               {r.status === "PENDING" && (

@@ -11,7 +11,11 @@ export default function RefundsPage() {
   useEffect(() => {
     const loadRefunds = async () => {
       try {
-        const data = await fetchApi('/refund/my-refunds');
+        const profile = await fetchApi('/user/profile');
+        const isAdmin = profile?.role === 'ADMIN' || profile?.role === 'SUPER_ADMIN';
+        
+        const endpoint = isAdmin ? '/refund/get-all-refunds' : '/refund/my-refunds';
+        const data = await fetchApi(endpoint);
         setRefunds(Array.isArray(data) ? data : data.data || []);
       } catch (err) {
         console.error(err);
@@ -49,8 +53,11 @@ export default function RefundsPage() {
           {refunds.map((refund) => (
             <div key={refund.id} className="glass-panel" style={{ padding: '2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.5rem' }}>Order Context</p>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Order Context</p>
                 <h3 style={{ fontSize: '1.1rem', fontFamily: 'monospace' }}>#{refund.orderId.split('-')[0].toUpperCase()}</h3>
+                <p style={{ fontSize: '0.8rem', color: 'var(--primary-color)', marginTop: '0.3rem' }}>
+                  User: {refund.order?.user?.name || refund.order?.user?.email || 'N/A'}
+                </p>
                 <p style={{ color: 'var(--text-secondary)', marginTop: '0.5rem' }}>Reason: {refund.reason}</p>
               </div>
               <div style={{ textAlign: 'right' }}>

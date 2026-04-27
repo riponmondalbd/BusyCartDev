@@ -96,7 +96,26 @@ export const getAllRefunds = async (req: any, res: any) => {
   try {
     const refunds = await prisma.refund.findMany({
       include: {
-        order: true,
+        order: {
+          include: {
+            items: {
+              include: {
+                product: {
+                  select: {
+                    name: true,
+                    price: true,
+                  },
+                },
+              },
+            },
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
         payment: true,
       },
       orderBy: { createdAt: "desc" },
