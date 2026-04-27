@@ -59,6 +59,9 @@ type ProductSummary = {
   stock: number;
   images?: string[];
   category?: { name?: string | null } | null;
+  numReviews?: number | null;
+  averageRating?: number | null;
+  createdAt?: string;
 };
 
 type DealOfDayRecord = {
@@ -116,14 +119,26 @@ export default function ElectroMarketplaceHome() {
     }
   };
 
-  const filteredProducts = products
+  const filteredProducts = [...products]
     .filter((p) => {
       if (activeTab === "New Arrivals") return true;
-      if (activeTab === "Bestsellers") return p.price > 100;
-      if (activeTab === "Trending") return p.discount > 0 || p.price < 200;
+      if (activeTab === "Bestsellers") return (p.numReviews || 0) >= 0; // In a real app, this would be sales count
+      if (activeTab === "Trending") return (p.discount || 0) > 0 || (p.averageRating || 0) > 4;
       return true;
     })
-    .slice(0, 8);
+    .sort((a, b) => {
+      if (activeTab === "New Arrivals") {
+        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      }
+      if (activeTab === "Bestsellers") {
+        return (b.numReviews || 0) - (a.numReviews || 0);
+      }
+      if (activeTab === "Trending") {
+        return (b.discount || 0) - (a.discount || 0);
+      }
+      return 0;
+    })
+    .slice(0, 6);
 
   const dealProduct = dealOfDay?.product;
   const dealPrice = dealProduct
@@ -136,7 +151,7 @@ export default function ElectroMarketplaceHome() {
       try {
         const [catsRes, prodsRes, dealRes] = await Promise.all([
           fetchApi("/category/all").catch(() => []),
-          fetchApi("/product/products").catch(() => []),
+          fetchApi("/product/products?limit=50").catch(() => []),
           fetchApi("/deal-of-day/current").catch(() => ({ data: null })),
         ]);
         setCategories(Array.isArray(catsRes) ? catsRes : catsRes.data || []);
