@@ -140,3 +140,129 @@ export const getMyRefunds = async (req: any, res: any) => {
     });
   }
 };
+
+
+// user: request a refund
+export const requestRefund = async (req: any, res: any) => {
+  try {
+    const { orderId, reason } = req.body;
+    const userId = req.user.id;
+
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    if (order.userId !== userId) {
+      return res.status(403).json({ message: "Unauthorized access to this order" });
+    }
+
+    if (!["PAID", "DELIVERED", "SHIPPED"].includes(order.status)) {
+      return res.status(400).json({
+        message: "Only PAID, SHIPPED, or DELIVERED orders can be refunded",
+      });
+    }
+
+    // Check if a refund request already exists for this order
+    const existingRefund = await prisma.refund.findFirst({
+      where: { orderId, status: "PENDING" },
+    });
+
+    if (existingRefund) {
+      return res.status(400).json({ message: "A refund request is already pending for this order." });
+    }
+
+    // Find payment
+    const payment = await prisma.payment.findFirst({
+      where: { orderId, status: "SUCCEEDED" },
+    });
+
+    if (!payment) {
+      return res.status(404).json({ message: "No successful payment found for this order." });
+    }
+
+    const refundReference = `REQ-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+
+    const refund = await prisma.refund.create({
+      data: {
+        orderId,
+        paymentId: payment.id,
+        amount: order.total,
+        reason,
+        reference: refundReference,
+        status: "PENDING",
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Refund request submitted successfully",
+      data: refund,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Failed to submit refund request",
+    });
+  }
+};
+
+// admin: update refund status (Approve/Reject)
+export const updateRefundStatus = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body; // SUCCEEDED or FAILED
+
+    if (!["SUCCEEDED", "FAILED"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status update" });
+    }
+
+    const refund = await prisma.refund.findUnique({
+      where: { id },
+      include: { order: true, payment: true },
+    });
+
+    if (!refund) {
+      return res.status(404).json({ message: "Refund request not found" });
+    }
+
+    if (refund.status !== "PENDING") {
+      return res.status(400).json({ message: "This refund has already been processed" });
+    }
+
+    const updatedRefund = await prisma.$transaction(async (tx) => {
+      const updated = await tx.refund.update({
+        where: { id },
+        data: { status },
+      });
+
+      if (status === "SUCCEEDED") {
+        // Update order status
+        await tx.order.update({
+          where: { id: refund.orderId },
+          data: { status: "REFUNDED", refundedAmount: refund.amount },
+        });
+
+        // Update payment status
+        await tx.payment.update({
+          where: { id: refund.paymentId },
+          data: { status: "REFUNDED" },
+        });
+      }
+
+      return updated;
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Refund request ${status.toLowerCase()} successfully`,
+      data: updatedRefund,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Failed to process refund",
+    });
+  }
+};

@@ -71,7 +71,7 @@ export default function OrdersPage() {
     const reason = prompt("Reason for refund:");
     if (!reason) return;
     try {
-      await fetchApi("/refund", {
+      await fetchApi("/refund/request-refund", {
         method: "POST",
         body: JSON.stringify({ orderId, reason }),
       });
@@ -205,7 +205,7 @@ export default function OrdersPage() {
                 >
                   <Download size={16} /> Download Invoice
                 </button>
-                {order.status === "DELIVERED" && (
+                {["PAID", "SHIPPED", "DELIVERED"].includes(order.status) && (
                   <button
                     onClick={() => requestRefund(order.id)}
                     style={{

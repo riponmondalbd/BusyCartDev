@@ -28,18 +28,20 @@ export default function AdminRefundsPage() {
 
   const handleAction = async (
     refundId: string,
-    status: "APPROVED" | "REJECTED",
+    action: "APPROVE" | "REJECT",
   ) => {
     try {
-      await fetchApi(`/admin/refund/${refundId}`, {
+      const status = action === "APPROVE" ? "SUCCEEDED" : "FAILED";
+      await fetchApi(`/refund/update-status/${refundId}`, {
         method: "PUT",
         body: JSON.stringify({ status }),
       });
       setRefunds(
         refunds.map((r) => (r.id === refundId ? { ...r, status } : r)),
       );
+      toast.success(`Refund ${action.toLowerCase()}d successfully`);
     } catch (err: any) {
-      toast.error(err.message);
+      toast.error(err.message || "Action failed");
     }
   };
 
@@ -174,7 +176,7 @@ export default function AdminRefundsPage() {
                   }}
                 >
                   <button
-                    onClick={() => handleAction(r.id, "APPROVED")}
+                    onClick={() => handleAction(r.id, "APPROVE")}
                     style={{
                       display: "flex",
                       alignItems: "center",
@@ -194,7 +196,7 @@ export default function AdminRefundsPage() {
                     <CheckCircle size={15} /> Approve
                   </button>
                   <button
-                    onClick={() => handleAction(r.id, "REJECTED")}
+                    onClick={() => handleAction(r.id, "REJECT")}
                     style={{
                       display: "flex",
                       alignItems: "center",

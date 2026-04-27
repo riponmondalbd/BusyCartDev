@@ -3,6 +3,8 @@ import {
   getAllRefunds,
   getMyRefunds,
   refundOrder,
+  requestRefund,
+  updateRefundStatus,
 } from "../controller/refund.controller";
 import { protect } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/authorize";
@@ -17,5 +19,12 @@ router.get(
   getAllRefunds,
 );
 router.get("/my-refunds", protect, getMyRefunds);
+router.post("/request-refund", protect, requestRefund);
+router.put(
+  "/update-status/:id",
+  protect,
+  authorize("ADMIN", "SUPER_ADMIN"),
+  updateRefundStatus,
+);
 
 export default router;
