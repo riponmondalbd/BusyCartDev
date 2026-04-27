@@ -32,6 +32,8 @@ export default function ProductsPage() {
   const [activeColor, setActiveColor] = useState<string>("all");
   const [dealsOnly, setDealsOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
+  const [maxInventoryPrice, setMaxInventoryPrice] = useState(10000);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -56,6 +58,13 @@ export default function ProductsPage() {
         setCategories(cats);
         setProducts(prods);
 
+        // Set dynamic price bounds based on current inventory
+        if (prods.length > 0) {
+          const highestPrice = Math.ceil(Math.max(...prods.map((p: any) => Number(p.price) || 0)));
+          setMaxInventoryPrice(highestPrice);
+          setPriceRange([0, highestPrice]);
+        }
+
         if (q) setSearchQuery(q);
         if (deals === "true") setDealsOnly(true);
         if (sort) setSortOption(sort);
@@ -78,9 +87,8 @@ export default function ProductsPage() {
 
   // Reset to page 1 when filters or sort changes
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
-  }, [activeCategory, searchQuery, sortOption, activeColor]);
+  }, [activeCategory, searchQuery, sortOption, activeColor, priceRange]);
 
   const filteredProducts = products.filter((p) => {
     const matchesCategory =
@@ -92,7 +100,8 @@ export default function ProductsPage() {
     const matchesColor =
       activeColor === "all" ||
       (p.color && String(p.color).toLowerCase() === activeColor.toLowerCase());
-    return matchesCategory && matchesSearch && matchesColor;
+    const matchesPrice = Number(p.price) >= priceRange[0] && Number(p.price) <= priceRange[1];
+    return matchesCategory && matchesSearch && matchesColor && matchesPrice;
   });
 
   const availableColors = Array.from(
@@ -277,8 +286,8 @@ export default function ProductsPage() {
                     style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem", width: "100%" }}
                   >
                     <option value="default">Release Date</option>
-                    <option value="price_low_high">Price: ASC</option>
-                    <option value="price_high_low">Price: DESC</option>
+                    <option value="price_low_high">Price: Low to High</option>
+                    <option value="price_high_low">Price: High to Low</option>
                   </select>
                 </div>
                 <div>
@@ -294,6 +303,31 @@ export default function ProductsPage() {
                       <option key={color} value={color}>{color}</option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
+                    <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700 }}>PRICE RANGE</label>
+                    <span style={{ fontSize: "0.8rem", color: "var(--primary-color)", fontWeight: 800 }}>${priceRange[1]}</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0"
+                    max={maxInventoryPrice}
+                    step="10"
+                    value={priceRange[1]}
+                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                    style={{
+                      width: "100%",
+                      accentColor: "var(--primary-color)",
+                      height: "4px",
+                      cursor: "pointer"
+                    }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
+                    <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>$0</span>
+                    <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>${maxInventoryPrice}</span>
+                  </div>
                 </div>
               </div>
             </div>
