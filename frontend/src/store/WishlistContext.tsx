@@ -1,7 +1,13 @@
-'use client';
+"use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { fetchApi } from '@/utils/api';
+import { fetchApi } from "@/utils/api";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 interface WishlistContextType {
   wishlistedIds: Set<string>;
@@ -9,24 +15,34 @@ interface WishlistContextType {
   toggleWishlist: (productId: string) => Promise<void>;
 }
 
-const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
+const WishlistContext = createContext<WishlistContextType | undefined>(
+  undefined,
+);
 
 export function WishlistProvider({ children }: { children: React.ReactNode }) {
   const [wishlistedIds, setWishlistedIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
 
   const fetchWishlist = useCallback(async () => {
-    const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+    const token =
+      typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (!token) return;
 
     setLoading(true);
     try {
-      const res = await fetchApi('/wishlist/all');
-      const data = Array.isArray(res.data) ? res.data : (res.data?.data || []);
-      const ids = new Set(data.map((item: any) => item.productId));
+      const res = await fetchApi("/wishlist/all");
+      const data = Array.isArray(res.data) ? res.data : res.data?.data || [];
+      const ids = new Set<string>(
+        data
+          .map((item: any) => item?.productId)
+          .filter(
+            (productId: unknown): productId is string =>
+              typeof productId === "string" && productId.length > 0,
+          ),
+      );
       setWishlistedIds(ids);
     } catch (err) {
-      console.error('Error loading wishlist:', err);
+      console.error("Error loading wishlist:", err);
     } finally {
       setLoading(false);
     }
@@ -41,16 +57,16 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 
     try {
       if (isWishlisted) {
-        await fetchApi(`/wishlist/remove/${id}`, { method: 'DELETE' });
+        await fetchApi(`/wishlist/remove/${id}`, { method: "DELETE" });
         setWishlistedIds((prev) => {
           const next = new Set(prev);
           next.delete(id);
           return next;
         });
       } else {
-        await fetchApi('/wishlist/add', {
-          method: 'POST',
-          body: JSON.stringify({ productId: id })
+        await fetchApi("/wishlist/add", {
+          method: "POST",
+          body: JSON.stringify({ productId: id }),
         });
         setWishlistedIds((prev) => {
           const next = new Set(prev);
@@ -59,13 +75,15 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
         });
       }
     } catch (err) {
-      console.error('Wishlist toggle failed:', err);
+      console.error("Wishlist toggle failed:", err);
       throw err;
     }
   };
 
   return (
-    <WishlistContext.Provider value={{ wishlistedIds, loading, toggleWishlist }}>
+    <WishlistContext.Provider
+      value={{ wishlistedIds, loading, toggleWishlist }}
+    >
       {children}
     </WishlistContext.Provider>
   );
@@ -74,7 +92,7 @@ export function WishlistProvider({ children }: { children: React.ReactNode }) {
 export function useWishlist() {
   const context = useContext(WishlistContext);
   if (context === undefined) {
-    throw new Error('useWishlist must be used within a WishlistProvider');
+    throw new Error("useWishlist must be used within a WishlistProvider");
   }
   return context;
 }

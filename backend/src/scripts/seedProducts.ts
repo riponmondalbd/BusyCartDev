@@ -31,18 +31,30 @@ const productPrefixes = {
 };
 
 const imageMap: Record<string, string> = {
-  Electronics: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=500&q=60",
-  Modules: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=60",
-  Hardware: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=500&q=60",
-  Fashion: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=500&q=60",
-  "Home & Kitchen": "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=500&q=60",
-  "Beauty & Personal Care": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=500&q=60",
-  "Sports & Outdoors": "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=500&q=60",
-  "Toys & Games": "https://images.unsplash.com/photo-1533750349088-cd871a92f312?auto=format&fit=crop&w=500&q=60",
-  Books: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=500&q=60",
-  Grocery: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=500&q=60",
-  Automotive: "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=500&q=60",
-  "Health & Wellness": "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=500&q=60",
+  Electronics:
+    "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=500&q=60",
+  Modules:
+    "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=60",
+  Hardware:
+    "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=500&q=60",
+  Fashion:
+    "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=500&q=60",
+  "Home & Kitchen":
+    "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=500&q=60",
+  "Beauty & Personal Care":
+    "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=500&q=60",
+  "Sports & Outdoors":
+    "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&w=500&q=60",
+  "Toys & Games":
+    "https://images.unsplash.com/photo-1533750349088-cd871a92f312?auto=format&fit=crop&w=500&q=60",
+  Books:
+    "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?auto=format&fit=crop&w=500&q=60",
+  Grocery:
+    "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=500&q=60",
+  Automotive:
+    "https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?auto=format&fit=crop&w=500&q=60",
+  "Health & Wellness":
+    "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?auto=format&fit=crop&w=500&q=60",
 };
 
 async function main() {
@@ -51,7 +63,11 @@ async function main() {
   for (const catData of categories) {
     const category = await prisma.category.upsert({
       where: { slug: catData.slug },
-      update: {},
+      update: {
+        name: catData.name,
+        image: imageMap[catData.name],
+        isActive: true,
+      },
       create: {
         name: catData.name,
         slug: catData.slug,
@@ -61,14 +77,29 @@ async function main() {
 
     console.log(`📂 Category: ${category.name}`);
 
-    const productCount = Math.floor(Math.random() * 6) + 10; // 10 to 15
-    const prefixes = productPrefixes[catData.name as keyof typeof productPrefixes];
+    const productCount = 12;
+    const prefixes =
+      productPrefixes[catData.name as keyof typeof productPrefixes];
+    let createdCount = 0;
+    let skippedCount = 0;
 
     for (let i = 1; i <= productCount; i++) {
       const prefix = prefixes[Math.floor(Math.random() * prefixes.length)];
-      const name = `${prefix} ${catData.name.split(' ')[0]} ${i}`;
+      const name = `${prefix} ${catData.name.split(" ")[0]} ${i}`;
       const price = parseFloat((Math.random() * 200 + 20).toFixed(2));
       const stock = Math.floor(Math.random() * 100) + 10;
+
+      const existingProduct = await prisma.product.findFirst({
+        where: {
+          name,
+          categoryId: category.id,
+        },
+      });
+
+      if (existingProduct) {
+        skippedCount += 1;
+        continue;
+      }
 
       await prisma.product.create({
         data: {
@@ -80,8 +111,12 @@ async function main() {
           images: [imageMap[catData.name]],
         },
       });
+
+      createdCount += 1;
     }
-    console.log(`   ✅ Seeded ${productCount} products`);
+    console.log(
+      `   ✅ Created ${createdCount} products, skipped ${skippedCount} existing`,
+    );
   }
 
   console.log("✨ Catalog seed complete!");

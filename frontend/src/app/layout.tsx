@@ -9,11 +9,15 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://busycart.dev",
+  ),
   title: {
     default: "BusyCart | The Future of eCommerce",
-    template: "%s | BusyCart"
+    template: "%s | BusyCart",
   },
-  description: "A secure, clean, modern, and futuristic eCommerce platform built for the next generation of online shopping.",
+  description:
+    "A secure, clean, modern, and futuristic eCommerce platform built for the next generation of online shopping.",
   keywords: ["eCommerce", "future", "shopping", "next-gen", "secure", "tech"],
   authors: [{ name: "BusyCart Team" }],
   creator: "BusyCart",
@@ -25,7 +29,8 @@ export const metadata: Metadata = {
   },
   openGraph: {
     title: "BusyCart | The Future of eCommerce",
-    description: "Experience the next generation of neural processing and urban cyberware.",
+    description:
+      "Experience the next generation of neural processing and urban cyberware.",
     url: "https://busycart.dev",
     siteName: "BusyCart",
     images: [

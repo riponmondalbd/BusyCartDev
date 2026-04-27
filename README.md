@@ -1,13 +1,11 @@
 # BusyCart - Full-Stack E-Commerce Platform
 
-BusyCart is a comprehensive e-commerce platform backend, designed to handle everything from user authentication to order processing, payments, reviews, and analytics. It is built with a robust, modern technology stack focused on scalability and type safety.
-
-*Note: Currently, the repository contains the backend component of the application. The frontend is planned/in progress.*
+BusyCart is a full-stack e-commerce platform with a Next.js frontend and an Express + Prisma backend, designed for secure auth, catalog management, orders, payments, reviews, and analytics.
 
 ## 🚀 Tech Stack
 
 - **Runtime environments:** Node.js
-- **Framework:** Express.js 
+- **Framework:** Express.js
 - **Language:** TypeScript
 - **Database ORM:** Prisma
 - **Database Engine:** PostgreSQL
@@ -18,36 +16,43 @@ BusyCart is a comprehensive e-commerce platform backend, designed to handle ever
 ## ✨ Core Features
 
 ### 🔐 Authentication & Authorization
+
 - Email and password registration/login with **bcrypt** password hashing.
 - Google OAuth integration for instant login/registration.
 - JWT-based authentication with access and refresh tokens.
 - Role-based access control (RBAC): `SUPER_ADMIN`, `ADMIN`, and `USER`.
 
 ### 🛒 Product & Category Management
+
 - Categorization with hierarchical support (parent/child categories).
 - Product management including stock tracking, discounts, pricing, and multiple images.
 - Soft deletion for products to maintain historical order data.
 - Search, filter, and pagination capabilities.
 
 ### 🛍️ User Cart & Wishlist
+
 - Persistent shopping cart tracking items and quantities.
 - Wishlist functionality to save favorite products.
 
 ### 📦 Order Management
+
 - Complete order lifecycle mapping (Pending -> Paid -> Shipped -> Delivered, etc.).
 - Tax, shipping, and discount computations.
 - Analytics and tracking capabilities for admins.
 
 ### 💳 Payments & Refunds
+
 - Payment tracking integration (Created, Processing, Succeeded, Failed, Refunded).
 - Integrated refund processing and lifecycle tracking.
 - Coupon and discount code system (Percentage/Fixed amounts, Expiration dates, Min required amounts).
 
 ### ⭐ Reviews & Ratings
+
 - Users can leave ratings and text reviews for products they've purchased.
 - Integrated average rating and total review counts per product.
 
 ### 📝 Invoices & Reporting
+
 - Automated generated PDF invoices utilizing `PDFKit` for user orders.
 - Analytics endpoints for metrics (e.g., sales, top products, user activities).
 - Activity logging system mapping user actions for audit trails.
@@ -72,52 +77,68 @@ BusyCart is a comprehensive e-commerce platform backend, designed to handle ever
 │   └── tsconfig.json       # TypeScript configuration
 ```
 
-## 🛠️ Getting Started (Backend)
+## 🛠️ Getting Started
 
 ### Prerequisites
+
 - Node.js (v18+ recommended)
 - PostgreSQL database
-- Cloudinary API Keys (for media uploads)
-- Google OAuth Credentials (for SSO login)
+- Cloudinary API keys (optional for media uploads)
+- Google OAuth credentials (optional for SSO login)
 
-### Installation
+### 1. Backend Setup
 
-1. **Clone the repository:**
-   ```bash
-   git clone <repository-url>
-   cd BusyCart
-   ```
+```bash
+cd backend
+npm install
+```
 
-2. **Navigate to the backend directory:**
-   ```bash
-   cd backend
-   ```
+Create `backend/.env` from `backend/.env.example`, then run:
 
-3. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+```bash
+npx prisma generate
+npx prisma db push
+npm run seed:catalog
+npm run seed:products
+npm run dev
+```
 
-4. **Environment Configuration:**
-   Create a `.env` file in the `backend/` directory referencing your database and API keys:
-   ```env
-   DATABASE_URL="postgresql://<YOUR_DB_USER>:<YOUR_DB_PASSWORD>@<YOUR_DB_HOST>:<YOUR_DB_PORT>/<YOUR_DB_NAME>?schema=public"
-   PORT=...
-   JWT_SECRET=...
-   # (Add Cloudinary keys, Google OAuth keys, etc.)
-   ```
+### 2. Frontend Setup
 
-5. **Prisma Setup:**
-   Generate the Prisma client and push the schema to the database.
-   ```bash
-   npx prisma generate
-   npx prisma db push
-   ```
+```bash
+cd frontend
+npm install
+```
 
-6. **Start the Development Server:**
-   ```bash
-   npm run dev
-   ```
+Create `frontend/.env.local` from `frontend/.env.example`, then run:
+
+```bash
+npm run dev
+```
+
+### 3. Production Build Validation
+
+```bash
+cd backend && npm run build
+cd ../frontend && npm run build
+```
+
+## 🚀 Deployment (Vercel + API)
+
+### Frontend (Vercel)
+
+- Deploy the `frontend/` directory as a Vercel project.
+- Set environment variables in Vercel:
+  - `NEXT_PUBLIC_API_URL`
+  - `NEXT_PUBLIC_SITE_URL`
+
+### Backend (API Host)
+
+- Deploy `backend/` to a Node.js host (Render, Railway, Fly.io, VPS, etc.).
+- Set server-side environment variables from `backend/.env.example`.
+- Point frontend `NEXT_PUBLIC_API_URL` to the deployed backend API URL.
+
+For full cleanup and readiness changes applied, see `DEPLOYMENT_REPORT.md`.
 
 ## 🤝 Contributing
 

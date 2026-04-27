@@ -5,7 +5,8 @@ import { prisma } from "../prisma/prisma";
 // create banner - admin super admin only
 export const createBanner = async (req: Request, res: Response) => {
   try {
-    const { title, tagline, desc, price, color, link, order, isActive } = req.body;
+    const { title, tagline, desc, price, color, link, order, isActive } =
+      req.body;
 
     if (!title) {
       return res.status(400).json({
@@ -33,9 +34,9 @@ export const createBanner = async (req: Request, res: Response) => {
     }
 
     if (!imageUrl) {
-        return res.status(400).json({
-            message: "Banner image is required",
-        });
+      return res.status(400).json({
+        message: "Banner image is required",
+      });
     }
 
     const newBanner = await prisma.banner.create({
@@ -106,8 +107,13 @@ export const getAdminBanners = async (req: Request, res: Response) => {
 // update banner
 export const updateBanner = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const { title, tagline, desc, price, color, link, order, isActive } = req.body;
+    const id = String(req.params.id || "");
+    const { title, tagline, desc, price, color, link, order, isActive } =
+      req.body;
+
+    if (!id) {
+      return res.status(400).json({ message: "Banner id is required" });
+    }
 
     const banner = await prisma.banner.findUnique({
       where: { id },
@@ -155,7 +161,12 @@ export const updateBanner = async (req: Request, res: Response) => {
         link: link || undefined,
         image: imageUrl,
         order: !isNaN(parseInt(order)) ? parseInt(order) : undefined,
-        isActive: isActive === undefined ? undefined : (isActive === "false" ? false : true),
+        isActive:
+          isActive === undefined
+            ? undefined
+            : isActive === "false"
+              ? false
+              : true,
       },
     });
 
@@ -173,7 +184,11 @@ export const updateBanner = async (req: Request, res: Response) => {
 // delete banner
 export const deleteBanner = async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id || "");
+
+    if (!id) {
+      return res.status(400).json({ message: "Banner id is required" });
+    }
 
     const banner = await prisma.banner.findUnique({
       where: { id },

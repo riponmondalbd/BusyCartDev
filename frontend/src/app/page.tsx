@@ -1,31 +1,28 @@
 "use client";
 
+import Skeleton from "@/components/Skeleton";
 import { useWishlist } from "@/store/WishlistContext";
 import { fetchApi } from "@/utils/api";
 import {
+  Activity,
   ArrowRight,
-  ChevronLeft,
   ChevronRight,
+  Cpu,
+  Globe,
   Heart,
   LayoutGrid,
+  Server,
   ShieldCheck,
   ShoppingCart,
   Sparkles,
   Trophy,
   Zap,
-  Globe,
-  Cpu,
-  Activity,
-  Server,
-  CloudLightning,
-  Workflow
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import Skeleton from "@/components/Skeleton";
 
 const sliderData = [
   {
@@ -58,6 +55,7 @@ type CategorySummary = {
   id: string;
   name: string;
   slug: string;
+  image?: string | null;
 };
 
 type ProductSummary = {
@@ -133,12 +131,16 @@ export default function ElectroMarketplaceHome() {
     .filter((p) => {
       if (activeTab === "New Arrivals") return true;
       if (activeTab === "Bestsellers") return (p.numReviews || 0) >= 0; // In a real app, this would be sales count
-      if (activeTab === "Trending") return (p.discount || 0) > 0 || (p.averageRating || 0) > 4;
+      if (activeTab === "Trending")
+        return (p.discount || 0) > 0 || (p.averageRating || 0) > 4;
       return true;
     })
     .sort((a, b) => {
       if (activeTab === "New Arrivals") {
-        return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+        return (
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime()
+        );
       }
       if (activeTab === "Bestsellers") {
         return (b.numReviews || 0) - (a.numReviews || 0);
@@ -168,12 +170,12 @@ export default function ElectroMarketplaceHome() {
         setCategories(Array.isArray(catsRes) ? catsRes : catsRes.data || []);
         setProducts(Array.isArray(prodsRes) ? prodsRes : prodsRes.data || []);
         setDealOfDay(dealRes.data || null);
-        
+
         const fetchedBanners = bannersRes.data || bannersRes;
         if (Array.isArray(fetchedBanners) && fetchedBanners.length > 0) {
-            setBanners(fetchedBanners);
+          setBanners(fetchedBanners);
         } else {
-            setBanners(sliderData); // Fallback to initial designs if none in DB
+          setBanners(sliderData); // Fallback to initial designs if none in DB
         }
       } catch (err) {
         console.error(err);
@@ -198,7 +200,7 @@ export default function ElectroMarketplaceHome() {
   // Auto-slide effect for the carousel
   useEffect(() => {
     if (banners.length <= 1) return;
-    
+
     const interval = setInterval(() => {
       setActiveSlider((prev) => (prev + 1) % banners.length);
     }, 5000);
@@ -212,13 +214,13 @@ export default function ElectroMarketplaceHome() {
     >
       {/* 1. Hero Section with Sidebar */}
       <section style={{ padding: "1.5rem 0", background: "var(--bg-color)" }}>
-        <div 
-          className="container" 
-          style={{ 
-            display: "flex", 
+        <div
+          className="container"
+          style={{
+            display: "flex",
             flexDirection: "row", // Will be handled by media query manually if needed, but let's keep it robust
             gap: "2rem",
-            minHeight: "500px" 
+            minHeight: "500px",
           }}
         >
           <style>{`
@@ -232,8 +234,11 @@ export default function ElectroMarketplaceHome() {
               }
             }
           `}</style>
-          
-          <div className="responsive-flex-wrapper" style={{ display: "flex", width: "100%", gap: "2rem" }}>
+
+          <div
+            className="responsive-flex-wrapper"
+            style={{ display: "flex", width: "100%", gap: "2rem" }}
+          >
             {/* Sidebar Departments - Hidden on smaller screens */}
             <aside
               className="glass-panel hidden-mobile"
@@ -259,38 +264,39 @@ export default function ElectroMarketplaceHome() {
                 <LayoutGrid size={20} /> BROWSE SECTORS
               </div>
               <div style={{ display: "flex", flexDirection: "column" }}>
-                {categories.length > 0 ? (
-                  categories.slice(0, 8).map((cat) => (
-                    <Link
-                      key={cat.id}
-                      href={`/products?category=${cat.slug}`}
-                      style={{
-                        padding: "0.875rem 1.5rem",
-                        fontSize: "0.9rem",
-                        color: "var(--text-secondary)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        transition: "0.2s",
-                        borderBottom: "1px solid rgba(255,255,255,0.02)",
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.currentTarget.style.color = "var(--primary-color)")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.currentTarget.style.color = "var(--text-secondary)")
-                      }
-                    >
-                      {cat.name} <ChevronRight size={14} />
-                    </Link>
-                  ))
-                ) : (
-                  Array(8).fill(0).map((_, i) => (
-                    <div key={i} style={{ padding: "0.875rem 1.5rem" }}>
-                      <Skeleton width="80%" height="15px" />
-                    </div>
-                  ))
-                )}
+                {categories.length > 0
+                  ? categories.slice(0, 8).map((cat) => (
+                      <Link
+                        key={cat.id}
+                        href={`/products?category=${cat.slug}`}
+                        style={{
+                          padding: "0.875rem 1.5rem",
+                          fontSize: "0.9rem",
+                          color: "var(--text-secondary)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          transition: "0.2s",
+                          borderBottom: "1px solid rgba(255,255,255,0.02)",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.color = "var(--primary-color)")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.color =
+                            "var(--text-secondary)")
+                        }
+                      >
+                        {cat.name} <ChevronRight size={14} />
+                      </Link>
+                    ))
+                  : Array(8)
+                      .fill(0)
+                      .map((_, i) => (
+                        <div key={i} style={{ padding: "0.875rem 1.5rem" }}>
+                          <Skeleton width="80%" height="15px" />
+                        </div>
+                      ))}
               </div>
             </aside>
 
@@ -305,114 +311,116 @@ export default function ElectroMarketplaceHome() {
                 overflow: "hidden",
                 background: "#000",
                 display: "block",
-                zIndex: 5
+                zIndex: 5,
               }}
             >
-               {banners.length > 0 ? (
-                 banners.map((slide, i) => (
-                   <div
-                     key={i}
-                     style={{
-                       position: "absolute",
-                       inset: 0,
-                       opacity: i === activeSlider ? 1 : 0,
-                       transition: "opacity 1s ease",
-                       display: "flex",
-                       alignItems: "center",
-                       zIndex: i === activeSlider ? 1 : 0,
-                     }}
-                   >
-                     <Image
-                       src={slide.image}
-                       alt={slide.title}
-                       fill
-                       style={{
-                         objectFit: "cover",
-                         opacity: 0.6,
-                       }}
-                       priority={i === 0}
-                     />
-                     <div
-                       style={{
-                         position: "absolute",
-                         inset: 0,
-                         background:
-                           "linear-gradient(90deg, rgba(11,12,16,0.95) 40%, rgba(11,12,16,0.4) 70%, transparent 100%)",
-                         zIndex: 1
-                       }}
-                     />
-                     <div
-                       className="slider-content"
-                       style={{
-                         position: "relative",
-                         zIndex: 10,
-                         padding: "2.5rem",
-                         maxWidth: "600px",
-                       }}
-                     >
-                       <span
-                         style={{
-                           color: slide.color || "var(--primary-color)",
-                           fontWeight: 800,
-                           letterSpacing: "2px",
-                           textTransform: "uppercase",
-                           fontSize: "0.75rem",
-                         }}
-                       >
-                         {slide.tagline}
-                       </span>
-                       <h1
-                         className="responsive-title"
-                         style={{
-                           fontSize: "clamp(1.8rem, 5vw, 3.5rem)",
-                           fontWeight: 900,
-                           margin: "0.75rem 0",
-                           lineHeight: 1.1,
-                           color: "#fff"
-                         }}
-                       >
-                         {slide.title}
-                       </h1>
-                       <p
-                         style={{
-                           color: "var(--text-secondary)",
-                           marginBottom: "1.5rem",
-                           fontSize: "0.95rem",
-                           lineHeight: 1.6
-                         }}
-                       >
-                         {slide.desc}
-                       </p>
-                       <Link
-                         href={slide.link || "/products"}
-                         className="btn-primary"
-                         style={{
-                           background: slide.color || "var(--primary-color)",
-                           color: "#000",
-                           border: "none",
-                           padding: "0.8rem 2rem",
-                           display: "inline-block"
-                         }}
-                       >
-                         Initialize Order
-                       </Link>
-                     </div>
-                   </div>
-                 ))
-               ) : (
-                 <Skeleton height="100%" borderRadius="16px" />
-               )}
+              {banners.length > 0 ? (
+                banners.map((slide, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      opacity: i === activeSlider ? 1 : 0,
+                      transition: "opacity 1s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      zIndex: i === activeSlider ? 1 : 0,
+                    }}
+                  >
+                    <Image
+                      src={slide.image}
+                      alt={slide.title}
+                      fill
+                      style={{
+                        objectFit: "cover",
+                        opacity: 0.6,
+                      }}
+                      priority={i === 0}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                          "linear-gradient(90deg, rgba(11,12,16,0.95) 40%, rgba(11,12,16,0.4) 70%, transparent 100%)",
+                        zIndex: 1,
+                      }}
+                    />
+                    <div
+                      className="slider-content"
+                      style={{
+                        position: "relative",
+                        zIndex: 10,
+                        padding: "2.5rem",
+                        maxWidth: "600px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: slide.color || "var(--primary-color)",
+                          fontWeight: 800,
+                          letterSpacing: "2px",
+                          textTransform: "uppercase",
+                          fontSize: "0.75rem",
+                        }}
+                      >
+                        {slide.tagline}
+                      </span>
+                      <h1
+                        className="responsive-title"
+                        style={{
+                          fontSize: "clamp(1.8rem, 5vw, 3.5rem)",
+                          fontWeight: 900,
+                          margin: "0.75rem 0",
+                          lineHeight: 1.1,
+                          color: "#fff",
+                        }}
+                      >
+                        {slide.title}
+                      </h1>
+                      <p
+                        style={{
+                          color: "var(--text-secondary)",
+                          marginBottom: "1.5rem",
+                          fontSize: "0.95rem",
+                          lineHeight: 1.6,
+                        }}
+                      >
+                        {slide.desc}
+                      </p>
+                      <Link
+                        href={slide.link || "/products"}
+                        className="btn-primary"
+                        style={{
+                          background: slide.color || "var(--primary-color)",
+                          color: "#000",
+                          border: "none",
+                          padding: "0.8rem 2rem",
+                          display: "inline-block",
+                        }}
+                      >
+                        Initialize Order
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <Skeleton height="100%" borderRadius="16px" />
+              )}
 
               {/* Dots */}
               {banners.length > 1 && (
-                <div style={{
-                  position: "absolute",
-                  bottom: "1.5rem",
-                  right: "1.5rem",
-                  zIndex: 100,
-                  display: "flex",
-                  gap: "0.75rem"
-                }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    bottom: "1.5rem",
+                    right: "1.5rem",
+                    zIndex: 100,
+                    display: "flex",
+                    gap: "0.75rem",
+                  }}
+                >
                   {banners.map((_, i) => (
                     <button
                       key={i}
@@ -421,10 +429,13 @@ export default function ElectroMarketplaceHome() {
                         width: i === activeSlider ? "28px" : "10px",
                         height: "10px",
                         borderRadius: "5px",
-                        background: i === activeSlider ? "var(--primary-color)" : "rgba(255,255,255,0.2)",
+                        background:
+                          i === activeSlider
+                            ? "var(--primary-color)"
+                            : "rgba(255,255,255,0.2)",
                         border: "none",
                         cursor: "pointer",
-                        transition: "all 0.3s ease"
+                        transition: "all 0.3s ease",
                       }}
                     />
                   ))}
@@ -436,18 +447,73 @@ export default function ElectroMarketplaceHome() {
       </section>
 
       {/* 2.5 Terminal Performance Metrics */}
-      <section style={{ padding: "4rem 0", background: "linear-gradient(180deg, transparent, rgba(102,252,241,0.02), transparent)" }}>
-        <div className="container" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem" }}>
+      <section
+        style={{
+          padding: "4rem 0",
+          background:
+            "linear-gradient(180deg, transparent, rgba(102,252,241,0.02), transparent)",
+        }}
+      >
+        <div
+          className="container"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "2rem",
+          }}
+        >
           {[
-            { icon: Globe, label: "Global Node Traffic", val: "1.2GB/s", color: "var(--primary-color)" },
-            { icon: Activity, label: "Active Module Sync", val: "99.98%", color: "var(--secondary-color)" },
-            { icon: Cpu, label: "Neural Load", val: "12.4 PFLOPS", color: "var(--primary-color)" },
-            { icon: Server, label: "Encrypted Sectors", val: "4,092", color: "var(--secondary-color)" }
+            {
+              icon: Globe,
+              label: "Global Node Traffic",
+              val: "1.2GB/s",
+              color: "var(--primary-color)",
+            },
+            {
+              icon: Activity,
+              label: "Active Module Sync",
+              val: "99.98%",
+              color: "var(--secondary-color)",
+            },
+            {
+              icon: Cpu,
+              label: "Neural Load",
+              val: "12.4 PFLOPS",
+              color: "var(--primary-color)",
+            },
+            {
+              icon: Server,
+              label: "Encrypted Sectors",
+              val: "4,092",
+              color: "var(--secondary-color)",
+            },
           ].map((stat, i) => (
             <div key={i} style={{ textAlign: "center", padding: "1rem" }}>
-              <stat.icon size={32} color={stat.color} style={{ marginBottom: "1rem", opacity: 0.8 }} />
-              <h3 style={{ fontSize: "1.5rem", fontWeight: 900, marginBottom: "0.25rem" }}>{stat.val}</h3>
-              <p style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "1px" }}>{stat.label}</p>
+              <stat.icon
+                size={32}
+                color={stat.color}
+                style={{ marginBottom: "1rem", opacity: 0.8 }}
+              />
+              <h3
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 900,
+                  marginBottom: "0.25rem",
+                }}
+              >
+                {stat.val}
+              </h3>
+              <p
+                style={{
+                  fontSize: "0.7rem",
+                  fontWeight: 800,
+                  color: "var(--text-secondary)",
+                  textTransform: "uppercase",
+                  letterSpacing: "1px",
+                }}
+              >
+                {stat.label}
+              </p>
             </div>
           ))}
         </div>
@@ -598,7 +664,14 @@ export default function ElectroMarketplaceHome() {
               </div>
               {dealProduct ? (
                 <div style={{ textAlign: "center" }}>
-                  <div style={{ position: "relative", width: "100%", height: "200px", marginBottom: "1.5rem" }}>
+                  <div
+                    style={{
+                      position: "relative",
+                      width: "100%",
+                      height: "200px",
+                      marginBottom: "1.5rem",
+                    }}
+                  >
                     <Image
                       src={dealProduct.images?.[0] || "/placeholder.jpg"}
                       alt={dealProduct.name}
@@ -722,13 +795,28 @@ export default function ElectroMarketplaceHome() {
                 </div>
               ) : loading ? (
                 <div style={{ textAlign: "center" }}>
-                   <Skeleton height="200px" borderRadius="12px" style={{ marginBottom: "1.5rem" }} />
-                   <Skeleton width="80%" height="20px" style={{ margin: "0 auto 1rem" }} />
-                   <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginBottom: "1.5rem" }}>
-                      <Skeleton width="60px" height="25px" />
-                      <Skeleton width="60px" height="25px" />
-                   </div>
-                   <Skeleton width="100%" height="45px" borderRadius="8px" />
+                  <Skeleton
+                    height="200px"
+                    borderRadius="12px"
+                    style={{ marginBottom: "1.5rem" }}
+                  />
+                  <Skeleton
+                    width="80%"
+                    height="20px"
+                    style={{ margin: "0 auto 1rem" }}
+                  />
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      gap: "1rem",
+                      marginBottom: "1.5rem",
+                    }}
+                  >
+                    <Skeleton width="60px" height="25px" />
+                    <Skeleton width="60px" height="25px" />
+                  </div>
+                  <Skeleton width="100%" height="45px" borderRadius="8px" />
                 </div>
               ) : (
                 <div
@@ -826,7 +914,13 @@ export default function ElectroMarketplaceHome() {
                         borderRadius: "8px",
                       }}
                     >
-                      <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                      <div
+                        style={{
+                          position: "relative",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                      >
                         <Image
                           src={prod.images?.[0] || "/placeholder.jpg"}
                           alt={prod.name}
@@ -924,18 +1018,36 @@ export default function ElectroMarketplaceHome() {
       </section>
 
       {/* 4. Category Grid (Electro Visual Style) */}
-      <section
-        style={{ padding: "6rem 0" }}
-      >
+      <section style={{ padding: "6rem 0" }}>
         <div className="container">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "3rem" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-end",
+              marginBottom: "3rem",
+            }}
+          >
             <div>
-              <h2 className="section-title" style={{ marginBottom: "0.5rem" }}>Department Catalog</h2>
-              <p style={{ color: "var(--text-secondary)" }}>Access secure hardware sectors across the global grid.</p>
+              <h2 className="section-title" style={{ marginBottom: "0.5rem" }}>
+                Department Catalog
+              </h2>
+              <p style={{ color: "var(--text-secondary)" }}>
+                Access secure hardware sectors across the global grid.
+              </p>
             </div>
-            <Link href="/products" style={{ color: "var(--primary-color)", fontWeight: 700, fontSize: "0.9rem" }}>VIEW ALL SECTORS &rarr;</Link>
+            <Link
+              href="/products"
+              style={{
+                color: "var(--primary-color)",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+              }}
+            >
+              VIEW ALL SECTORS &rarr;
+            </Link>
           </div>
-          
+
           <div
             style={{
               display: "grid",
@@ -943,66 +1055,156 @@ export default function ElectroMarketplaceHome() {
               gap: "2rem",
             }}
           >
-            {categories.length > 0 ? (
-              categories.map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/products?category=${cat.slug}`}
-                  className="category-card"
-                  style={{
-                    padding: "2rem 1.5rem",
-                    textAlign: "center",
-                    transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                    background: "rgba(255,255,255,0.02)",
-                    borderRadius: "16px",
-                    border: "1px solid rgba(255,255,255,0.05)",
-                    display: "block",
-                    position: "relative",
-                    overflow: "hidden"
-                  }}
-                >
-                  <div
+            {categories.length > 0
+              ? categories.map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/products?category=${cat.slug}`}
+                    className="category-card"
                     style={{
-                      width: "70px",
-                      height: "70px",
-                      margin: "0 auto 1.5rem",
-                      background: `url(${cat.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=200&q=80'}) center/cover`,
-                      borderRadius: "50%",
-                      border: "2px solid rgba(255,255,255,0.1)",
-                      boxShadow: "0 0 20px rgba(0,0,0,0.5)"
+                      padding: "2rem 1.5rem",
+                      textAlign: "center",
+                      transition:
+                        "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                      background: "rgba(255,255,255,0.02)",
+                      borderRadius: "16px",
+                      border: "1px solid rgba(255,255,255,0.05)",
+                      display: "block",
+                      position: "relative",
+                      overflow: "hidden",
                     }}
-                  />
-                  <h4 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "0.25rem" }}>
-                    {cat.name}
-                  </h4>
-                  <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", opacity: 0.6 }}>
-                    Module Access
-                  </p>
-                </Link>
-              ))
-            ) : (
-              Array(10).fill(0).map((_, i) => (
-                <div key={i} className="glass-panel" style={{ padding: "2rem 1.5rem", textAlign: "center" }}>
-                  <Skeleton width="70px" height="70px" circle style={{ margin: "0 auto 1.5rem" }} />
-                  <Skeleton width="60%" height="15px" style={{ margin: "0 auto 0.5rem" }} />
-                  <Skeleton width="40%" height="10px" style={{ margin: "0 auto" }} />
-                </div>
-              ))
-            )}
+                  >
+                    <div
+                      style={{
+                        width: "70px",
+                        height: "70px",
+                        margin: "0 auto 1.5rem",
+                        borderRadius: "50%",
+                        border: "2px solid rgba(255,255,255,0.1)",
+                        boxShadow: "0 0 20px rgba(0,0,0,0.5)",
+                        overflow: "hidden",
+                        background: "rgba(255,255,255,0.05)",
+                      }}
+                    >
+                      <Image
+                        src={
+                          cat.image ||
+                          "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=200&q=80"
+                        }
+                        alt={cat.name ? `${cat.name} category` : "Category"}
+                        width={70}
+                        height={70}
+                        style={{
+                          objectFit: "cover",
+                          width: "100%",
+                          height: "100%",
+                        }}
+                        sizes="70px"
+                        priority={false}
+                      />
+                    </div>
+                    <h4
+                      style={{
+                        fontWeight: 800,
+                        fontSize: "0.95rem",
+                        marginBottom: "0.25rem",
+                      }}
+                    >
+                      {cat.name}
+                    </h4>
+                    <p
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--text-secondary)",
+                        opacity: 0.6,
+                      }}
+                    >
+                      Module Access
+                    </p>
+                  </Link>
+                ))
+              : Array(10)
+                  .fill(0)
+                  .map((_, i) => (
+                    <div
+                      key={i}
+                      className="glass-panel"
+                      style={{ padding: "2rem 1.5rem", textAlign: "center" }}
+                    >
+                      <Skeleton
+                        width="70px"
+                        height="70px"
+                        circle
+                        style={{ margin: "0 auto 1.5rem" }}
+                      />
+                      <Skeleton
+                        width="60%"
+                        height="15px"
+                        style={{ margin: "0 auto 0.5rem" }}
+                      />
+                      <Skeleton
+                        width="40%"
+                        height="10px"
+                        style={{ margin: "0 auto" }}
+                      />
+                    </div>
+                  ))}
           </div>
         </div>
       </section>
 
       {/* NEW: 6. Partner Manufacturing Ecosystem */}
-      <section style={{ padding: "4rem 0", background: "rgba(0,0,0,0.2)", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-         <div className="container" style={{ textAlign: "center" }}>
-            <p style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--text-secondary)", letterSpacing: "3px", marginBottom: "3rem", textTransform: "uppercase" }}>Strategic Hardware Partners</p>
-            <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: "4rem", alignItems: "center", opacity: 0.4 }}>
-               {['CYBERDYNE', 'TYRELL CORP', 'WEYLAND-YUTANI', 'OSCORP', 'STARK TECH'].map(brand => (
-                 <span key={brand} style={{ fontSize: "1.5rem", fontWeight: 900, letterSpacing: "4px" }}>{brand}</span>
-               ))}
-            </div>
-         </div>
+      <section
+        style={{
+          padding: "4rem 0",
+          background: "rgba(0,0,0,0.2)",
+          borderTop: "1px solid rgba(255,255,255,0.05)",
+          borderBottom: "1px solid rgba(255,255,255,0.05)",
+        }}
+      >
+        <div className="container" style={{ textAlign: "center" }}>
+          <p
+            style={{
+              fontSize: "0.75rem",
+              fontWeight: 800,
+              color: "var(--text-secondary)",
+              letterSpacing: "3px",
+              marginBottom: "3rem",
+              textTransform: "uppercase",
+            }}
+          >
+            Strategic Hardware Partners
+          </p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-around",
+              flexWrap: "wrap",
+              gap: "4rem",
+              alignItems: "center",
+              opacity: 0.4,
+            }}
+          >
+            {[
+              "CYBERDYNE",
+              "TYRELL CORP",
+              "WEYLAND-YUTANI",
+              "OSCORP",
+              "STARK TECH",
+            ].map((brand) => (
+              <span
+                key={brand}
+                style={{
+                  fontSize: "1.5rem",
+                  fontWeight: 900,
+                  letterSpacing: "4px",
+                }}
+              >
+                {brand}
+              </span>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* 5. Support Features */}

@@ -6,7 +6,11 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
-    "start": "node dist/server.js"
+    "start": "node dist/server.js",
+    "seed:roles": "ts-node src/scripts/seedRoles.ts",
+    "seed:catalog": "ts-node src/scripts/seedProducts.ts",
+    "seed:products": "ts-node src/scripts/seedMoreProducts.ts",
+    "seed:all": "npm run seed:roles && npm run seed:catalog && npm run seed:products"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +37,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^6.0.0",
+    "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",

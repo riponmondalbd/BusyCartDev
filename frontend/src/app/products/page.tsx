@@ -1,10 +1,11 @@
 "use client";
 
+import Skeleton from "@/components/Skeleton";
+import { fetchApi } from "@/utils/api";
 import Image from "next/image";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import Skeleton from "@/components/Skeleton";
+import { Suspense, useEffect, useState } from "react";
 
 type CategorySummary = {
   id: string;
@@ -22,7 +23,7 @@ type ProductSummary = {
   color?: string | null;
 };
 
-export default function ProductsPage() {
+function ProductsPageContent() {
   const searchParams = useSearchParams();
   const [products, setProducts] = useState<ProductSummary[]>([]);
   const [categories, setCategories] = useState<CategorySummary[]>([]);
@@ -61,7 +62,9 @@ export default function ProductsPage() {
 
         // Set dynamic price bounds based on current inventory
         if (prods.length > 0) {
-          const highestPrice = Math.ceil(Math.max(...prods.map((p: any) => Number(p.price) || 0)));
+          const highestPrice = Math.ceil(
+            Math.max(...prods.map((p: any) => Number(p.price) || 0)),
+          );
           setMaxInventoryPrice(highestPrice);
           setPriceRange([0, highestPrice]);
         }
@@ -101,7 +104,8 @@ export default function ProductsPage() {
     const matchesColor =
       activeColor === "all" ||
       (p.color && String(p.color).toLowerCase() === activeColor.toLowerCase());
-    const matchesPrice = Number(p.price) >= priceRange[0] && Number(p.price) <= priceRange[1];
+    const matchesPrice =
+      Number(p.price) >= priceRange[0] && Number(p.price) <= priceRange[1];
     return matchesCategory && matchesSearch && matchesColor && matchesPrice;
   });
 
@@ -146,7 +150,8 @@ export default function ProductsPage() {
             gap: "2rem",
             alignItems: "center",
             textAlign: "center",
-            background: "linear-gradient(135deg, rgba(31, 40, 51, 0.9) 0%, rgba(11, 12, 16, 0.9) 100%)",
+            background:
+              "linear-gradient(135deg, rgba(31, 40, 51, 0.9) 0%, rgba(11, 12, 16, 0.9) 100%)",
             border: "1px solid rgba(102, 252, 241, 0.1)",
           }}
         >
@@ -161,18 +166,33 @@ export default function ProductsPage() {
                 letterSpacing: "-1px",
               }}
             >
-              {searchParams.get("deals") === "true" ? "HOT DEALS" : 
-               searchParams.get("sort") === "newest" ? "NEW ARRIVALS" :
-               searchParams.get("sort") === "bestseller" ? "BESTSELLERS" :
-               activeCategory !== "all" ? categories.find(c => c.id === activeCategory)?.name?.toUpperCase() || "CATEGORY" :
-               "CORE INVENTORY"}
+              {searchParams.get("deals") === "true"
+                ? "HOT DEALS"
+                : searchParams.get("sort") === "newest"
+                  ? "NEW ARRIVALS"
+                  : searchParams.get("sort") === "bestseller"
+                    ? "BESTSELLERS"
+                    : activeCategory !== "all"
+                      ? categories
+                          .find((c) => c.id === activeCategory)
+                          ?.name?.toUpperCase() || "CATEGORY"
+                      : "CORE INVENTORY"}
             </h1>
-            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", opacity: 0.8 }}>
-              {searchParams.get("deals") === "true" ? "Premium modules at calibrated price points." : 
-               "Browse the complete futuristic collection of high-performance modules."}
+            <p
+              style={{
+                color: "var(--text-secondary)",
+                fontSize: "1.1rem",
+                opacity: 0.8,
+              }}
+            >
+              {searchParams.get("deals") === "true"
+                ? "Premium modules at calibrated price points."
+                : "Browse the complete futuristic collection of high-performance modules."}
             </p>
           </div>
-          <div style={{ width: "100%", maxWidth: "600px", position: "relative" }}>
+          <div
+            style={{ width: "100%", maxWidth: "600px", position: "relative" }}
+          >
             <input
               type="text"
               className="input-field"
@@ -187,25 +207,28 @@ export default function ProductsPage() {
                 border: "1px solid var(--border-color)",
                 fontSize: "1rem",
                 transition: "all 0.3s ease",
-                textAlign: "center"
+                textAlign: "center",
               }}
             />
           </div>
         </div>
 
-        <div className="products-layout" style={{ display: "flex", gap: "2rem", alignItems: "flex-start" }}>
+        <div
+          className="products-layout"
+          style={{ display: "flex", gap: "2rem", alignItems: "flex-start" }}
+        >
           {/* Filters Sidebar */}
           <aside
             className="glass-panel hidden-mobile"
-            style={{ 
-              width: "280px", 
-              padding: "2rem", 
-              flexShrink: 0, 
-              position: "sticky", 
+            style={{
+              width: "280px",
+              padding: "2rem",
+              flexShrink: 0,
+              position: "sticky",
               top: "100px",
               display: "flex",
               flexDirection: "column",
-              gap: "3rem" 
+              gap: "3rem",
             }}
           >
             <div>
@@ -217,25 +240,34 @@ export default function ProductsPage() {
                   letterSpacing: "2px",
                   textTransform: "uppercase",
                   marginBottom: "1.5rem",
-                  display: "block"
+                  display: "block",
                 }}
               >
                 Sectors
               </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "0.5rem",
+                }}
+              >
                 <button
                   onClick={() => setActiveCategory("all")}
                   style={{
                     background: "none",
                     border: "none",
-                    color: activeCategory === "all" ? "var(--primary-color)" : "var(--text-secondary)",
+                    color:
+                      activeCategory === "all"
+                        ? "var(--primary-color)"
+                        : "var(--text-secondary)",
                     textAlign: "left",
                     padding: "0.5rem 0",
                     cursor: "pointer",
                     fontSize: "0.95rem",
                     transition: "0.2s",
                     display: "block",
-                    width: "100%"
+                    width: "100%",
                   }}
                 >
                   All Modules
@@ -247,14 +279,17 @@ export default function ProductsPage() {
                     style={{
                       background: "none",
                       border: "none",
-                      color: activeCategory === cat.id ? "var(--primary-color)" : "var(--text-secondary)",
+                      color:
+                        activeCategory === cat.id
+                          ? "var(--primary-color)"
+                          : "var(--text-secondary)",
                       textAlign: "left",
                       padding: "0.5rem 0",
                       cursor: "pointer",
                       fontSize: "0.95rem",
                       transition: "0.2s",
                       display: "block",
-                      width: "100%"
+                      width: "100%",
                     }}
                   >
                     {cat.name}
@@ -272,19 +307,40 @@ export default function ProductsPage() {
                   letterSpacing: "2px",
                   textTransform: "uppercase",
                   marginBottom: "1.5rem",
-                  display: "block"
+                  display: "block",
                 }}
               >
                 Configuration
               </h3>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "1.5rem",
+                }}
+              >
                 <div>
-                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem", fontWeight: 700 }}>SORT PRIORITY</label>
+                  <label
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--text-secondary)",
+                      display: "block",
+                      marginBottom: "0.5rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    SORT PRIORITY
+                  </label>
                   <select
                     className="input-field"
                     value={sortOption}
                     onChange={(event) => setSortOption(event.target.value)}
-                    style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem", width: "100%" }}
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      borderRadius: "8px",
+                      fontSize: "0.9rem",
+                      width: "100%",
+                    }}
                   >
                     <option value="default">Release Date</option>
                     <option value="price_low_high">Price: Low to High</option>
@@ -292,24 +348,64 @@ export default function ProductsPage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem", fontWeight: 700 }}>COLOR THEME</label>
+                  <label
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--text-secondary)",
+                      display: "block",
+                      marginBottom: "0.5rem",
+                      fontWeight: 700,
+                    }}
+                  >
+                    COLOR THEME
+                  </label>
                   <select
                     className="input-field"
                     value={activeColor}
                     onChange={(event) => setActiveColor(event.target.value)}
-                    style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem", width: "100%" }}
+                    style={{
+                      background: "rgba(255,255,255,0.03)",
+                      borderRadius: "8px",
+                      fontSize: "0.9rem",
+                      width: "100%",
+                    }}
                   >
                     <option value="all">All Specs</option>
                     {availableColors.map((color) => (
-                      <option key={color} value={color}>{color}</option>
+                      <option key={color} value={color}>
+                        {color}
+                      </option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
-                    <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700 }}>PRICE RANGE</label>
-                    <span style={{ fontSize: "0.8rem", color: "var(--primary-color)", fontWeight: 800 }}>${priceRange[1]}</span>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      marginBottom: "0.75rem",
+                    }}
+                  >
+                    <label
+                      style={{
+                        fontSize: "0.75rem",
+                        color: "var(--text-secondary)",
+                        fontWeight: 700,
+                      }}
+                    >
+                      PRICE RANGE
+                    </label>
+                    <span
+                      style={{
+                        fontSize: "0.8rem",
+                        color: "var(--primary-color)",
+                        fontWeight: 800,
+                      }}
+                    >
+                      ${priceRange[1]}
+                    </span>
                   </div>
                   <input
                     type="range"
@@ -317,17 +413,39 @@ export default function ProductsPage() {
                     max={maxInventoryPrice}
                     step="10"
                     value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], Number(e.target.value)])}
+                    onChange={(e) =>
+                      setPriceRange([priceRange[0], Number(e.target.value)])
+                    }
                     style={{
                       width: "100%",
                       accentColor: "var(--primary-color)",
                       height: "4px",
-                      cursor: "pointer"
+                      cursor: "pointer",
                     }}
                   />
-                  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.5rem" }}>
-                    <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>$0</span>
-                    <span style={{ fontSize: "0.7rem", color: "var(--text-secondary)" }}>${maxInventoryPrice}</span>
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      marginTop: "0.5rem",
+                    }}
+                  >
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      $0
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        color: "var(--text-secondary)",
+                      }}
+                    >
+                      ${maxInventoryPrice}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -347,14 +465,40 @@ export default function ProductsPage() {
                 {Array(8)
                   .fill(0)
                   .map((_, i) => (
-                    <div key={i} className="glass-panel" style={{ padding: "1.25rem", height: "350px" }}>
-                       <Skeleton height="180px" borderRadius="8px" style={{ marginBottom: "1rem" }} />
-                       <Skeleton height="15px" width="40%" style={{ marginBottom: "0.5rem" }} />
-                       <Skeleton height="25px" width="80%" style={{ marginBottom: "1rem" }} />
-                       <div style={{ display: "flex", justifyContent: "space-between", marginTop: "auto" }}>
-                          <Skeleton height="25px" width="30%" />
-                          <Skeleton height="25px" width="30%" borderRadius="6px" />
-                       </div>
+                    <div
+                      key={i}
+                      className="glass-panel"
+                      style={{ padding: "1.25rem", height: "350px" }}
+                    >
+                      <Skeleton
+                        height="180px"
+                        borderRadius="8px"
+                        style={{ marginBottom: "1rem" }}
+                      />
+                      <Skeleton
+                        height="15px"
+                        width="40%"
+                        style={{ marginBottom: "0.5rem" }}
+                      />
+                      <Skeleton
+                        height="25px"
+                        width="80%"
+                        style={{ marginBottom: "1rem" }}
+                      />
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginTop: "auto",
+                        }}
+                      >
+                        <Skeleton height="25px" width="30%" />
+                        <Skeleton
+                          height="25px"
+                          width="30%"
+                          borderRadius="6px"
+                        />
+                      </div>
                     </div>
                   ))}
               </div>
@@ -377,17 +521,21 @@ export default function ProductsPage() {
                         background: "rgba(255,255,255,0.02)",
                         transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                         border: "1px solid rgba(255,255,255,0.05)",
-                        position: "relative"
+                        position: "relative",
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = "translateY(-5px)";
-                        e.currentTarget.style.borderColor = "var(--primary-color)";
-                        e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                        e.currentTarget.style.borderColor =
+                          "var(--primary-color)";
+                        e.currentTarget.style.background =
+                          "rgba(255,255,255,0.04)";
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = "translateY(0)";
-                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
-                        e.currentTarget.style.background = "rgba(255,255,255,0.02)";
+                        e.currentTarget.style.borderColor =
+                          "rgba(255,255,255,0.05)";
+                        e.currentTarget.style.background =
+                          "rgba(255,255,255,0.02)";
                       }}
                     >
                       <div
@@ -397,11 +545,17 @@ export default function ProductsPage() {
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
-                          overflow: "hidden"
+                          overflow: "hidden",
                         }}
                       >
                         {prod.images && prod.images[0] ? (
-                          <div style={{ position: "relative", width: "100%", height: "100%" }}>
+                          <div
+                            style={{
+                              position: "relative",
+                              width: "100%",
+                              height: "100%",
+                            }}
+                          >
                             <Image
                               src={prod.images[0]}
                               alt={prod.name}
@@ -413,12 +567,36 @@ export default function ProductsPage() {
                             />
                           </div>
                         ) : (
-                          <span style={{ color: "var(--text-secondary)", fontSize: "0.7rem" }}>DATA_MISSING</span>
+                          <span
+                            style={{
+                              color: "var(--text-secondary)",
+                              fontSize: "0.7rem",
+                            }}
+                          >
+                            DATA_MISSING
+                          </span>
                         )}
                       </div>
-                      <div style={{ padding: "1.25rem", flex: 1, display: "flex", flexDirection: "column" }}>
-                        <p style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--primary-color)", textTransform: "uppercase", marginBottom: "0.5rem", letterSpacing: "1px" }}>
-                          {categories.find(c => c.id === prod.categoryId)?.name || "MODULE"}
+                      <div
+                        style={{
+                          padding: "1.25rem",
+                          flex: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
+                        <p
+                          style={{
+                            fontSize: "0.65rem",
+                            fontWeight: 800,
+                            color: "var(--primary-color)",
+                            textTransform: "uppercase",
+                            marginBottom: "0.5rem",
+                            letterSpacing: "1px",
+                          }}
+                        >
+                          {categories.find((c) => c.id === prod.categoryId)
+                            ?.name || "MODULE"}
                         </p>
                         <h3
                           style={{
@@ -461,13 +639,15 @@ export default function ProductsPage() {
                               border: "1px solid var(--primary-color)",
                               color: "var(--primary-color)",
                             }}
-                            onMouseEnter={e => {
-                              e.currentTarget.style.background = "var(--primary-color)";
+                            onMouseEnter={(e) => {
+                              e.currentTarget.style.background =
+                                "var(--primary-color)";
                               e.currentTarget.style.color = "#000";
                             }}
-                            onMouseLeave={e => {
+                            onMouseLeave={(e) => {
                               e.currentTarget.style.background = "none";
-                              e.currentTarget.style.color = "var(--primary-color)";
+                              e.currentTarget.style.color =
+                                "var(--primary-color)";
                             }}
                           >
                             INITIATE
@@ -498,7 +678,9 @@ export default function ProductsPage() {
                           ? "rgba(255,255,255,0.05)"
                           : "var(--primary-color)",
                       color:
-                        currentPage === 1 ? "rgba(255,255,255,0.4)" : "var(--bg-color)",
+                        currentPage === 1
+                          ? "rgba(255,255,255,0.4)"
+                          : "var(--bg-color)",
                       border: "none",
                       borderRadius: "8px",
                       cursor: currentPage === 1 ? "not-allowed" : "pointer",
@@ -601,5 +783,13 @@ export default function ProductsPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ProductsPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: "60vh" }} />}>
+      <ProductsPageContent />
+    </Suspense>
   );
 }

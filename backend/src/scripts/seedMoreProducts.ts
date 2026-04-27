@@ -182,12 +182,25 @@ async function main() {
   }
 
   let createdCount = 0;
+  let skippedCount = 0;
 
   for (let index = 0; index < productSeeds.length; index += 1) {
     const seed = productSeeds[index];
     const category = categories[index % categories.length];
 
     const uniqueName = `${seed.name} ${index + 1}`;
+
+    const existingProduct = await prisma.product.findFirst({
+      where: {
+        name: uniqueName,
+        categoryId: category.id,
+      },
+    });
+
+    if (existingProduct) {
+      skippedCount += 1;
+      continue;
+    }
 
     await prisma.product.create({
       data: {
@@ -207,7 +220,7 @@ async function main() {
   }
 
   console.log(
-    `Done. Added ${createdCount} products across ${categories.length} categories.`,
+    `Done. Added ${createdCount} products across ${categories.length} categories, skipped ${skippedCount} existing.`,
   );
 }
 
