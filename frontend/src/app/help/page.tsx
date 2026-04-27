@@ -1,8 +1,17 @@
 'use client';
 
-import { 
-  HelpCircle, Search, MessageSquare, Truck, RefreshCcw, 
-  CreditCard, Shield, ChevronDown, Mail, Phone, Clock 
+import {
+  ChevronDown,
+  Clock,
+  CreditCard,
+  HelpCircle,
+  Mail,
+  MessageSquare,
+  Phone,
+  RefreshCcw,
+  Search,
+  Shield,
+  Truck
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -129,7 +138,7 @@ export default function HelpPage() {
                 </div>
                 <div>
                   <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase', fontWeight: 700 }}>Secure Line</p>
-                  <p style={{ fontWeight: 600 }}>+880 1234 56789</p>
+                  <p style={{ fontWeight: 600 }}>+880 1956 149980</p>
                 </div>
               </div>
 

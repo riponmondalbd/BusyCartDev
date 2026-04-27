@@ -1,5 +1,6 @@
 "use client";
 
+import Skeleton from "@/components/Skeleton";
 import { fetchApi } from "@/utils/api";
 import {
   Box,
@@ -15,7 +16,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import Skeleton from "@/components/Skeleton";
 
 export default function SingleProductPage() {
   const params = useParams();
@@ -690,7 +690,7 @@ export default function SingleProductPage() {
                   <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.5rem" }}>{prod.name}</h4>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
                     <span style={{ fontWeight: 800, color: "var(--primary-color)" }}>${prod.price}</span>
-                    <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700 }}>VIEW SECTOR &rarr;</span>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700 }}>Buy Now &rarr;</span>
                   </div>
                 </Link>
               ))}

@@ -123,7 +123,7 @@ export default function Footer() {
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-                <MapPin size={16} color="var(--primary-color)" /> Sector 7, Cyber City, Tokyo
+                <MapPin size={16} color="var(--primary-color)" /> Dhaka, Bangladesh
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
                 <Mail size={16} color="var(--primary-color)" /> support@busycart.tech

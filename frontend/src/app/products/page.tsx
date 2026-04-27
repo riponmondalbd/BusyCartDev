@@ -650,7 +650,7 @@ function ProductsPageContent() {
                                 "var(--primary-color)";
                             }}
                           >
-                            INITIATE
+                            Buy
                           </Link>
                         </div>
                       </div>
