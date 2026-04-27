@@ -689,8 +689,10 @@ export default function ElectroMarketplaceHome() {
                       src={dealProduct.images?.[0] || "/placeholder.jpg"}
                       alt={dealProduct.name}
                       fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
                       style={{
                         objectFit: "contain",
+                        padding: "1rem"
                       }}
                     />
                   </div>
@@ -938,8 +940,10 @@ export default function ElectroMarketplaceHome() {
                           src={prod.images?.[0] || "/placeholder.jpg"}
                           alt={prod.name}
                           fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           style={{
                             objectFit: "contain",
+                            padding: "1rem"
                           }}
                         />
                       </div>

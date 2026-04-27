@@ -560,9 +560,11 @@ function ProductsPageContent() {
                               src={prod.images[0]}
                               alt={prod.name}
                               fill
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               style={{
-                                objectFit: "cover",
+                                objectFit: "contain",
                                 opacity: 0.85,
+                                padding: "1rem"
                               }}
                             />
                           </div>
