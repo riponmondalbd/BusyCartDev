@@ -31,6 +31,7 @@ export default function DealOfDayAdminPage() {
   const [currentDeal, setCurrentDeal] = useState<DealOfDayRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [productSearch, setProductSearch] = useState("");
   const [form, setForm] = useState({ productId: "", endsAt: "" });
 
   const loadData = async () => {
@@ -112,6 +113,10 @@ export default function DealOfDayAdminPage() {
 
   const selectedProduct = products.find(
     (product) => product.id === form.productId,
+  );
+
+  const filteredProducts = products.filter((product) =>
+    product.name.toLowerCase().includes(productSearch.toLowerCase()),
   );
 
   return (
@@ -229,6 +234,14 @@ export default function DealOfDayAdminPage() {
             >
               <div>
                 <label className="label">Featured Product</label>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Search product by name"
+                  value={productSearch}
+                  onChange={(event) => setProductSearch(event.target.value)}
+                  style={{ marginBottom: "0.6rem" }}
+                />
                 <select
                   className="input-field"
                   value={form.productId}
@@ -238,7 +251,7 @@ export default function DealOfDayAdminPage() {
                   required
                 >
                   <option value="">Select a product</option>
-                  {products.map((product) => (
+                  {filteredProducts.map((product) => (
                     <option key={product.id} value={product.id}>
                       {product.name}
                     </option>
