@@ -907,13 +907,7 @@ export default function ElectroMarketplaceHome() {
                   </button>
                 ))}
               </div>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))",
-                  gap: "2rem",
-                }}
-              >
+              <div className="product-grid-5">
                 {filteredProducts.map((prod) => (
                   <div
                     key={prod.id}

@@ -679,7 +679,7 @@ export default function SingleProductPage() {
             <h2 style={{ fontSize: "2rem", fontWeight: 900, marginBottom: "3rem", display: "flex", alignItems: "center", gap: "1rem" }}>
               <Zap size={28} color="var(--primary-color)" /> RELATED MODULES
             </h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "2rem" }}>
+            <div className="product-grid-5" style={{ marginBottom: "2rem" }}>
               {relatedProducts.map((prod) => (
                 <Link key={prod.id} href={`/products/${prod.id}`} className="glass-panel" style={{ padding: "1.5rem", transition: "0.3s", display: "flex", flexDirection: "column" }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
