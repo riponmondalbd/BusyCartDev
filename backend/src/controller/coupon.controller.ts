@@ -57,7 +57,8 @@ export const applyCoupon = async (req: any, res: any) => {
 
     // Calculate subtotal
     const subtotal = cart.items.reduce(
-      (sum, item) => sum + item.product.price * item.quantity,
+      (sum: number, item: (typeof cart.items)[number]) =>
+        sum + item.product.price * item.quantity,
       0,
     );
 

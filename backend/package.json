@@ -7,6 +7,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "postinstall": "prisma generate",
     "seed:roles": "ts-node src/scripts/seedRoles.ts",
     "seed:catalog": "ts-node src/scripts/seedProducts.ts",
     "seed:products": "ts-node src/scripts/seedMoreProducts.ts",

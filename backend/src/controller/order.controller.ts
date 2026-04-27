@@ -1,4 +1,5 @@
 import { appEnv } from "../config/env";
+import type { Prisma } from "../generated/prisma";
 import { prisma } from "../prisma/prisma";
 import { canTransition } from "../utils/orderStateMachine";
 
@@ -22,7 +23,7 @@ export const createOrder = async (req: any, res: any) => {
     let subtotal = 0;
 
     // Validate stock
-    for (let item of cart.items) {
+    for (const item of cart.items) {
       if (item.quantity > item.product.stock) {
         return res.status(400).json({
           message: `Insufficient stock for ${item.product.name}`,
@@ -62,51 +63,53 @@ export const createOrder = async (req: any, res: any) => {
     const total = discountedSubtotal + taxAmount + shippingAmount;
 
     // Create order transaction
-    const order = await prisma.$transaction(async (tx) => {
-      const newOrder = await tx.order.create({
-        data: {
-          userId,
-          subtotal,
-          tax: taxAmount,
-          shipping: shippingAmount,
-          discount: discountAmount,
-          total,
-        },
-      });
-
-      // Create order items and deduct stock atomically to avoid overselling.
-      for (let item of cart.items) {
-        await tx.orderItem.create({
+    const order = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const newOrder = await tx.order.create({
           data: {
-            orderId: newOrder.id,
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.product.price,
+            userId,
+            subtotal,
+            tax: taxAmount,
+            shipping: shippingAmount,
+            discount: discountAmount,
+            total,
           },
         });
 
-        const updated = await tx.product.updateMany({
-          where: {
-            id: item.productId,
-            stock: { gte: item.quantity },
-          },
-          data: { stock: { decrement: item.quantity } },
-        });
+        // Create order items and deduct stock atomically to avoid overselling.
+        for (let item of cart.items) {
+          await tx.orderItem.create({
+            data: {
+              orderId: newOrder.id,
+              productId: item.productId,
+              quantity: item.quantity,
+              price: item.product.price,
+            },
+          });
 
-        if (updated.count === 0) {
-          throw new Error(`Insufficient stock for ${item.product.name}`);
+          const updated = await tx.product.updateMany({
+            where: {
+              id: item.productId,
+              stock: { gte: item.quantity },
+            },
+            data: { stock: { decrement: item.quantity } },
+          });
+
+          if (updated.count === 0) {
+            throw new Error(`Insufficient stock for ${item.product.name}`);
+          }
         }
-      }
 
-      // Clear cart items and remove coupon
-      await tx.cart.update({
-        where: { id: cart.id },
-        data: { appliedCoupon: null },
-      });
-      await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+        // Clear cart items and remove coupon
+        await tx.cart.update({
+          where: { id: cart.id },
+          data: { appliedCoupon: null },
+        });
+        await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
 
-      return newOrder;
-    });
+        return newOrder;
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -246,8 +249,13 @@ export const updateOrderStatus = async (req: any, res: any) => {
     if (status === "REFUNDED" || status === "PARTIALLY_REFUNDED") {
       // adjust refunded amount
       const refundAmount = order.payments
-        .filter((p: any) => p.status === "SUCCEEDED")
-        .reduce((sum: number, p: any) => sum + p.amount, 0);
+        .filter(
+          (p: (typeof order.payments)[number]) => p.status === "SUCCEEDED",
+        )
+        .reduce(
+          (sum: number, p: (typeof order.payments)[number]) => sum + p.amount,
+          0,
+        );
 
       // update order refunded amount
       await prisma.order.update({
@@ -290,7 +298,9 @@ export const trackOrder = async (req: any, res: any) => {
     });
 
     if (!order) {
-      return res.status(404).json({ message: "Order not found with this tracking ID." });
+      return res
+        .status(404)
+        .json({ message: "Order not found with this tracking ID." });
     }
 
     return res.status(200).json({

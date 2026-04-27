@@ -1,5 +1,19 @@
 import { prisma } from "../prisma/prisma";
 
+type TopProductRow = {
+  productId: string;
+  _sum: {
+    quantity: number | null;
+  };
+};
+
+type RevenueRow = {
+  createdAt: Date;
+  _sum: {
+    total: number | null;
+  };
+};
+
 // Get Top Products
 export const getTopProducts = async (req: any, res: any) => {
   try {
@@ -25,7 +39,7 @@ export const getTopProducts = async (req: any, res: any) => {
     });
 
     const results = await Promise.all(
-      topProducts.map(async (item) => {
+      topProducts.map(async (item: TopProductRow) => {
         const product = await prisma.product.findUnique({
           where: { id: item.productId },
         });
@@ -94,7 +108,7 @@ export const getRevenueAnalytics = async (req: any, res: any) => {
 
     // Aggregate monthly totals
     const monthlyRevenue: Record<string, number> = {};
-    monthlyRevenueRaw.forEach((order) => {
+    monthlyRevenueRaw.forEach((order: RevenueRow) => {
       const month = order.createdAt.toISOString().slice(0, 7); // YYYY-MM
       monthlyRevenue[month] =
         (monthlyRevenue[month] || 0) + (order._sum.total || 0);
@@ -102,7 +116,7 @@ export const getRevenueAnalytics = async (req: any, res: any) => {
 
     // Yearly Revenue
     const yearlyRevenue: Record<string, number> = {};
-    monthlyRevenueRaw.forEach((order) => {
+    monthlyRevenueRaw.forEach((order: RevenueRow) => {
       const year = order.createdAt.getFullYear().toString();
       yearlyRevenue[year] =
         (yearlyRevenue[year] || 0) + (order._sum.total || 0);

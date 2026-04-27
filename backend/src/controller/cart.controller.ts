@@ -1,5 +1,7 @@
 import { prisma } from "../prisma/prisma";
 
+import type { Prisma } from "../generated/prisma";
+
 // add to cart
 export const addToCart = async (req: any, res: any) => {
   try {
@@ -28,49 +30,51 @@ export const addToCart = async (req: any, res: any) => {
       });
     }
 
-    const result = await prisma.$transaction(async (tx) => {
-      let cart = await tx.cart.findUnique({
-        where: { userId },
-      });
-
-      if (!cart) {
-        cart = await tx.cart.create({
-          data: { userId },
+    const result = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        let cart = await tx.cart.findUnique({
+          where: { userId },
         });
-      }
 
-      const existingItem = await tx.cartItem.findUnique({
-        where: {
-          cartId_productId: {
-            cartId: cart.id,
-            productId,
-          },
-        },
-      });
-
-      if (existingItem) {
-        const newQuantity = existingItem.quantity + quantity;
-
-        if (newQuantity > product.stock) {
-          throw new Error(
-            `Cannot add more than available stock (${product.stock})`,
-          );
+        if (!cart) {
+          cart = await tx.cart.create({
+            data: { userId },
+          });
         }
 
-        return tx.cartItem.update({
-          where: { id: existingItem.id },
-          data: { quantity: newQuantity },
-        });
-      } else {
-        return tx.cartItem.create({
-          data: {
-            cartId: cart.id,
-            productId,
-            quantity,
+        const existingItem = await tx.cartItem.findUnique({
+          where: {
+            cartId_productId: {
+              cartId: cart.id,
+              productId,
+            },
           },
         });
-      }
-    });
+
+        if (existingItem) {
+          const newQuantity = existingItem.quantity + quantity;
+
+          if (newQuantity > product.stock) {
+            throw new Error(
+              `Cannot add more than available stock (${product.stock})`,
+            );
+          }
+
+          return tx.cartItem.update({
+            where: { id: existingItem.id },
+            data: { quantity: newQuantity },
+          });
+        } else {
+          return tx.cartItem.create({
+            data: {
+              cartId: cart.id,
+              productId,
+              quantity,
+            },
+          });
+        }
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -227,24 +231,26 @@ export const getMyCart = async (req: any, res: any) => {
     let subtotal = 0;
     let totalItems = 0;
 
-    const formattedItems = cart.items.map((item) => {
-      const price = Number(item.product.price || 0);
-      const quantity = Number(item.quantity || 0);
-      const itemTotal = price * quantity;
-      subtotal += itemTotal;
-      totalItems += quantity;
+    const formattedItems = cart.items.map(
+      (item: (typeof cart.items)[number]) => {
+        const price = Number(item.product.price || 0);
+        const quantity = Number(item.quantity || 0);
+        const itemTotal = price * quantity;
+        subtotal += itemTotal;
+        totalItems += quantity;
 
-      return {
-        itemId: item.id,
-        productId: item.product.id,
-        name: item.product.name,
-        price: item.product.price,
-        quantity: item.quantity,
-        stock: item.product.stock,
-        image: item.product.images?.[0] || null,
-        itemTotal,
-      };
-    });
+        return {
+          itemId: item.id,
+          productId: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          stock: item.product.stock,
+          image: item.product.images?.[0] || null,
+          itemTotal,
+        };
+      },
+    );
 
     let discountAmount = 0;
     let appliedCoupon = null;

@@ -1,3 +1,4 @@
+import type { Prisma } from "../generated/prisma";
 import { prisma } from "../prisma/prisma";
 
 export const refundOrder = async (req: any, res: any) => {
@@ -51,33 +52,35 @@ export const refundOrder = async (req: any, res: any) => {
       .substring(2, 10)
       .toUpperCase()}`;
 
-    const refund = await prisma.$transaction(async (tx) => {
-      // Create refund record
-      const newRefund = await tx.refund.create({
-        data: {
-          orderId,
-          paymentId: payment!.id,
-          amount: payment!.amount,
-          reason,
-          reference: refundReference,
-          status: "SUCCEEDED",
-        },
-      });
+    const refund = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        // Create refund record
+        const newRefund = await tx.refund.create({
+          data: {
+            orderId,
+            paymentId: payment!.id,
+            amount: payment!.amount,
+            reason,
+            reference: refundReference,
+            status: "SUCCEEDED",
+          },
+        });
 
-      // Update order status
-      await tx.order.update({
-        where: { id: orderId },
-        data: { status: "REFUNDED" },
-      });
+        // Update order status
+        await tx.order.update({
+          where: { id: orderId },
+          data: { status: "REFUNDED" },
+        });
 
-      // Update payment status
-      await tx.payment.update({
-        where: { id: payment!.id },
-        data: { status: "REFUNDED" },
-      });
+        // Update payment status
+        await tx.payment.update({
+          where: { id: payment!.id },
+          data: { status: "REFUNDED" },
+        });
 
-      return newRefund;
-    });
+        return newRefund;
+      },
+    );
 
     return res.status(200).json({
       success: true,
@@ -160,7 +163,6 @@ export const getMyRefunds = async (req: any, res: any) => {
   }
 };
 
-
 // user: request a refund
 export const requestRefund = async (req: any, res: any) => {
   try {
@@ -176,7 +178,9 @@ export const requestRefund = async (req: any, res: any) => {
     }
 
     if (order.userId !== userId) {
-      return res.status(403).json({ message: "Unauthorized access to this order" });
+      return res
+        .status(403)
+        .json({ message: "Unauthorized access to this order" });
     }
 
     if (!["PAID", "DELIVERED", "SHIPPED"].includes(order.status)) {
@@ -191,7 +195,11 @@ export const requestRefund = async (req: any, res: any) => {
     });
 
     if (existingRefund) {
-      return res.status(400).json({ message: "A refund request is already pending for this order." });
+      return res
+        .status(400)
+        .json({
+          message: "A refund request is already pending for this order.",
+        });
     }
 
     // Find payment
@@ -200,7 +208,9 @@ export const requestRefund = async (req: any, res: any) => {
     });
 
     if (!payment) {
-      return res.status(404).json({ message: "No successful payment found for this order." });
+      return res
+        .status(404)
+        .json({ message: "No successful payment found for this order." });
     }
 
     const refundReference = `REQ-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
@@ -248,31 +258,35 @@ export const updateRefundStatus = async (req: any, res: any) => {
     }
 
     if (refund.status !== "PENDING") {
-      return res.status(400).json({ message: "This refund has already been processed" });
+      return res
+        .status(400)
+        .json({ message: "This refund has already been processed" });
     }
 
-    const updatedRefund = await prisma.$transaction(async (tx) => {
-      const updated = await tx.refund.update({
-        where: { id },
-        data: { status },
-      });
-
-      if (status === "SUCCEEDED") {
-        // Update order status
-        await tx.order.update({
-          where: { id: refund.orderId },
-          data: { status: "REFUNDED", refundedAmount: refund.amount },
+    const updatedRefund = await prisma.$transaction(
+      async (tx: Prisma.TransactionClient) => {
+        const updated = await tx.refund.update({
+          where: { id },
+          data: { status },
         });
 
-        // Update payment status
-        await tx.payment.update({
-          where: { id: refund.paymentId },
-          data: { status: "REFUNDED" },
-        });
-      }
+        if (status === "SUCCEEDED") {
+          // Update order status
+          await tx.order.update({
+            where: { id: refund.orderId },
+            data: { status: "REFUNDED", refundedAmount: refund.amount },
+          });
 
-      return updated;
-    });
+          // Update payment status
+          await tx.payment.update({
+            where: { id: refund.paymentId },
+            data: { status: "REFUNDED" },
+          });
+        }
+
+        return updated;
+      },
+    );
 
     return res.status(200).json({
       success: true,

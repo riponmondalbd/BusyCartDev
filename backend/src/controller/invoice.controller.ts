@@ -75,7 +75,7 @@ export const generateInvoice = async (req: any, res: Response) => {
     doc.moveDown(0.5);
 
     // Table Rows
-    order.items.forEach((item) => {
+    order.items.forEach((item: (typeof order.items)[number]) => {
       doc.text(
         `${item.product.name} - Qty: ${item.quantity} - Price: $${item.price} - Subtotal: $${item.price * item.quantity}`,
       );
