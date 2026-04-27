@@ -131,8 +131,16 @@ export default function ElectroMarketplaceHome() {
     .filter((p) => {
       if (activeTab === "New Arrivals") return true;
       if (activeTab === "Bestsellers") return (p.numReviews || 0) >= 0; // In a real app, this would be sales count
-      if (activeTab === "Trending")
-        return (p.discount || 0) > 0 || (p.averageRating || 0) > 4;
+      if (activeTab === "Trending") {
+        // Consider as trending if it has a discount, strong rating, some reviews, or is recently added
+        const hasDiscount = (p.discount || 0) > 0;
+        const highRating = (p.averageRating || 0) >= 4;
+        const someReviews = (p.numReviews || 0) > 0;
+        const createdAt = p.createdAt ? new Date(p.createdAt).getTime() : 0;
+        const thirtyDays = 1000 * 60 * 60 * 24 * 30;
+        const recent = Date.now() - createdAt < thirtyDays && createdAt > 0;
+        return hasDiscount || highRating || someReviews || recent;
+      }
       return true;
     })
     .sort((a, b) => {
@@ -146,7 +154,12 @@ export default function ElectroMarketplaceHome() {
         return (b.numReviews || 0) - (a.numReviews || 0);
       }
       if (activeTab === "Trending") {
-        return (b.discount || 0) - (a.discount || 0);
+        // Prioritize by rating, then discount, then number of reviews
+        const ratingDiff = (b.averageRating || 0) - (a.averageRating || 0);
+        if (ratingDiff !== 0) return ratingDiff;
+        const discountDiff = (b.discount || 0) - (a.discount || 0);
+        if (discountDiff !== 0) return discountDiff;
+        return (b.numReviews || 0) - (a.numReviews || 0);
       }
       return 0;
     })
