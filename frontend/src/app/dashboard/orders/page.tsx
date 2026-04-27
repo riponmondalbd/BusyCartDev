@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -68,16 +69,56 @@ export default function OrdersPage() {
   };
 
   const requestRefund = async (orderId: string) => {
-    const reason = prompt("Reason for refund:");
+    const { value: reason } = await Swal.fire({
+      title: 'REFUND PROTOCOL',
+      text: 'Provide the reason for module de-integration:',
+      input: 'textarea',
+      inputPlaceholder: 'Type your reason here...',
+      showCancelButton: true,
+      confirmButtonText: 'INITIALIZE',
+      cancelButtonText: 'ABORT',
+      confirmButtonColor: 'var(--primary-color)',
+      cancelButtonColor: 'rgba(255,255,255,0.1)',
+      customClass: {
+        popup: 'glass-panel',
+        input: 'glass-panel'
+      }
+    });
+
     if (!reason) return;
+
     try {
-      await fetchApi("/refund/request-refund", {
+      const res = await fetchApi("/refund/request-refund", {
         method: "POST",
         body: JSON.stringify({ orderId, reason }),
       });
-      toast.success("Refund request submitted successfully");
+      
+      // Update local state to reflect the new refund request
+      setOrders(prev => prev.map(o => 
+        o.id === orderId 
+          ? { ...o, refunds: [...(o.refunds || []), res.data] } 
+          : o
+      ));
+
+      Swal.fire({
+        icon: 'success',
+        title: 'PROTOCOL ACCEPTED',
+        text: 'Your refund request has been queued in the system.',
+        confirmButtonColor: 'var(--primary-color)',
+        customClass: {
+          popup: 'glass-panel'
+        }
+      });
     } catch (err: any) {
-      toast.error(err.message || "Refund request failed");
+      Swal.fire({
+        icon: 'error',
+        title: 'TRANSFER FAILED',
+        text: err.message || 'Error during refund initialization.',
+        confirmButtonColor: 'var(--error-color)',
+        customClass: {
+          popup: 'glass-panel'
+        }
+      });
     }
   };
 
@@ -91,6 +132,8 @@ export default function OrdersPage() {
         return <XCircle size={18} color="var(--error-color)" />;
       case "PROCESSING":
         return <Clock size={18} color="#ffcc00" />;
+      case "REFUNDED":
+        return <RefreshCw size={18} color="var(--error-color)" />;
       default:
         return <Clock size={18} color="var(--text-secondary)" />;
     }
@@ -135,98 +178,107 @@ export default function OrdersPage() {
         <div
           style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}
         >
-          {orders.map((order) => (
-            <div
-              key={order.id}
-              className="glass-panel"
-              style={{ padding: "2rem" }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  marginBottom: "1.5rem",
-                }}
-              >
-                <div>
-                  <p
-                    style={{
-                      color: "var(--text-secondary)",
-                      fontSize: "0.8rem",
-                      textTransform: "uppercase",
-                      letterSpacing: "1px",
-                    }}
-                  >
-                    Transaction ID
-                  </p>
-                  <h3
-                    style={{
-                      fontSize: "1.2rem",
-                      fontFamily: "monospace",
-                      color: "var(--primary-color)",
-                    }}
-                  >
-                    #{order.id.split("-")[0].toUpperCase()}
-                  </h3>
-                </div>
-                <div style={{ textAlign: "right" }}>
-                  <p style={{ fontSize: "1.5rem", fontWeight: 800 }}>
-                    ${order.total}
-                  </p>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "0.5rem",
-                      justifyContent: "flex-end",
-                      marginTop: "0.5rem",
-                    }}
-                  >
-                    {getStatusIcon(order.status)}
-                    <span style={{ fontWeight: 600, fontSize: "0.9rem" }}>
-                      {order.status}
-                    </span>
-                  </div>
-                </div>
-              </div>
+          {orders.map((order) => {
+            const hasPendingRefund = order.refunds?.some((r: any) => r.status === 'PENDING');
+            const isRefunded = order.status === 'REFUNDED';
 
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
-                <button
-                  onClick={() => downloadInvoice(order.id)}
-                  className="btn-primary"
+            return (
+              <div
+                key={order.id}
+                className="glass-panel"
+                style={{ padding: "2rem" }}
+              >
+                <div
                   style={{
                     display: "flex",
-                    alignItems: "center",
-                    gap: "0.5rem",
-                    padding: "0.6rem 1rem",
-                    fontSize: "0.85rem",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: "1.5rem",
                   }}
                 >
-                  <Download size={16} /> Download Invoice
-                </button>
-                {["PAID", "SHIPPED", "DELIVERED"].includes(order.status) && (
+                  <div>
+                    <p
+                      style={{
+                        color: "var(--text-secondary)",
+                        fontSize: "0.8rem",
+                        textTransform: "uppercase",
+                        letterSpacing: "1px",
+                      }}
+                    >
+                      Transaction ID
+                    </p>
+                    <h3
+                      style={{
+                        fontSize: "1.2rem",
+                        fontFamily: "monospace",
+                        color: "var(--primary-color)",
+                      }}
+                    >
+                      #{order.id.split("-")[0].toUpperCase()}
+                    </h3>
+                  </div>
+                  <div style={{ textAlign: "right" }}>
+                    <p style={{ fontSize: "1.5rem", fontWeight: 800 }}>
+                      ${order.total}
+                    </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        justifyContent: "flex-end",
+                        marginTop: "0.5rem",
+                      }}
+                    >
+                      {getStatusIcon(order.status)}
+                      <span style={{ fontWeight: 600, fontSize: "0.9rem" }}>
+                        {order.status}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "1rem" }}>
                   <button
-                    onClick={() => requestRefund(order.id)}
+                    onClick={() => downloadInvoice(order.id)}
+                    className="btn-primary"
                     style={{
-                      background: "rgba(255,255,255,0.05)",
-                      border: "1px solid var(--border-color)",
-                      color: "var(--text-primary)",
-                      borderRadius: "8px",
-                      padding: "0.6rem 1rem",
-                      fontSize: "0.85rem",
-                      cursor: "pointer",
                       display: "flex",
                       alignItems: "center",
                       gap: "0.5rem",
+                      padding: "0.6rem 1rem",
+                      fontSize: "0.85rem",
                     }}
                   >
-                    <RefreshCw size={16} /> Request Refund
+                    <Download size={16} /> Download Invoice
                   </button>
-                )}
+                  {["PAID", "SHIPPED", "DELIVERED"].includes(order.status) && !isRefunded && (
+                    <button
+                      onClick={() => !hasPendingRefund && requestRefund(order.id)}
+                      disabled={hasPendingRefund}
+                      style={{
+                        background: hasPendingRefund ? "rgba(255,255,255,0.02)" : "rgba(255,255,255,0.05)",
+                        border: hasPendingRefund ? "1px solid rgba(255,255,255,0.05)" : "1px solid var(--border-color)",
+                        color: hasPendingRefund ? "var(--text-secondary)" : "var(--text-primary)",
+                        borderRadius: "8px",
+                        padding: "0.6rem 1rem",
+                        fontSize: "0.85rem",
+                        cursor: hasPendingRefund ? "not-allowed" : "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "0.5rem",
+                        transition: "0.3s",
+                        opacity: hasPendingRefund ? 0.6 : 1
+                      }}
+                    >
+                      <RefreshCw size={16} className={hasPendingRefund ? "" : "hover-spin"} /> 
+                      {hasPendingRefund ? "Requested" : "Request Refund"}
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

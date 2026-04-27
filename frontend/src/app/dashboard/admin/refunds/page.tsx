@@ -5,6 +5,7 @@ import { CheckCircle, Clock, XCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 export default function AdminRefundsPage() {
   const router = useRouter();
@@ -30,6 +31,22 @@ export default function AdminRefundsPage() {
     refundId: string,
     action: "APPROVE" | "REJECT",
   ) => {
+    const result = await Swal.fire({
+      title: `${action} REFUND?`,
+      text: `Are you sure you want to ${action.toLowerCase()} this transaction protocol?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: `CONFIRM ${action}`,
+      cancelButtonText: 'ABORT',
+      confirmButtonColor: action === 'APPROVE' ? 'var(--success-color)' : 'var(--error-color)',
+      cancelButtonColor: 'rgba(255,255,255,0.1)',
+      customClass: {
+        popup: 'glass-panel'
+      }
+    });
+
+    if (!result.isConfirmed) return;
+
     try {
       const status = action === "APPROVE" ? "SUCCEEDED" : "FAILED";
       await fetchApi(`/refund/update-status/${refundId}`, {
@@ -39,9 +56,25 @@ export default function AdminRefundsPage() {
       setRefunds(
         refunds.map((r) => (r.id === refundId ? { ...r, status } : r)),
       );
-      toast.success(`Refund ${action.toLowerCase()}d successfully`);
+      Swal.fire({
+        icon: 'success',
+        title: 'PROTOCOL UPDATED',
+        text: `Refund has been ${action.toLowerCase()}d.`,
+        confirmButtonColor: 'var(--primary-color)',
+        customClass: {
+          popup: 'glass-panel'
+        }
+      });
     } catch (err: any) {
-      toast.error(err.message || "Action failed");
+      Swal.fire({
+        icon: 'error',
+        title: 'UPDATE FAILED',
+        text: err.message || "Action failed",
+        confirmButtonColor: 'var(--error-color)',
+        customClass: {
+          popup: 'glass-panel'
+        }
+      });
     }
   };
 
