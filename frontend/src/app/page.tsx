@@ -39,13 +39,64 @@ const sliderData = [
   },
 ];
 
+type CountdownParts = {
+  hours: string;
+  minutes: string;
+  seconds: string;
+};
+
+type CategorySummary = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type ProductSummary = {
+  id: string;
+  name: string;
+  price: number;
+  discount?: number | null;
+  stock: number;
+  images?: string[];
+  category?: { name?: string | null } | null;
+};
+
+type DealOfDayRecord = {
+  productId: string;
+  endsAt: string;
+  product: ProductSummary;
+};
+
+function getCountdownParts(endsAt?: string | null): CountdownParts {
+  if (!endsAt) {
+    return { hours: "00", minutes: "00", seconds: "00" };
+  }
+
+  const remaining = Math.max(0, new Date(endsAt).getTime() - Date.now());
+  const hours = Math.floor(remaining / (1000 * 60 * 60));
+  const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60));
+  const seconds = Math.floor((remaining % (1000 * 60)) / 1000);
+
+  return {
+    hours: String(hours).padStart(2, "0"),
+    minutes: String(minutes).padStart(2, "0"),
+    seconds: String(seconds).padStart(2, "0"),
+  };
+}
+
 export default function ElectroMarketplaceHome() {
   const router = useRouter();
-  const [categories, setCategories] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<CategorySummary[]>([]);
+  const [products, setProducts] = useState<ProductSummary[]>([]);
+  const [dealOfDay, setDealOfDay] = useState<DealOfDayRecord | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSlider, setActiveSlider] = useState(0);
   const [activeTab, setActiveTab] = useState("Trending");
+  const [countdown, setCountdown] = useState<CountdownParts>({
+    hours: "00",
+    minutes: "00",
+    seconds: "00",
+  });
 
   const { wishlistedIds, toggleWishlist } = useWishlist();
 
@@ -59,8 +110,9 @@ export default function ElectroMarketplaceHome() {
     }
     try {
       await toggleWishlist(id);
-    } catch (err: any) {
-      toast.error(err.message || "Action failed");
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Action failed";
+      toast.error(message);
     }
   };
 
@@ -73,15 +125,23 @@ export default function ElectroMarketplaceHome() {
     })
     .slice(0, 8);
 
+  const dealProduct = dealOfDay?.product;
+  const dealPrice = dealProduct
+    ? Math.max(0, dealProduct.price - (dealProduct.discount || 0))
+    : 0;
+  const dealOriginalPrice = dealProduct?.price || 0;
+
   useEffect(() => {
     const load = async () => {
       try {
-        const [catsRes, prodsRes] = await Promise.all([
+        const [catsRes, prodsRes, dealRes] = await Promise.all([
           fetchApi("/category/all").catch(() => []),
           fetchApi("/product/products").catch(() => []),
+          fetchApi("/deal-of-day/current").catch(() => ({ data: null })),
         ]);
         setCategories(Array.isArray(catsRes) ? catsRes : catsRes.data || []);
         setProducts(Array.isArray(prodsRes) ? prodsRes : prodsRes.data || []);
+        setDealOfDay(dealRes.data || null);
       } catch (err) {
         console.error(err);
       } finally {
@@ -90,6 +150,17 @@ export default function ElectroMarketplaceHome() {
     };
     load();
   }, []);
+
+  useEffect(() => {
+    const updateCountdown = () => {
+      setCountdown(getCountdownParts(dealOfDay?.endsAt));
+    };
+
+    updateCountdown();
+    const timer = setInterval(updateCountdown, 1000);
+
+    return () => clearInterval(timer);
+  }, [dealOfDay?.endsAt]);
 
   return (
     <div
@@ -347,7 +418,7 @@ export default function ElectroMarketplaceHome() {
         </div>
       </section>
 
-      {/* 3. Deal of the Week (Electro Specialty) */}
+      {/* 3. Deal of the Day */}
       <section style={{ padding: "4rem 0" }}>
         <div className="container">
           <div
@@ -375,6 +446,17 @@ export default function ElectroMarketplaceHome() {
                 >
                   Deal of the Day
                 </h3>
+                <p
+                  style={{
+                    color: "var(--text-secondary)",
+                    fontSize: "0.9rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  {dealOfDay?.endsAt
+                    ? `Ends ${new Date(dealOfDay.endsAt).toLocaleString()}`
+                    : "Waiting for the admin team to publish a deal."}
+                </p>
                 <div
                   style={{
                     display: "flex",
@@ -383,9 +465,9 @@ export default function ElectroMarketplaceHome() {
                   }}
                 >
                   {[
-                    { val: "08", unit: "Hrs" },
-                    { val: "45", unit: "Min" },
-                    { val: "12", unit: "Sec" },
+                    { val: countdown.hours, unit: "Hrs" },
+                    { val: countdown.minutes, unit: "Min" },
+                    { val: countdown.seconds, unit: "Sec" },
                   ].map((t, i) => (
                     <div
                       key={i}
@@ -418,10 +500,10 @@ export default function ElectroMarketplaceHome() {
                   ))}
                 </div>
               </div>
-              {products[0] && (
+              {dealProduct ? (
                 <div style={{ textAlign: "center" }}>
                   <img
-                    src={products[0].images?.[0]}
+                    src={dealProduct.images?.[0]}
                     style={{
                       width: "100%",
                       height: "200px",
@@ -430,14 +512,14 @@ export default function ElectroMarketplaceHome() {
                     }}
                   />
                   <Link
-                    href={`/products/${products[0].id}`}
+                    href={`/products/${dealProduct.id}`}
                     style={{
                       fontWeight: 700,
                       display: "block",
                       marginBottom: "1rem",
                     }}
                   >
-                    {products[0].name}
+                    {dealProduct.name}
                   </Link>
                   <div
                     style={{
@@ -454,7 +536,7 @@ export default function ElectroMarketplaceHome() {
                         color: "var(--primary-color)",
                       }}
                     >
-                      ${products[0].price}
+                      ${dealPrice.toFixed(2)}
                     </span>
                     <span
                       style={{
@@ -462,10 +544,18 @@ export default function ElectroMarketplaceHome() {
                         color: "var(--text-secondary)",
                       }}
                     >
-                      ${(products[0].price * 1.5).toFixed(2)}
+                      ${dealOriginalPrice.toFixed(2)}
                     </span>
                   </div>
-                  {/* Progress Bar */}
+                  <p
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "var(--text-secondary)",
+                      marginBottom: "1rem",
+                    }}
+                  >
+                    {dealProduct.stock} units available right now
+                  </p>
                   <div style={{ marginBottom: "1.5rem" }}>
                     <div
                       style={{
@@ -475,8 +565,8 @@ export default function ElectroMarketplaceHome() {
                         marginBottom: "0.5rem",
                       }}
                     >
-                      <span>Available: 15</span>
-                      <span>Sold: 45</span>
+                      <span>Live deal</span>
+                      <span>{Math.max(0, dealProduct.stock)} stock</span>
                     </div>
                     <div
                       style={{
@@ -489,7 +579,7 @@ export default function ElectroMarketplaceHome() {
                       <div
                         style={{
                           height: "100%",
-                          width: "75%",
+                          width: `${Math.min(100, Math.max(10, dealProduct.stock || 0))}%`,
                           background: "var(--primary-color)",
                         }}
                       />
@@ -503,21 +593,21 @@ export default function ElectroMarketplaceHome() {
                     }}
                   >
                     <Link
-                      href={`/products/${products[0].id}`}
+                      href={`/products/${dealProduct.id}`}
                       className="btn-primary"
                       style={{ flex: 1, textAlign: "center" }}
                     >
                       Buy Now
                     </Link>
                     <button
-                      onClick={() => handleToggleWishlist(products[0].id)}
+                      onClick={() => handleToggleWishlist(dealProduct.id)}
                       style={{
                         background: "none",
                         border: "1px solid var(--border-color)",
                         padding: "0.75rem",
                         borderRadius: "8px",
                         cursor: "pointer",
-                        color: wishlistedIds.has(products[0].id)
+                        color: wishlistedIds.has(dealProduct.id)
                           ? "var(--error-color)"
                           : "var(--text-secondary)",
                       }}
@@ -525,13 +615,49 @@ export default function ElectroMarketplaceHome() {
                       <Heart
                         size={20}
                         fill={
-                          wishlistedIds.has(products[0].id)
+                          wishlistedIds.has(dealProduct.id)
                             ? "var(--error-color)"
                             : "none"
                         }
                       />
                     </button>
                   </div>
+                </div>
+              ) : (
+                <div
+                  className="glass-panel"
+                  style={{
+                    padding: "2rem",
+                    minHeight: "320px",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    textAlign: "center",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  <Sparkles
+                    size={42}
+                    color="var(--primary-color)"
+                    style={{ marginBottom: "1rem" }}
+                  />
+                  <h4
+                    style={{
+                      color: "var(--text-primary)",
+                      fontSize: "1.1rem",
+                      marginBottom: "0.5rem",
+                    }}
+                  >
+                    No Deal Configured Yet
+                  </h4>
+                  <p style={{ maxWidth: "360px", marginBottom: "1.5rem" }}>
+                    The admin team can publish a product and countdown from the
+                    dashboard.
+                  </p>
+                  <Link href="/products" className="btn-primary">
+                    Browse Products
+                  </Link>
                 </div>
               )}
             </div>

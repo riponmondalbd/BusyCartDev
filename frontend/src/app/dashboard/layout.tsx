@@ -1,34 +1,72 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import Link from 'next/link';
-import { fetchApi } from '@/utils/api';
+import { fetchApi } from "@/utils/api";
 import {
-  UserCircle, Package, RefreshCw, Heart,
-  Users, Database, ArrowRightLeft,
-  Layers, ShieldAlert, Tag,
-  LayoutDashboard, LogOut, ChevronRight, Menu, X
-} from 'lucide-react';
+  ArrowRightLeft,
+  ChevronRight,
+  Database,
+  Heart,
+  Layers,
+  LayoutDashboard,
+  LogOut,
+  Menu,
+  Package,
+  RefreshCw,
+  ShieldAlert,
+  Sparkles,
+  Tag,
+  UserCircle,
+  Users,
+  X,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const userLinks = [
-  { href: '/dashboard/profile',   label: 'Identity Profile', icon: UserCircle },
-  { href: '/dashboard/orders',    label: 'Order History',     icon: Package },
-  { href: '/dashboard/refunds',   label: 'Refund Logs',       icon: RefreshCw },
-  { href: '/dashboard/wishlist',  label: 'Saved Modules',     icon: Heart },
+  { href: "/dashboard/profile", label: "Identity Profile", icon: UserCircle },
+  { href: "/dashboard/orders", label: "Order History", icon: Package },
+  { href: "/dashboard/refunds", label: "Refund Logs", icon: RefreshCw },
+  { href: "/dashboard/wishlist", label: "Saved Modules", icon: Heart },
 ];
 
 const adminLinks = [
-  { href: '/dashboard/admin/users',   label: 'User Database',     icon: Users },
-  { href: '/dashboard/super-admin/inventory', label: 'Inventory Architect', icon: Layers },
-  { href: '/dashboard/admin/orders',  label: 'Order Matrix',       icon: Database },
-  { href: '/dashboard/admin/refunds', label: 'Refund Processing',  icon: ArrowRightLeft },
+  { href: "/dashboard/admin/users", label: "User Database", icon: Users },
+  {
+    href: "/dashboard/super-admin/inventory",
+    label: "Inventory Architect",
+    icon: Layers,
+  },
+  {
+    href: "/dashboard/admin/deal-of-day",
+    label: "Deal of the Day",
+    icon: Sparkles,
+  },
+  { href: "/dashboard/admin/orders", label: "Order Matrix", icon: Database },
+  {
+    href: "/dashboard/admin/refunds",
+    label: "Refund Processing",
+    icon: ArrowRightLeft,
+  },
 ];
 
 const superAdminLinks = [
-  { href: '/dashboard/super-admin/inventory', label: 'Inventory Architect', icon: Layers },
-  { href: '/dashboard/super-admin/admins',    label: 'Access Delegation',   icon: ShieldAlert },
-  { href: '/dashboard/super-admin/coupons',   label: 'Promo Codes',         icon: Tag },
+  {
+    href: "/dashboard/super-admin/inventory",
+    label: "Inventory Architect",
+    icon: Layers,
+  },
+  {
+    href: "/dashboard/super-admin/admins",
+    label: "Access Delegation",
+    icon: ShieldAlert,
+  },
+  {
+    href: "/dashboard/admin/deal-of-day",
+    label: "Deal of the Day",
+    icon: Sparkles,
+  },
+  { href: "/dashboard/super-admin/coupons", label: "Promo Codes", icon: Tag },
 ];
 
 interface NavItemProps {
@@ -39,44 +77,99 @@ interface NavItemProps {
   color?: string;
 }
 
-function NavItem({ href, label, icon: Icon, active, color = 'var(--primary-color)' }: NavItemProps) {
+function NavItem({
+  href,
+  label,
+  icon: Icon,
+  active,
+  color = "var(--primary-color)",
+}: NavItemProps) {
   return (
-    <Link href={href} style={{ textDecoration: 'none' }}>
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: '0.875rem',
-        padding: '0.75rem 1rem', borderRadius: '10px',
-        background: active ? `color-mix(in srgb, ${color} 12%, transparent)` : 'transparent',
-        border: active ? `1px solid color-mix(in srgb, ${color} 30%, transparent)` : '1px solid transparent',
-        color: active ? color : 'var(--text-secondary)',
-        transition: 'all 0.2s ease',
-        cursor: 'pointer',
-        marginBottom: '4px'
-      }}
-        onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = 'var(--text-primary)'; } }}
-        onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; } }}
+    <Link href={href} style={{ textDecoration: "none" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "0.875rem",
+          padding: "0.75rem 1rem",
+          borderRadius: "10px",
+          background: active
+            ? `color-mix(in srgb, ${color} 12%, transparent)`
+            : "transparent",
+          border: active
+            ? `1px solid color-mix(in srgb, ${color} 30%, transparent)`
+            : "1px solid transparent",
+          color: active ? color : "var(--text-secondary)",
+          transition: "all 0.2s ease",
+          cursor: "pointer",
+          marginBottom: "4px",
+        }}
+        onMouseEnter={(e) => {
+          if (!active) {
+            e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+            e.currentTarget.style.color = "var(--text-primary)";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!active) {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "var(--text-secondary)";
+          }
+        }}
       >
         <Icon size={18} style={{ flexShrink: 0 }} />
-        <span style={{ fontSize: '0.9rem', fontWeight: active ? 600 : 400 }}>{label}</span>
-        {active && <ChevronRight size={14} style={{ marginLeft: 'auto' }} />}
+        <span style={{ fontSize: "0.9rem", fontWeight: active ? 600 : 400 }}>
+          {label}
+        </span>
+        {active && <ChevronRight size={14} style={{ marginLeft: "auto" }} />}
       </div>
     </Link>
   );
 }
 
-function SectionLabel({ label, color = 'var(--text-secondary)' }: { label: string; color?: string }) {
+function SectionLabel({
+  label,
+  color = "var(--text-secondary)",
+}: {
+  label: string;
+  color?: string;
+}) {
   return (
-    <p style={{
-      fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase',
-      letterSpacing: '1.5px', color, padding: '0 1rem', marginBottom: '0.5rem', marginTop: '1.25rem',
-      display: 'flex', alignItems: 'center', gap: '0.5rem'
-    }}>
-      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: color, display: 'inline-block', boxShadow: `0 0 6px ${color}` }}></span>
+    <p
+      style={{
+        fontSize: "0.7rem",
+        fontWeight: 700,
+        textTransform: "uppercase",
+        letterSpacing: "1.5px",
+        color,
+        padding: "0 1rem",
+        marginBottom: "0.5rem",
+        marginTop: "1.25rem",
+        display: "flex",
+        alignItems: "center",
+        gap: "0.5rem",
+      }}
+    >
+      <span
+        style={{
+          width: "6px",
+          height: "6px",
+          borderRadius: "50%",
+          background: color,
+          display: "inline-block",
+          boxShadow: `0 0 6px ${color}`,
+        }}
+      ></span>
       {label}
     </p>
   );
 }
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const [profile, setProfile] = useState<any>(null);
@@ -86,10 +179,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     const load = async () => {
       try {
-        const data = await fetchApi('/user/profile');
+        const data = await fetchApi("/user/profile");
         setProfile(data);
       } catch {
-        router.push('/login');
+        router.push("/login");
       } finally {
         setLoading(false);
       }
@@ -98,92 +191,218 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    router.push('/login');
+    localStorage.removeItem("token");
+    router.push("/login");
   };
 
-  const role = profile?.role || 'USER';
-  const isAdmin = role === 'ADMIN' || role === 'SUPER_ADMIN';
-  const isSuperAdmin = role === 'SUPER_ADMIN';
+  const role = profile?.role || "USER";
+  const isAdmin = role === "ADMIN" || role === "SUPER_ADMIN";
+  const isSuperAdmin = role === "SUPER_ADMIN";
 
-  const roleColor = isSuperAdmin ? 'var(--error-color)' : isAdmin ? '#ffcc00' : 'var(--primary-color)';
+  const roleColor = isSuperAdmin
+    ? "var(--error-color)"
+    : isAdmin
+      ? "#ffcc00"
+      : "var(--primary-color)";
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '70vh', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ width: '44px', height: '44px', border: '3px solid rgba(102,252,241,0.1)', borderTopColor: 'var(--primary-color)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "70vh",
+          flexDirection: "column",
+          gap: "1rem",
+        }}
+      >
+        <div
+          style={{
+            width: "44px",
+            height: "44px",
+            border: "3px solid rgba(102,252,241,0.1)",
+            borderTopColor: "var(--primary-color)",
+            borderRadius: "50%",
+            animation: "spin 0.8s linear infinite",
+          }}
+        />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
 
   const SidebarContent = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '1.5rem 0.75rem' }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        padding: "1.5rem 0.75rem",
+      }}
+    >
       {/* User Badge - Fixed Top */}
-      <div style={{ padding: '1rem', marginBottom: '1.5rem', borderRadius: '12px', background: 'rgba(255,255,255,0.03)', border: 'var(--glass-border)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
-          <div style={{
-            width: '42px', height: '42px', borderRadius: '50%', flexShrink: 0,
-            background: profile?.imageUrl ? `url(${profile.imageUrl}) center/cover` : `linear-gradient(135deg, ${roleColor}, var(--bg-color))`,
-            border: `2px solid ${roleColor}`,
-            display: 'flex', justifyContent: 'center', alignItems: 'center',
-            fontSize: '1rem', fontWeight: 700, color: roleColor,
-            boxShadow: `0 0 12px color-mix(in srgb, ${roleColor} 30%, transparent)`
-          }}>
+      <div
+        style={{
+          padding: "1rem",
+          marginBottom: "1.5rem",
+          borderRadius: "12px",
+          background: "rgba(255,255,255,0.03)",
+          border: "var(--glass-border)",
+          flexShrink: 0,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
+          <div
+            style={{
+              width: "42px",
+              height: "42px",
+              borderRadius: "50%",
+              flexShrink: 0,
+              background: profile?.imageUrl
+                ? `url(${profile.imageUrl}) center/cover`
+                : `linear-gradient(135deg, ${roleColor}, var(--bg-color))`,
+              border: `2px solid ${roleColor}`,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              fontSize: "1rem",
+              fontWeight: 700,
+              color: roleColor,
+              boxShadow: `0 0 12px color-mix(in srgb, ${roleColor} 30%, transparent)`,
+            }}
+          >
             {!profile?.imageUrl && profile?.name?.charAt(0).toUpperCase()}
           </div>
-          <div style={{ overflow: 'hidden' }}>
-            <p style={{ fontWeight: 600, fontSize: '0.95rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{profile?.name}</p>
-            <span style={{
-              fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px',
-              color: roleColor, background: `color-mix(in srgb, ${roleColor} 15%, transparent)`,
-              padding: '0.15rem 0.5rem', borderRadius: '20px'
-            }}>{role}</span>
+          <div style={{ overflow: "hidden" }}>
+            <p
+              style={{
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+              }}
+            >
+              {profile?.name}
+            </p>
+            <span
+              style={{
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "1px",
+                color: roleColor,
+                background: `color-mix(in srgb, ${roleColor} 15%, transparent)`,
+                padding: "0.15rem 0.5rem",
+                borderRadius: "20px",
+              }}
+            >
+              {role}
+            </span>
           </div>
         </div>
       </div>
 
       {/* Scrollable Nav Area */}
-      <div style={{ flex: 1, overflowY: 'auto', paddingRight: '4px' }} className="custom-scrollbar">
-        <NavItem href="/dashboard" label="Dashboard Overview" icon={LayoutDashboard} active={pathname === '/dashboard'} color="var(--primary-color)" />
+      <div
+        style={{ flex: 1, overflowY: "auto", paddingRight: "4px" }}
+        className="custom-scrollbar"
+      >
+        <NavItem
+          href="/dashboard"
+          label="Dashboard Overview"
+          icon={LayoutDashboard}
+          active={pathname === "/dashboard"}
+          color="var(--primary-color)"
+        />
 
-        <div style={{ height: '1px', background: 'var(--border-color)', margin: '1rem 0.5rem' }} />
+        <div
+          style={{
+            height: "1px",
+            background: "var(--border-color)",
+            margin: "1rem 0.5rem",
+          }}
+        />
 
         <SectionLabel label="My Account" color="var(--primary-color)" />
-        {userLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="var(--primary-color)" />)}
+        {userLinks.map((l) => (
+          <NavItem
+            key={l.href}
+            {...l}
+            active={pathname === l.href}
+            color="var(--primary-color)"
+          />
+        ))}
 
         {isAdmin && (
           <>
             <SectionLabel label="Admin Controls" color="#ffcc00" />
-            {adminLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="#ffcc00" />)}
+            {adminLinks.map((l) => (
+              <NavItem
+                key={l.href}
+                {...l}
+                active={pathname === l.href}
+                color="#ffcc00"
+              />
+            ))}
           </>
         )}
 
         {isSuperAdmin && (
           <>
             <SectionLabel label="System Override" color="var(--error-color)" />
-            {superAdminLinks.map(l => <NavItem key={l.href} {...l} active={pathname === l.href} color="var(--error-color)" />)}
+            {superAdminLinks.map((l) => (
+              <NavItem
+                key={l.href}
+                {...l}
+                active={pathname === l.href}
+                color="var(--error-color)"
+              />
+            ))}
           </>
         )}
       </div>
 
       {/* Logout - Fixed Bottom */}
-      <div style={{ marginTop: 'auto', paddingTop: '1.5rem', flexShrink: 0 }}>
-        <div style={{ height: '1px', background: 'var(--border-color)', marginBottom: '1rem' }} />
-        <button onClick={handleLogout} style={{
-          display: 'flex', alignItems: 'center', gap: '0.875rem', width: '100%',
-          padding: '0.75rem 1rem', borderRadius: '10px', border: 'none',
-          background: 'transparent', color: 'var(--text-secondary)', cursor: 'pointer',
-          transition: 'all 0.2s', fontSize: '0.9rem'
-        }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,75,75,0.08)'; e.currentTarget.style.color = 'var(--error-color)'; }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'var(--text-secondary)'; }}
+      <div style={{ marginTop: "auto", paddingTop: "1.5rem", flexShrink: 0 }}>
+        <div
+          style={{
+            height: "1px",
+            background: "var(--border-color)",
+            marginBottom: "1rem",
+          }}
+        />
+        <button
+          onClick={handleLogout}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.875rem",
+            width: "100%",
+            padding: "0.75rem 1rem",
+            borderRadius: "10px",
+            border: "none",
+            background: "transparent",
+            color: "var(--text-secondary)",
+            cursor: "pointer",
+            transition: "all 0.2s",
+            fontSize: "0.9rem",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(255,75,75,0.08)";
+            e.currentTarget.style.color = "var(--error-color)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "transparent";
+            e.currentTarget.style.color = "var(--text-secondary)";
+          }}
         >
           <LogOut size={18} style={{ flexShrink: 0 }} />
           <span>System Logout</span>
         </button>
       </div>
-      
+
       <style>{`
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
@@ -194,42 +413,105 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   );
 
   return (
-    <div style={{ display: 'flex', minHeight: 'calc(100vh - 185px)', background: 'var(--bg-color)' }}>
+    <div
+      style={{
+        display: "flex",
+        minHeight: "calc(100vh - 185px)",
+        background: "var(--bg-color)",
+      }}
+    >
       {/* Desktop Sidebar */}
-      <aside style={{
-        width: '260px', flexShrink: 0,
-        background: 'rgba(11, 12, 16, 0.95)',
-        backdropFilter: 'blur(16px)',
-        borderRight: 'var(--glass-border)',
-        height: 'calc(100vh - 185px)',
-        position: 'fixed',
-        top: '185px',
-        left: 0,
-        zIndex: 50
-      }} className="dashboard-sidebar">
+      <aside
+        style={{
+          width: "260px",
+          flexShrink: 0,
+          background: "rgba(11, 12, 16, 0.95)",
+          backdropFilter: "blur(16px)",
+          borderRight: "var(--glass-border)",
+          height: "calc(100vh - 185px)",
+          position: "fixed",
+          top: "185px",
+          left: 0,
+          zIndex: 50,
+        }}
+        className="dashboard-sidebar"
+      >
         <SidebarContent />
       </aside>
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex' }}>
-          <div onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} />
-          <aside style={{ position: 'relative', zIndex: 1, width: '260px', background: 'rgba(11, 12, 16, 1)', height: '100%' }}>
+        <div
+          style={{ position: "fixed", inset: 0, zIndex: 200, display: "flex" }}
+        >
+          <div
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: "absolute",
+              inset: 0,
+              background: "rgba(0,0,0,0.6)",
+              backdropFilter: "blur(4px)",
+            }}
+          />
+          <aside
+            style={{
+              position: "relative",
+              zIndex: 1,
+              width: "260px",
+              background: "rgba(11, 12, 16, 1)",
+              height: "100%",
+            }}
+          >
             <SidebarContent />
           </aside>
-          <button onClick={() => setSidebarOpen(false)} style={{ position: 'absolute', top: '1rem', right: '1rem', background: 'rgba(0,0,0,0.6)', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-primary)' }}>
+          <button
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              position: "absolute",
+              top: "1rem",
+              right: "1rem",
+              background: "rgba(0,0,0,0.6)",
+              border: "1px solid var(--border-color)",
+              borderRadius: "8px",
+              padding: "0.5rem",
+              cursor: "pointer",
+              color: "var(--text-primary)",
+            }}
+          >
             <X size={20} />
           </button>
         </div>
       )}
 
       {/* Mobile menu button */}
-      <button onClick={() => setSidebarOpen(true)} className="mobile-menu-btn" style={{ position: 'fixed', bottom: '2rem', left: '1rem', zIndex: 100, background: 'var(--primary-color)', color: '#0b0c10', border: 'none', borderRadius: '50%', width: '48px', height: '48px', display: 'none', justifyContent: 'center', alignItems: 'center', cursor: 'pointer', boxShadow: 'var(--glow)' }}>
+      <button
+        onClick={() => setSidebarOpen(true)}
+        className="mobile-menu-btn"
+        style={{
+          position: "fixed",
+          bottom: "2rem",
+          left: "1rem",
+          zIndex: 100,
+          background: "var(--primary-color)",
+          color: "#0b0c10",
+          border: "none",
+          borderRadius: "50%",
+          width: "48px",
+          height: "48px",
+          display: "none",
+          justifyContent: "center",
+          alignItems: "center",
+          cursor: "pointer",
+          boxShadow: "var(--glow)",
+        }}
+      >
         <Menu size={22} />
       </button>
 
       {/* Main content */}
-      <main style={{ flex: 1, marginLeft: '260px', width: 'calc(100% - 260px)' }}>
+      <main
+        style={{ flex: 1, marginLeft: "260px", width: "calc(100% - 260px)" }}
+      >
         {children}
       </main>
 

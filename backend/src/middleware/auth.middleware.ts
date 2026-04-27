@@ -25,7 +25,7 @@ export const protect = (req: Request, res: Response, next: NextFunction) => {
       process.env.ACCESS_TOKEN_SECRET!,
     ) as JwtPayload;
 
-    req.user = decoded;
+    req.user = decoded as Express.User;
 
     next();
   } catch (error) {
