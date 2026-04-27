@@ -1,4 +1,11 @@
-import { OrderStatus } from "../generated/prisma/enums";
+export type OrderStatus =
+  | "PENDING"
+  | "PAID"
+  | "SHIPPED"
+  | "DELIVERED"
+  | "PARTIALLY_REFUNDED"
+  | "REFUNDED"
+  | "CANCELED";
 
 export const canTransition = (
   currentStatus: OrderStatus,
