@@ -1,6 +1,7 @@
 "use client";
 
-import { API_BASE_URL, fetchApi } from "@/utils/api";
+import { env } from "@/config/env";
+import { fetchApi } from "@/utils/api";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
@@ -51,7 +52,16 @@ function LoginPageContent() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${API_BASE_URL}/auth/google`;
+    const params = new URLSearchParams({
+      client_id: env.GOOGLE_CLIENT_ID,
+      redirect_uri: env.GOOGLE_CALLBACK_URL,
+      response_type: "code",
+      scope: "profile email",
+      access_type: "offline",
+      prompt: "consent",
+    });
+
+    window.location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
   };
 
   return (
