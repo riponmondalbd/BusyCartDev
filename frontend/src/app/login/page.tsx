@@ -157,7 +157,7 @@ function LoginPageContent() {
           </button>
         </form>
 
-        {/* <div
+        <div
           style={{ display: "flex", alignItems: "center", margin: "2rem 0" }}
         >
           <div
@@ -197,7 +197,7 @@ function LoginPageContent() {
           }}
         >
           Google
-        </button> */}
+        </button>
 
         <p
           style={{
