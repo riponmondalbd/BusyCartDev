@@ -18,6 +18,7 @@ import {
   UserCircle,
   Users,
   X,
+  Image
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -47,6 +48,11 @@ const adminLinks = [
     href: "/dashboard/admin/refunds",
     label: "Refund Processing",
     icon: ArrowRightLeft,
+  },
+  {
+    href: "/dashboard/admin/banners",
+    label: "Banner Console",
+    icon: Image,
   },
 ];
 

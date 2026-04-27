@@ -17,6 +17,7 @@ import reviewRoutes from "./review.routes";
 import superAdminRoutes from "./super.admin.routes";
 import userRoutes from "./user.routes";
 import wishlistRoutes from "./wishlist.routes";
+import bannerRoutes from "./banner.routes";
 
 const router = Router();
 
@@ -38,5 +39,6 @@ router.use("/refund", refundRoutes);
 router.use("/analytics", analyticsRoutes);
 router.use("/invoice", invoiceRoutes);
 router.use("/review", reviewRoutes);
+router.use("/banner", bannerRoutes);
 
 export default router;

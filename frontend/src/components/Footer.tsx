@@ -1,9 +1,9 @@
 'use client';
 
-import Link from 'next/link';
-import { Mail, Phone, MapPin, Globe, ArrowRight, Zap, ShieldCheck, Cpu, MessageSquare, Terminal } from 'lucide-react';
-import { useState, useEffect } from 'react';
 import { fetchApi } from '@/utils/api';
+import { ArrowRight, Cpu, Globe, Mail, MapPin, MessageSquare, Terminal } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 export default function Footer() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -43,14 +43,26 @@ export default function Footer() {
               Defining the next generation of digital commerce. We provide secure, high-performance hardware and modules for the futuristic builder.
             </p>
             <div style={{ display: 'flex', gap: '1rem' }}>
-              {[Globe, Terminal, Cpu, MessageSquare].map((Icon, i) => (
-                <a key={i} href="#" style={{ 
-                  width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)',
-                  transition: '0.3s', border: '1px solid rgba(255,255,255,0.05)'
-                }} onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.borderColor = 'var(--primary-color)'; }}
-                   onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; }}>
-                  <Icon size={18} />
+              {[
+                { Icon: Globe, url: 'https://riponmondalbd.vercel.app/' },
+                { Icon: Terminal, url: 'https://github.com/riponmondalbd' },
+                { Icon: Cpu, url: 'https://www.linkedin.com/in/riponmondalbd/' },
+                { Icon: MessageSquare, url: 'https://wa.me/8801956149980' }
+              ].map((item, i) => (
+                <a 
+                  key={i} 
+                  href={item.url} 
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ 
+                    width: '40px', height: '40px', borderRadius: '50%', background: 'rgba(255,255,255,0.05)', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-secondary)',
+                    transition: '0.3s', border: '1px solid rgba(255,255,255,0.05)'
+                  }} 
+                  onMouseEnter={e => { e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.borderColor = 'var(--primary-color)'; }}
+                  onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; }}
+                >
+                  <item.Icon size={18} />
                 </a>
               ))}
             </div>

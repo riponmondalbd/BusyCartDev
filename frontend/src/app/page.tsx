@@ -12,6 +12,12 @@ import {
   Sparkles,
   Trophy,
   Zap,
+  Globe,
+  Cpu,
+  Activity,
+  Server,
+  CloudLightning,
+  Workflow
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -92,6 +98,7 @@ export default function ElectroMarketplaceHome() {
   const [categories, setCategories] = useState<CategorySummary[]>([]);
   const [products, setProducts] = useState<ProductSummary[]>([]);
   const [dealOfDay, setDealOfDay] = useState<DealOfDayRecord | null>(null);
+  const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSlider, setActiveSlider] = useState(0);
   const [activeTab, setActiveTab] = useState("Trending");
@@ -149,14 +156,22 @@ export default function ElectroMarketplaceHome() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [catsRes, prodsRes, dealRes] = await Promise.all([
+        const [catsRes, prodsRes, dealRes, bannersRes] = await Promise.all([
           fetchApi("/category/all").catch(() => []),
           fetchApi("/product/products?limit=50").catch(() => []),
           fetchApi("/deal-of-day/current").catch(() => ({ data: null })),
+          fetchApi("/banner/active").catch(() => ({ data: [] })),
         ]);
         setCategories(Array.isArray(catsRes) ? catsRes : catsRes.data || []);
         setProducts(Array.isArray(prodsRes) ? prodsRes : prodsRes.data || []);
         setDealOfDay(dealRes.data || null);
+        
+        const fetchedBanners = bannersRes.data || bannersRes;
+        if (Array.isArray(fetchedBanners) && fetchedBanners.length > 0) {
+            setBanners(fetchedBanners);
+        } else {
+            setBanners(sliderData); // Fallback to initial designs if none in DB
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -176,6 +191,17 @@ export default function ElectroMarketplaceHome() {
 
     return () => clearInterval(timer);
   }, [dealOfDay?.endsAt]);
+
+  // Auto-slide effect for the carousel
+  useEffect(() => {
+    if (banners.length <= 1) return;
+    
+    const interval = setInterval(() => {
+      setActiveSlider((prev) => (prev + 1) % banners.length);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [banners.length]);
 
   return (
     <div
@@ -247,7 +273,7 @@ export default function ElectroMarketplaceHome() {
               background: "#000",
             }}
           >
-            {sliderData.map((slide, i) => (
+            {banners.map((slide, i) => (
               <div
                 key={i}
                 style={{
@@ -337,6 +363,24 @@ export default function ElectroMarketplaceHome() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* 2.5 Terminal Performance Metrics */}
+      <section style={{ padding: "4rem 0", background: "linear-gradient(180deg, transparent, rgba(102,252,241,0.02), transparent)" }}>
+        <div className="container" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "2rem" }}>
+          {[
+            { icon: Globe, label: "Global Node Traffic", val: "1.2GB/s", color: "var(--primary-color)" },
+            { icon: Activity, label: "Active Module Sync", val: "99.98%", color: "var(--secondary-color)" },
+            { icon: Cpu, label: "Neural Load", val: "12.4 PFLOPS", color: "var(--primary-color)" },
+            { icon: Server, label: "Encrypted Sectors", val: "4,092", color: "var(--secondary-color)" }
+          ].map((stat, i) => (
+            <div key={i} style={{ textAlign: "center", padding: "1rem" }}>
+              <stat.icon size={32} color={stat.color} style={{ marginBottom: "1rem", opacity: 0.8 }} />
+              <h3 style={{ fontSize: "1.5rem", fontWeight: 900, marginBottom: "0.25rem" }}>{stat.val}</h3>
+              <p style={{ fontSize: "0.7rem", fontWeight: 800, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "1px" }}>{stat.label}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -799,59 +843,82 @@ export default function ElectroMarketplaceHome() {
 
       {/* 4. Category Grid (Electro Visual Style) */}
       <section
-        style={{ padding: "4rem 0", background: "rgba(255,255,255,0.01)" }}
+        style={{ padding: "6rem 0" }}
       >
         <div className="container">
-          <h2 className="section-title">Department Catalog</h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "3rem" }}>
+            <div>
+              <h2 className="section-title" style={{ marginBottom: "0.5rem" }}>Department Catalog</h2>
+              <p style={{ color: "var(--text-secondary)" }}>Access secure hardware sectors across the global grid.</p>
+            </div>
+            <Link href="/products" style={{ color: "var(--primary-color)", fontWeight: 700, fontSize: "0.9rem" }}>VIEW ALL SECTORS &rarr;</Link>
+          </div>
+          
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(6, 1fr)",
-              gap: "1.5rem",
+              gridTemplateColumns: "repeat(auto-fill, minmax(180px, 1fr))",
+              gap: "2rem",
             }}
           >
             {categories.map((cat) => (
               <Link
                 key={cat.id}
                 href={`/products?category=${cat.slug}`}
-                className="glass-panel"
+                className="category-card"
                 style={{
-                  padding: "1.5rem",
+                  padding: "2rem 1.5rem",
                   textAlign: "center",
-                  transition: "0.3s",
+                  transition: "all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
+                  background: "rgba(255,255,255,0.02)",
+                  borderRadius: "16px",
+                  border: "1px solid rgba(255,255,255,0.05)",
+                  display: "block",
+                  position: "relative",
+                  overflow: "hidden"
                 }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.borderColor = "var(--primary-color)")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.borderColor = "transparent")
-                }
               >
                 <div
                   style={{
-                    width: "80px",
-                    height: "80px",
-                    margin: "0 auto 1rem",
-                    background: `url(${cat.image}) center/cover`,
-                    borderRadius: "12px",
+                    width: "70px",
+                    height: "70px",
+                    margin: "0 auto 1.5rem",
+                    background: `url(${cat.image || 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=200&q=80'}) center/cover`,
+                    borderRadius: "50%",
+                    border: "2px solid rgba(255,255,255,0.1)",
+                    boxShadow: "0 0 20px rgba(0,0,0,0.5)"
                   }}
                 />
-                <p style={{ fontWeight: 700, fontSize: "0.9rem" }}>
+                <h4 style={{ fontWeight: 800, fontSize: "0.95rem", marginBottom: "0.25rem" }}>
                   {cat.name}
+                </h4>
+                <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", opacity: 0.6 }}>
+                  Module Access
                 </p>
-                <p
-                  style={{
-                    fontSize: "0.7rem",
-                    color: "var(--text-secondary)",
-                    marginTop: "0.25rem",
-                  }}
-                >
-                  Explore &rarr;
-                </p>
+                <style>{`
+                  .category-card:hover {
+                    transform: translateY(-10px);
+                    background: rgba(102,252,241,0.05) !important;
+                    border-color: var(--primary-color) !important;
+                    box-shadow: 0 10px 30px rgba(102,252,241,0.1);
+                  }
+                `}</style>
               </Link>
             ))}
           </div>
         </div>
+      </section>
+
+      {/* NEW: 6. Partner Manufacturing Ecosystem */}
+      <section style={{ padding: "4rem 0", background: "rgba(0,0,0,0.2)", borderTop: "1px solid rgba(255,255,255,0.05)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+         <div className="container" style={{ textAlign: "center" }}>
+            <p style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--text-secondary)", letterSpacing: "3px", marginBottom: "3rem", textTransform: "uppercase" }}>Strategic Hardware Partners</p>
+            <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: "4rem", alignItems: "center", opacity: 0.4 }}>
+               {['CYBERDYNE', 'TYRELL CORP', 'WEYLAND-YUTANI', 'OSCORP', 'STARK TECH'].map(brand => (
+                 <span key={brand} style={{ fontSize: "1.5rem", fontWeight: 900, letterSpacing: "4px" }}>{brand}</span>
+               ))}
+            </div>
+         </div>
       </section>
 
       {/* 5. Support Features */}

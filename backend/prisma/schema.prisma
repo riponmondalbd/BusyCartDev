@@ -264,3 +264,18 @@ model ActivityLog {
   @@index([entityType])
   @@index([createdAt])
 }
+
+model Banner {
+  id        String   @id @default(uuid())
+  title     String
+  tagline   String?
+  desc      String?
+  price     String?
+  image     String
+  color     String?  @default("#66fcf1")
+  link      String?  @default("/products")
+  isActive  Boolean  @default(true)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
