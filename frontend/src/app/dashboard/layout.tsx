@@ -61,11 +61,6 @@ const superAdminLinks = [
     label: "Access Delegation",
     icon: ShieldAlert,
   },
-  {
-    href: "/dashboard/admin/deal-of-day",
-    label: "Deal of the Day",
-    icon: Sparkles,
-  },
   { href: "/dashboard/super-admin/coupons", label: "Promo Codes", icon: Tag },
 ];
 
