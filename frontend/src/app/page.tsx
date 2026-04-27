@@ -209,188 +209,222 @@ export default function ElectroMarketplaceHome() {
       style={{ background: "var(--bg-color)", color: "var(--text-primary)" }}
     >
       {/* 1. Hero Section with Sidebar */}
-      <section style={{ padding: "1.5rem 0" }}>
-        <div className="container hero-container" style={{ display: "flex", gap: "2rem" }}>
-          {/* Vertical Category Sidebar - Hidden on smaller screens */}
-          <aside
-            className="glass-panel hidden-mobile"
-            style={{
-              width: "280px",
-              flexShrink: 0,
-              padding: "1rem 0",
-              flexDirection: "column",
-            }}
-          >
-            <div
+      <section style={{ padding: "1.5rem 0", background: "var(--bg-color)" }}>
+        <div 
+          className="container" 
+          style={{ 
+            display: "flex", 
+            flexDirection: "row", // Will be handled by media query manually if needed, but let's keep it robust
+            gap: "2rem",
+            minHeight: "500px" 
+          }}
+        >
+          <style>{`
+            @media (max-width: 992px) {
+              .responsive-flex-wrapper {
+                flex-direction: column !important;
+              }
+              .main-banner-terminal {
+                height: 400px !important;
+                width: 100% !important;
+              }
+            }
+          `}</style>
+          
+          <div className="responsive-flex-wrapper" style={{ display: "flex", width: "100%", gap: "2rem" }}>
+            {/* Sidebar Departments - Hidden on smaller screens */}
+            <aside
+              className="glass-panel hidden-mobile"
               style={{
-                padding: "0 1.5rem 1rem",
-                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                width: "280px",
+                flexShrink: 0,
+                padding: "1rem 0",
                 display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                color: "var(--primary-color)",
-                fontWeight: 800,
+                flexDirection: "column",
               }}
             >
-              <LayoutGrid size={20} /> BROWSE SECTORS
-            </div>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              {categories.slice(0, 8).map((cat) => (
-                <Link
-                  key={cat.id}
-                  href={`/products?category=${cat.slug}`}
-                  style={{
-                    padding: "0.875rem 1.5rem",
-                    fontSize: "0.9rem",
-                    color: "var(--text-secondary)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    transition: "0.2s",
-                    borderBottom: "1px solid rgba(255,255,255,0.02)",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "var(--primary-color)")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "var(--text-secondary)")
-                  }
-                >
-                  {cat.name} <ChevronRight size={14} />
-                </Link>
-              ))}
-            </div>
-          </aside>
-
-          {/* Main Slider */}
-          <div
-            className="hero-slider"
-            style={{
-              flex: 1,
-              position: "relative",
-              height: "500px",
-              borderRadius: "16px",
-              overflow: "hidden",
-              background: "#000",
-            }}
-          >
-            {banners.map((slide, i) => (
               <div
-                key={i}
                 style={{
-                  position: "absolute",
-                  inset: 0,
-                  opacity: i === activeSlider ? 1 : 0,
-                  transition: "opacity 1s ease",
+                  padding: "0 1.5rem 1rem",
+                  borderBottom: "1px solid rgba(255,255,255,0.05)",
                   display: "flex",
                   alignItems: "center",
-                  zIndex: i === activeSlider ? 1 : 0,
+                  gap: "0.75rem",
+                  color: "var(--primary-color)",
+                  fontWeight: 800,
                 }}
               >
-                <img
-                  src={slide.image}
-                  alt="Slider"
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    opacity: 0.6,
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    inset: 0,
-                    background:
-                      "linear-gradient(90deg, rgba(11,12,16,0.95) 30%, transparent 100%)",
-                  }}
-                />
-                <div
-                  className="slider-content"
-                  style={{
-                    position: "relative",
-                    zIndex: 2,
-                    padding: "2.5rem",
-                    maxWidth: "600px",
-                  }}
-                >
-                  <span
-                    style={{
-                      color: slide.color,
-                      fontWeight: 800,
-                      letterSpacing: "2px",
-                      textTransform: "uppercase",
-                      fontSize: "0.75rem",
-                    }}
-                  >
-                    {slide.tagline}
-                  </span>
-                  <h1
-                    className="responsive-title"
-                    style={{
-                      fontSize: "clamp(2rem, 5vw, 3.5rem)",
-                      fontWeight: 900,
-                      margin: "0.75rem 0",
-                      lineHeight: 1.1,
-                    }}
-                  >
-                    {slide.title}
-                  </h1>
-                  <p
-                    style={{
-                      color: "var(--text-secondary)",
-                      marginBottom: "1.5rem",
-                      fontSize: "0.95rem",
-                      lineHeight: 1.6
-                    }}
-                  >
-                    {slide.desc}
-                  </p>
-                  <Link
-                    href={slide.link || "/products"}
-                    className="btn-primary"
-                    style={{
-                      background: slide.color,
-                      color: "#000",
-                      border: "none",
-                      padding: "0.8rem 2rem"
-                    }}
-                  >
-                    Initialize Order
-                  </Link>
-                </div>
+                <LayoutGrid size={20} /> BROWSE SECTORS
               </div>
-            ))}
-
-            {/* Dots */}
-            {banners.length > 1 && (
-              <div style={{
-                position: "absolute",
-                bottom: "1.5rem",
-                right: "1.5rem",
-                zIndex: 10,
-                display: "flex",
-                gap: "0.75rem"
-              }}>
-                {banners.map((_, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setActiveSlider(i)}
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                {categories.slice(0, 8).map((cat) => (
+                  <Link
+                    key={cat.id}
+                    href={`/products?category=${cat.slug}`}
                     style={{
-                      width: i === activeSlider ? "24px" : "8px",
-                      height: "8px",
-                      borderRadius: "4px",
-                      background: i === activeSlider ? "var(--primary-color)" : "rgba(255,255,255,0.3)",
-                      border: "none",
-                      cursor: "pointer",
-                      transition: "all 0.3s ease"
+                      padding: "0.875rem 1.5rem",
+                      fontSize: "0.9rem",
+                      color: "var(--text-secondary)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      transition: "0.2s",
+                      borderBottom: "1px solid rgba(255,255,255,0.02)",
                     }}
-                  />
+                    onMouseEnter={(e) =>
+                      (e.currentTarget.style.color = "var(--primary-color)")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.currentTarget.style.color = "var(--text-secondary)")
+                    }
+                  >
+                    {cat.name} <ChevronRight size={14} />
+                  </Link>
                 ))}
               </div>
-            )}
+            </aside>
+
+            {/* Main Slider - Guaranteed Visibility */}
+            <div
+              className="main-banner-terminal"
+              style={{
+                flex: 1,
+                position: "relative",
+                height: "500px",
+                borderRadius: "16px",
+                overflow: "hidden",
+                background: "#000",
+                display: "block",
+                zIndex: 5
+              }}
+            >
+              {banners.length > 0 ? (
+                banners.map((slide, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      opacity: i === activeSlider ? 1 : 0,
+                      transition: "opacity 1s ease",
+                      display: "flex",
+                      alignItems: "center",
+                      zIndex: i === activeSlider ? 1 : 0,
+                    }}
+                  >
+                    <img
+                      src={slide.image}
+                      alt="Slider"
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                        opacity: 0.6,
+                      }}
+                    />
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: 0,
+                        background:
+                          "linear-gradient(90deg, rgba(11,12,16,0.95) 40%, rgba(11,12,16,0.4) 70%, transparent 100%)",
+                        zIndex: 1
+                      }}
+                    />
+                    <div
+                      className="slider-content"
+                      style={{
+                        position: "relative",
+                        zIndex: 10,
+                        padding: "2.5rem",
+                        maxWidth: "600px",
+                      }}
+                    >
+                      <span
+                        style={{
+                          color: slide.color || "var(--primary-color)",
+                          fontWeight: 800,
+                          letterSpacing: "2px",
+                          textTransform: "uppercase",
+                          fontSize: "0.75rem",
+                        }}
+                      >
+                        {slide.tagline}
+                      </span>
+                      <h1
+                        className="responsive-title"
+                        style={{
+                          fontSize: "clamp(1.8rem, 5vw, 3.5rem)",
+                          fontWeight: 900,
+                          margin: "0.75rem 0",
+                          lineHeight: 1.1,
+                          color: "#fff"
+                        }}
+                      >
+                        {slide.title}
+                      </h1>
+                      <p
+                        style={{
+                          color: "var(--text-secondary)",
+                          marginBottom: "1.5rem",
+                          fontSize: "0.95rem",
+                          lineHeight: 1.6
+                        }}
+                      >
+                        {slide.desc}
+                      </p>
+                      <Link
+                        href={slide.link || "/products"}
+                        className="btn-primary"
+                        style={{
+                          background: slide.color || "var(--primary-color)",
+                          color: "#000",
+                          border: "none",
+                          padding: "0.8rem 2rem",
+                          display: "inline-block"
+                        }}
+                      >
+                        Initialize Order
+                      </Link>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "var(--primary-color)", fontWeight: 800 }}>
+                   INITIALIZING BANNER ARRAY...
+                </div>
+              )}
+
+              {/* Dots */}
+              {banners.length > 1 && (
+                <div style={{
+                  position: "absolute",
+                  bottom: "1.5rem",
+                  right: "1.5rem",
+                  zIndex: 100,
+                  display: "flex",
+                  gap: "0.75rem"
+                }}>
+                  {banners.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveSlider(i)}
+                      style={{
+                        width: i === activeSlider ? "28px" : "10px",
+                        height: "10px",
+                        borderRadius: "5px",
+                        background: i === activeSlider ? "var(--primary-color)" : "rgba(255,255,255,0.2)",
+                        border: "none",
+                        cursor: "pointer",
+                        transition: "all 0.3s ease"
+                      }}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>

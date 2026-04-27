@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import Swal from "sweetalert2";
 
 type Banner = {
   id: string;
@@ -73,13 +74,29 @@ export default function BannerManagementPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this banner?")) return;
-    try {
-      await fetchApi(`/banner/delete/${id}`, { method: "DELETE" });
-      toast.success("Banner deleted");
-      loadBanners();
-    } catch (err) {
-      toast.error("Delete failed");
+    const result = await Swal.fire({
+      title: "Confirm Deletion",
+      text: "Are you sure you want to terminate this visual transmission? This action cannot be undone.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "var(--error-color)",
+      cancelButtonColor: "#333",
+      confirmButtonText: "Yes, delete it!",
+      background: "#1f2833",
+      color: "#fff",
+      customClass: {
+        popup: "glass-panel"
+      }
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await fetchApi(`/banner/delete/${id}`, { method: "DELETE" });
+        toast.success("Banner deleted successfully");
+        loadBanners();
+      } catch (err) {
+        toast.error("Deletion failed");
+      }
     }
   };
 
