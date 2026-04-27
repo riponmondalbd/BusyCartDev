@@ -187,9 +187,18 @@ export default function ProductsPage() {
           {/* Filters Sidebar */}
           <aside
             className="glass-panel hidden-mobile"
-            style={{ width: "280px", padding: "2rem", flexShrink: 0, position: "sticky", top: "100px" }}
+            style={{ 
+              width: "280px", 
+              padding: "2rem", 
+              flexShrink: 0, 
+              position: "sticky", 
+              top: "100px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "3rem" 
+            }}
           >
-            <div style={{ marginBottom: "2.5rem" }}>
+            <div>
               <h3
                 style={{
                   fontSize: "0.85rem",
@@ -198,6 +207,7 @@ export default function ProductsPage() {
                   letterSpacing: "2px",
                   textTransform: "uppercase",
                   marginBottom: "1.5rem",
+                  display: "block"
                 }}
               >
                 Sectors
@@ -205,7 +215,6 @@ export default function ProductsPage() {
               <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 <button
                   onClick={() => setActiveCategory("all")}
-                  className={activeCategory === "all" ? "active-filter" : ""}
                   style={{
                     background: "none",
                     border: "none",
@@ -214,7 +223,9 @@ export default function ProductsPage() {
                     padding: "0.5rem 0",
                     cursor: "pointer",
                     fontSize: "0.95rem",
-                    transition: "0.2s"
+                    transition: "0.2s",
+                    display: "block",
+                    width: "100%"
                   }}
                 >
                   All Modules
@@ -231,7 +242,9 @@ export default function ProductsPage() {
                       padding: "0.5rem 0",
                       cursor: "pointer",
                       fontSize: "0.95rem",
-                      transition: "0.2s"
+                      transition: "0.2s",
+                      display: "block",
+                      width: "100%"
                     }}
                   >
                     {cat.name}
@@ -249,18 +262,19 @@ export default function ProductsPage() {
                   letterSpacing: "2px",
                   textTransform: "uppercase",
                   marginBottom: "1.5rem",
+                  display: "block"
                 }}
               >
                 Configuration
               </h3>
-              <div style={{ display: "grid", gap: "1.25rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
                 <div>
-                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem" }}>SORT PRIORITY</label>
+                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem", fontWeight: 700 }}>SORT PRIORITY</label>
                   <select
                     className="input-field"
                     value={sortOption}
                     onChange={(event) => setSortOption(event.target.value)}
-                    style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem" }}
+                    style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem", width: "100%" }}
                   >
                     <option value="default">Release Date</option>
                     <option value="price_low_high">Price: ASC</option>
@@ -268,12 +282,12 @@ export default function ProductsPage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem" }}>COLOR THEME</label>
+                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem", fontWeight: 700 }}>COLOR THEME</label>
                   <select
                     className="input-field"
                     value={activeColor}
                     onChange={(event) => setActiveColor(event.target.value)}
-                    style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem" }}
+                    style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem", width: "100%" }}
                   >
                     <option value="all">All Specs</option>
                     {availableColors.map((color) => (

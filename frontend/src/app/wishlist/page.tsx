@@ -49,13 +49,11 @@ export default function WishlistPage() {
   const removeItem = async (productId: string) => {
     try {
       await fetchApi(`/wishlist/remove/${productId}`, { method: "DELETE" });
-      setWishlistItems((prev) => {
-        const next = prev.filter((item) => item.productId !== productId);
-        window.dispatchEvent(
-          new CustomEvent("wishlist-update", { detail: next.length }),
-        );
-        return next;
-      });
+      const next = wishlistItems.filter((item) => item.productId !== productId);
+      setWishlistItems(next);
+      window.dispatchEvent(
+        new CustomEvent("wishlist-update", { detail: next.length }),
+      );
     } catch (err) {
       console.error("Removal failed:", err);
     }

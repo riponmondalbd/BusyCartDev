@@ -26,7 +26,12 @@ export default function Navbar() {
 
   useEffect(() => {
     // ... existing event listeners ...
-    const handleWishlistUpdate = (e: any) => setWishlistCount(e.detail);
+    const handleWishlistUpdate = (e: any) => {
+      // Defer state update to next tick to avoid "update during render" errors
+      setTimeout(() => {
+        setWishlistCount(e.detail);
+      }, 0);
+    };
     window.addEventListener('wishlist-update', handleWishlistUpdate);
 
     const handleCartUpdate = (e: any) => {
