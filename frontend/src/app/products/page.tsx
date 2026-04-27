@@ -36,7 +36,7 @@ export default function ProductsPage() {
       try {
         const [catsRes, prodsRes] = await Promise.all([
           fetchApi("/category/all").catch(() => ({ data: [] })),
-          fetchApi("/product/products").catch(() => ({ data: [] })),
+          fetchApi("/product/products?limit=200").catch(() => ({ data: [] })),
         ]);
 
         const cats = Array.isArray(catsRes) ? catsRes : catsRes.data || [];
