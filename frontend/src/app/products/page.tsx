@@ -540,8 +540,8 @@ function ProductsPageContent() {
                     >
                       <div
                         style={{
-                          height: "180px",
-                          background: "#000",
+                          aspectRatio: "4/3",
+                          background: "rgba(255,255,255,0.02)",
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",

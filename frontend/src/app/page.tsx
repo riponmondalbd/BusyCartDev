@@ -681,7 +681,7 @@ export default function ElectroMarketplaceHome() {
                     style={{
                       position: "relative",
                       width: "100%",
-                      height: "200px",
+                      aspectRatio: "16/9",
                       marginBottom: "1.5rem",
                     }}
                   >
@@ -923,7 +923,7 @@ export default function ElectroMarketplaceHome() {
                     <div
                       className="product-image-wrapper"
                       style={{
-                        height: "160px",
+                        aspectRatio: "4/3",
                         marginBottom: "1rem",
                         background: "rgba(255,255,255,0.02)",
                         borderRadius: "8px",

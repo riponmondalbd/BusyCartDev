@@ -684,7 +684,7 @@ export default function SingleProductPage() {
                 <Link key={prod.id} href={`/products/${prod.id}`} className="glass-panel" style={{ padding: "1.5rem", transition: "0.3s", display: "flex", flexDirection: "column" }}
                       onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
                       onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}>
-                  <div style={{ height: "180px", marginBottom: "1.5rem", background: "rgba(255,255,255,0.02)", borderRadius: "12px", display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}>
+                  <div style={{ aspectRatio: "4/3", marginBottom: "1.5rem", background: "rgba(255,255,255,0.02)", borderRadius: "12px", display: "flex", justifyContent: "center", alignItems: "center", position: "relative" }}>
                     <Image src={prod.images?.[0] || "/placeholder.jpg"} alt={prod.name} fill style={{ objectFit: "contain", padding: "1rem" }} />
                   </div>
                   <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.5rem" }}>{prod.name}</h4>
