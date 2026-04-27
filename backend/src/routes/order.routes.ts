@@ -4,6 +4,7 @@ import {
   getAllOrders,
   getMyOrders,
   updateOrderStatus,
+  trackOrder,
 } from "../controller/order.controller";
 import { protect } from "../middleware/auth.middleware";
 import { authorize } from "../middleware/authorize";
@@ -19,4 +20,5 @@ router.put(
   authorize("ADMIN", "SUPER_ADMIN"),
   updateOrderStatus,
 );
+router.get("/track/:id", trackOrder);
 export default router;

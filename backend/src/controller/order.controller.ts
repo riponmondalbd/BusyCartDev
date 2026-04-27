@@ -265,3 +265,40 @@ export const updateOrderStatus = async (req: any, res: any) => {
     });
   }
 };
+
+// Public: Track order by ID
+export const trackOrder = async (req: any, res: any) => {
+  try {
+    const { id } = req.params;
+
+    const order = await prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        user: {
+          select: {
+            email: true,
+            name: true,
+          },
+        },
+      },
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found with this tracking ID." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: order,
+    });
+  } catch (error: any) {
+    return res.status(500).json({
+      message: "Failed to fetch tracking data",
+    });
+  }
+};

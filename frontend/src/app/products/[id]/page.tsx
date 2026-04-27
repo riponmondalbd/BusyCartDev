@@ -27,14 +27,29 @@ export default function SingleProductPage() {
   const [isBuying, setIsBuying] = useState(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
+  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [topSellingRelated, setTopSellingRelated] = useState<any[]>([]);
+
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const res = await fetchApi(`/product/products/${id}`);
-        if (res.success && res.product) {
-          setProduct(res.product);
-        } else {
-          setProduct(res.data || res);
+        const productData = res.success && res.product ? res.product : (res.data || res);
+        setProduct(productData);
+
+        // Fetch related products from same category
+        if (productData.categoryId) {
+          const relatedRes = await fetchApi(`/product/products?limit=20&category=${productData.category?.slug || ''}`);
+          const allRelated = Array.isArray(relatedRes) ? relatedRes : relatedRes.data || [];
+          
+          // Filter out current product
+          const filteredRelated = allRelated.filter((p: any) => p.id !== id);
+          
+          setRelatedProducts(filteredRelated.slice(0, 4));
+          setTopSellingRelated([...filteredRelated]
+            .sort((a, b) => (b.numReviews || 0) - (a.numReviews || 0))
+            .slice(0, 4)
+          );
         }
 
         // Check wishlist
@@ -655,6 +670,60 @@ export default function SingleProductPage() {
           </div>
         </div>
       </div>
+
+      {/* Related Products Section */}
+      {relatedProducts.length > 0 && (
+        <section style={{ marginTop: "8rem" }}>
+          <div className="container">
+            <h2 style={{ fontSize: "2rem", fontWeight: 900, marginBottom: "3rem", display: "flex", alignItems: "center", gap: "1rem" }}>
+              <Zap size={28} color="var(--primary-color)" /> RELATED MODULES
+            </h2>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: "2rem" }}>
+              {relatedProducts.map((prod) => (
+                <Link key={prod.id} href={`/products/${prod.id}`} className="glass-panel" style={{ padding: "1.5rem", transition: "0.3s", display: "flex", flexDirection: "column" }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--primary-color)'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'}>
+                  <div style={{ height: "180px", marginBottom: "1.5rem", background: "rgba(255,255,255,0.02)", borderRadius: "12px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                    <img src={prod.images?.[0]} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "1rem" }} />
+                  </div>
+                  <h4 style={{ fontSize: "1.1rem", fontWeight: 800, marginBottom: "0.5rem" }}>{prod.name}</h4>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "auto" }}>
+                    <span style={{ fontWeight: 800, color: "var(--primary-color)" }}>${prod.price}</span>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-secondary)", fontWeight: 700 }}>VIEW SECTOR &rarr;</span>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Top Selling Related Section */}
+      {topSellingRelated.length > 0 && (
+        <section style={{ marginTop: "6rem" }}>
+          <div className="container">
+            <div className="glass-panel" style={{ padding: "3rem", border: "1px solid var(--primary-color)", background: "rgba(102,252,241,0.02)" }}>
+              <h2 style={{ fontSize: "1.75rem", fontWeight: 900, marginBottom: "3rem", textAlign: "center", textTransform: "uppercase", letterSpacing: "2px" }}>
+                Top Rated in this Sector
+              </h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "2.5rem" }}>
+                {topSellingRelated.map((prod) => (
+                  <div key={prod.id} style={{ display: "flex", gap: "1.5rem", alignItems: "center" }}>
+                    <Link href={`/products/${prod.id}`} style={{ width: "80px", height: "80px", flexShrink: 0, background: "rgba(255,255,255,0.05)", borderRadius: "12px", overflow: "hidden", display: "flex", justifyContent: "center", alignItems: "center" }}>
+                      <img src={prod.images?.[0]} style={{ width: "100%", height: "100%", objectFit: "contain", padding: "0.5rem" }} />
+                    </Link>
+                    <div>
+                      <Link href={`/products/${prod.id}`} style={{ fontWeight: 700, fontSize: "0.95rem", display: "block", marginBottom: "0.25rem" }}>{prod.name}</Link>
+                      <p style={{ color: "var(--primary-color)", fontWeight: 800, fontSize: "1rem" }}>${prod.price}</p>
+                      <p style={{ fontSize: "0.7rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>{prod.numReviews || 0} TRANSMISSIONS</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
