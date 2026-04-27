@@ -30,14 +30,24 @@ export default function ProductsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOption, setSortOption] = useState<string>("default");
   const [activeColor, setActiveColor] = useState<string>("all");
+  const [dealsOnly, setDealsOnly] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        const sort = searchParams.get("sort") || "newest";
+        const deals = searchParams.get("deals") || "false";
+        const categorySlug = searchParams.get("category");
+        const q = searchParams.get("search") || "";
+
+        let apiUrl = `/product/products?limit=200&sort=${sort}&deals=${deals}`;
+        if (categorySlug) apiUrl += `&category=${categorySlug}`;
+        if (q) apiUrl += `&search=${encodeURIComponent(q)}`;
+
         const [catsRes, prodsRes] = await Promise.all([
           fetchApi("/category/all").catch(() => ({ data: [] })),
-          fetchApi("/product/products?limit=200").catch(() => ({ data: [] })),
+          fetchApi(apiUrl).catch(() => ({ data: [] })),
         ]);
 
         const cats = Array.isArray(catsRes) ? catsRes : catsRes.data || [];
@@ -46,12 +56,10 @@ export default function ProductsPage() {
         setCategories(cats);
         setProducts(prods);
 
-        // Check for search query in URL
-        const q = searchParams.get("search");
         if (q) setSearchQuery(q);
+        if (deals === "true") setDealsOnly(true);
+        if (sort) setSortOption(sort);
 
-        // Check for category slug in URL
-        const categorySlug = searchParams.get("category");
         if (categorySlug) {
           const cat = cats.find(
             (c: CategorySummary) => c.slug === categorySlug,
@@ -139,10 +147,17 @@ export default function ProductsPage() {
                 marginBottom: "0.5rem",
               }}
             >
-              Core Inventory
+              {searchParams.get("deals") === "true" ? "Hot Deals" : 
+               searchParams.get("sort") === "newest" ? "New Arrivals" :
+               searchParams.get("sort") === "bestseller" ? "Bestsellers" :
+               activeCategory !== "all" ? categories.find(c => c.id === activeCategory)?.name || "Category" :
+               "Core Inventory"}
             </h1>
             <p style={{ color: "var(--text-secondary)" }}>
-              Browse the complete futuristic collection
+              {searchParams.get("deals") === "true" ? "Limited time offers on premium modules" : 
+               searchParams.get("sort") === "newest" ? "Just landed in our futuristic collection" :
+               searchParams.get("sort") === "bestseller" ? "Most popular gear across the network" :
+               "Browse the complete futuristic collection"}
             </p>
           </div>
           <div style={{ flex: "1 1 300px", maxWidth: "500px" }}>

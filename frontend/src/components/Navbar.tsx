@@ -161,13 +161,13 @@ export default function Navbar() {
            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem' }}>
               <Menu size={20} /> ALL DEPARTMENTS
            </div>
-           <div style={{ display: 'flex', gap: '2rem' }}>
-              <Link href="/products" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>New Arrivals</Link>
-              <Link href="/categories" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Hot Deals</Link>
-              <Link href="/products" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Bestsellers</Link>
-              <Link href="/products" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Modules</Link>
-              <Link href="/products" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Hardware</Link>
-           </div>
+            <div style={{ display: 'flex', gap: '2rem' }}>
+               <Link href="/products?sort=newest" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>New Arrivals</Link>
+               <Link href="/products?deals=true" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Hot Deals</Link>
+               <Link href="/products?sort=bestseller" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Bestsellers</Link>
+               <Link href="/products?category=modules" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Modules</Link>
+               <Link href="/products?category=hardware" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Hardware</Link>
+            </div>
         </div>
       </div>
     </header>

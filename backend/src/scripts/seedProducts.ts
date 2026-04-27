@@ -2,6 +2,8 @@ import { prisma } from "../prisma/prisma";
 
 const categories = [
   { name: "Electronics", slug: "electronics" },
+  { name: "Modules", slug: "modules" },
+  { name: "Hardware", slug: "hardware" },
   { name: "Fashion", slug: "fashion" },
   { name: "Home & Kitchen", slug: "home-kitchen" },
   { name: "Beauty & Personal Care", slug: "beauty-personal-care" },
@@ -15,6 +17,8 @@ const categories = [
 
 const productPrefixes = {
   Electronics: ["Quantum", "Neo", "Cyber", "Apex", "Volt"],
+  Modules: ["Logic", "Neural", "Control", "Power", "Link"],
+  Hardware: ["Titan", "Alloy", "Frame", "Core", "Drive"],
   Fashion: ["Vogue", "Silk", "Neon", "Urban", "Glow"],
   "Home & Kitchen": ["Smart", "Chef", "Lux", "Eco", "Pure"],
   "Beauty & Personal Care": ["Aura", "Bio", "Luxe", "Dew", "Radiant"],
@@ -28,6 +32,8 @@ const productPrefixes = {
 
 const imageMap: Record<string, string> = {
   Electronics: "https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&w=500&q=60",
+  Modules: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=500&q=60",
+  Hardware: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=500&q=60",
   Fashion: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=500&q=60",
   "Home & Kitchen": "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?auto=format&fit=crop&w=500&q=60",
   "Beauty & Personal Care": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=500&q=60",

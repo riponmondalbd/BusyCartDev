@@ -91,6 +91,7 @@ export const getAllProducts = async (
       minPrice,
       maxPrice,
       sort,
+      deals,
     } = req.query;
 
     const pageNumber = parseInt(page as string);
@@ -107,6 +108,13 @@ export const getAllProducts = async (
       where.name = {
         contains: search as string,
         mode: "insensitive",
+      };
+    }
+
+    // Filter by deals (products with discount)
+    if (deals === "true") {
+      where.discount = {
+        gt: 0,
       };
     }
 
@@ -134,6 +142,8 @@ export const getAllProducts = async (
       orderBy = { price: "desc" };
     } else if (sort === "newest") {
       orderBy = { createdAt: "desc" };
+    } else if (sort === "bestseller") {
+      orderBy = { numReviews: "desc" };
     }
 
     const [products, totalProducts] = await Promise.all([
