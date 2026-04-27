@@ -256,10 +256,11 @@ export default function SingleProductPage() {
 
       <div className="container" style={{ paddingTop: "3rem" }}>
         <div
+          className="product-detail-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "1fr 1fr",
-            gap: "5rem",
+            gap: "3rem",
           }}
         >
           <div>
@@ -268,7 +269,9 @@ export default function SingleProductPage() {
               style={{
                 position: "relative",
                 width: "100%",
-                height: "600px",
+                height: "auto",
+                aspectRatio: "1/1",
+                maxHeight: "600px",
                 borderRadius: "24px",
                 overflow: "hidden",
                 display: "flex",
@@ -426,8 +429,9 @@ export default function SingleProductPage() {
                 {product.category?.name || "Unassigned Sector"}
               </span>
               <h1
+                className="responsive-title"
                 style={{
-                  fontSize: "4rem",
+                  fontSize: "clamp(2.5rem, 6vw, 4rem)",
                   fontWeight: 900,
                   marginTop: "1rem",
                   lineHeight: 1.1,
@@ -480,7 +484,7 @@ export default function SingleProductPage() {
               <div style={{ position: "relative" }}>
                 <span
                   style={{
-                    fontSize: "3rem",
+                    fontSize: "clamp(2rem, 5vw, 3rem)",
                     fontWeight: 900,
                     color: "var(--primary-color)",
                   }}

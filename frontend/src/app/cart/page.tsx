@@ -224,10 +224,11 @@ export default function CartPage() {
         </div>
       ) : (
         <div
+          className="cart-layout"
           style={{
             display: "grid",
-            gridTemplateColumns: "2fr 1fr",
-            gap: "3rem",
+            gridTemplateColumns: "2.5fr 1fr",
+            gap: "2rem",
             alignItems: "flex-start",
           }}
         >
@@ -251,12 +252,13 @@ export default function CartPage() {
             {items.map((item: any, idx: number) => (
               <div
                 key={item.itemId || `cart-item-${idx}`}
-                className="glass-panel"
+                className="glass-panel cart-item"
                 style={{
                   display: "flex",
                   gap: "1.5rem",
-                  padding: "1.5rem",
+                  padding: "1.25rem",
                   alignItems: "center",
+                  flexWrap: "wrap"
                 }}
               >
                 <div

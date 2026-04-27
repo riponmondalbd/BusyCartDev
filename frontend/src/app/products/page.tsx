@@ -127,181 +127,160 @@ export default function ProductsPage() {
   return (
     <div className="container" style={{ padding: "2rem 0" }}>
       <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
-        {/* Header & Search */}
         <div
           className="glass-panel"
           style={{
-            padding: "2rem",
+            padding: "3rem",
             display: "flex",
-            flexWrap: "wrap",
+            flexDirection: "column",
             gap: "2rem",
-            justifyContent: "space-between",
             alignItems: "center",
+            textAlign: "center",
+            background: "linear-gradient(135deg, rgba(31, 40, 51, 0.9) 0%, rgba(11, 12, 16, 0.9) 100%)",
+            border: "1px solid rgba(102, 252, 241, 0.1)",
           }}
         >
-          <div>
+          <div style={{ maxWidth: "800px" }}>
             <h1
+              className="responsive-title"
               style={{
-                fontSize: "2.5rem",
+                fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                fontWeight: 900,
                 color: "var(--text-primary)",
-                marginBottom: "0.5rem",
+                marginBottom: "0.75rem",
+                letterSpacing: "-1px",
               }}
             >
-              {searchParams.get("deals") === "true" ? "Hot Deals" : 
-               searchParams.get("sort") === "newest" ? "New Arrivals" :
-               searchParams.get("sort") === "bestseller" ? "Bestsellers" :
-               activeCategory !== "all" ? categories.find(c => c.id === activeCategory)?.name || "Category" :
-               "Core Inventory"}
+              {searchParams.get("deals") === "true" ? "HOT DEALS" : 
+               searchParams.get("sort") === "newest" ? "NEW ARRIVALS" :
+               searchParams.get("sort") === "bestseller" ? "BESTSELLERS" :
+               activeCategory !== "all" ? categories.find(c => c.id === activeCategory)?.name?.toUpperCase() || "CATEGORY" :
+               "CORE INVENTORY"}
             </h1>
-            <p style={{ color: "var(--text-secondary)" }}>
-              {searchParams.get("deals") === "true" ? "Limited time offers on premium modules" : 
-               searchParams.get("sort") === "newest" ? "Just landed in our futuristic collection" :
-               searchParams.get("sort") === "bestseller" ? "Most popular gear across the network" :
-               "Browse the complete futuristic collection"}
+            <p style={{ color: "var(--text-secondary)", fontSize: "1.1rem", opacity: 0.8 }}>
+              {searchParams.get("deals") === "true" ? "Premium modules at calibrated price points." : 
+               "Browse the complete futuristic collection of high-performance modules."}
             </p>
           </div>
-          <div style={{ flex: "1 1 300px", maxWidth: "500px" }}>
+          <div style={{ width: "100%", maxWidth: "600px", position: "relative" }}>
             <input
               type="text"
               className="input-field"
-              placeholder="Search by product name or description..."
+              placeholder="Query the database..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
-                background: "rgba(0,0,0,0.3)",
-                padding: "1rem 1.5rem",
-                borderRadius: "30px",
+                background: "rgba(0,0,0,0.4)",
+                padding: "1.25rem 2rem",
+                borderRadius: "50px",
+                width: "100%",
+                border: "1px solid var(--border-color)",
+                fontSize: "1rem",
+                transition: "all 0.3s ease",
+                textAlign: "center"
               }}
             />
           </div>
         </div>
 
-        <div style={{ display: "flex", gap: "2rem", alignItems: "flex-start" }}>
+        <div className="products-layout" style={{ display: "flex", gap: "2rem", alignItems: "flex-start" }}>
           {/* Filters Sidebar */}
           <aside
-            className="glass-panel"
-            style={{ width: "250px", padding: "1.5rem", flexShrink: 0 }}
+            className="glass-panel hidden-mobile"
+            style={{ width: "280px", padding: "2rem", flexShrink: 0, position: "sticky", top: "100px" }}
           >
-            <h3
-              style={{
-                fontSize: "1.2rem",
-                marginBottom: "1.5rem",
-                borderBottom: "1px solid var(--border-color)",
-                paddingBottom: "0.75rem",
-              }}
-            >
-              Categories
-            </h3>
-            <ul
-              style={{
-                listStyle: "none",
-                display: "flex",
-                flexDirection: "column",
-                gap: "0.75rem",
-              }}
-            >
-              <li>
+            <div style={{ marginBottom: "2.5rem" }}>
+              <h3
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 900,
+                  color: "var(--primary-color)",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                Sectors
+              </h3>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                 <button
                   onClick={() => setActiveCategory("all")}
+                  className={activeCategory === "all" ? "active-filter" : ""}
                   style={{
                     background: "none",
                     border: "none",
-                    color:
-                      activeCategory === "all"
-                        ? "var(--primary-color)"
-                        : "var(--text-secondary)",
-                    fontWeight: activeCategory === "all" ? "bold" : "normal",
-                    cursor: "pointer",
+                    color: activeCategory === "all" ? "var(--primary-color)" : "var(--text-secondary)",
                     textAlign: "left",
-                    width: "100%",
-                    fontSize: "1rem",
-                    transition: "color 0.3s ease",
+                    padding: "0.5rem 0",
+                    cursor: "pointer",
+                    fontSize: "0.95rem",
+                    transition: "0.2s"
                   }}
                 >
-                  All Categories
+                  All Modules
                 </button>
-              </li>
-              {categories.map((cat) => (
-                <li key={cat.id}>
+                {categories.map((cat) => (
                   <button
+                    key={cat.id}
                     onClick={() => setActiveCategory(cat.id)}
                     style={{
                       background: "none",
                       border: "none",
-                      color:
-                        activeCategory === cat.id
-                          ? "var(--primary-color)"
-                          : "var(--text-secondary)",
-                      fontWeight: activeCategory === cat.id ? "bold" : "normal",
-                      cursor: "pointer",
+                      color: activeCategory === cat.id ? "var(--primary-color)" : "var(--text-secondary)",
                       textAlign: "left",
-                      width: "100%",
-                      fontSize: "1rem",
-                      transition: "color 0.3s ease",
+                      padding: "0.5rem 0",
+                      cursor: "pointer",
+                      fontSize: "0.95rem",
+                      transition: "0.2s"
                     }}
                   >
                     {cat.name}
                   </button>
-                </li>
-              ))}
-            </ul>
-
-            <div
-              style={{
-                height: "1px",
-                background: "var(--border-color)",
-                margin: "1.25rem 0",
-              }}
-            />
-
-            <div style={{ display: "grid", gap: "0.9rem" }}>
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.8rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.35rem",
-                  }}
-                >
-                  Sort By
-                </label>
-                <select
-                  className="input-field"
-                  value={sortOption}
-                  onChange={(event) => setSortOption(event.target.value)}
-                >
-                  <option value="default">Default</option>
-                  <option value="price_low_high">Price: Low to High</option>
-                  <option value="price_high_low">Price: High to Low</option>
-                  <option value="color_a_z">Color: A to Z</option>
-                  <option value="color_z_a">Color: Z to A</option>
-                </select>
+                ))}
               </div>
+            </div>
 
-              <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.8rem",
-                    color: "var(--text-secondary)",
-                    marginBottom: "0.35rem",
-                  }}
-                >
-                  Color
-                </label>
-                <select
-                  className="input-field"
-                  value={activeColor}
-                  onChange={(event) => setActiveColor(event.target.value)}
-                >
-                  <option value="all">All Colors</option>
-                  {availableColors.map((color) => (
-                    <option key={color} value={color}>
-                      {color}
-                    </option>
-                  ))}
-                </select>
+            <div>
+              <h3
+                style={{
+                  fontSize: "0.85rem",
+                  fontWeight: 900,
+                  color: "var(--primary-color)",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                Configuration
+              </h3>
+              <div style={{ display: "grid", gap: "1.25rem" }}>
+                <div>
+                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem" }}>SORT PRIORITY</label>
+                  <select
+                    className="input-field"
+                    value={sortOption}
+                    onChange={(event) => setSortOption(event.target.value)}
+                    style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem" }}
+                  >
+                    <option value="default">Release Date</option>
+                    <option value="price_low_high">Price: ASC</option>
+                    <option value="price_high_low">Price: DESC</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: "0.75rem", color: "var(--text-secondary)", display: "block", marginBottom: "0.5rem" }}>COLOR THEME</label>
+                  <select
+                    className="input-field"
+                    value={activeColor}
+                    onChange={(event) => setActiveColor(event.target.value)}
+                    style={{ background: "rgba(255,255,255,0.03)", borderRadius: "8px", fontSize: "0.9rem" }}
+                  >
+                    <option value="all">All Specs</option>
+                    {availableColors.map((color) => (
+                      <option key={color} value={color}>{color}</option>
+                    ))}
+                  </select>
+                </div>
               </div>
             </div>
           </aside>
@@ -329,11 +308,8 @@ export default function ProductsPage() {
             ) : sortedProducts.length > 0 ? (
               <div style={{ flex: 1 }}>
                 <div
+                  className="product-grid-5"
                   style={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(auto-fill, minmax(280px, 1fr))",
-                    gap: "2rem",
                     marginBottom: "2rem",
                   }}
                 >
@@ -345,16 +321,30 @@ export default function ProductsPage() {
                         overflow: "hidden",
                         display: "flex",
                         flexDirection: "column",
+                        background: "rgba(255,255,255,0.02)",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        border: "1px solid rgba(255,255,255,0.05)",
+                        position: "relative"
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "translateY(-5px)";
+                        e.currentTarget.style.borderColor = "var(--primary-color)";
+                        e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "translateY(0)";
+                        e.currentTarget.style.borderColor = "rgba(255,255,255,0.05)";
+                        e.currentTarget.style.background = "rgba(255,255,255,0.02)";
                       }}
                     >
                       <div
                         style={{
-                          height: "200px",
-                          background: "rgba(255,255,255,0.02)",
+                          height: "180px",
+                          background: "#000",
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
-                          borderBottom: "var(--glass-border)",
+                          overflow: "hidden"
                         }}
                       >
                         {prod.images && prod.images[0] ? (
@@ -365,42 +355,33 @@ export default function ProductsPage() {
                               width: "100%",
                               height: "100%",
                               objectFit: "cover",
+                              opacity: 0.85,
+                              transition: "0.5s"
                             }}
+                            onMouseEnter={e => e.currentTarget.style.transform = "scale(1.1)"}
+                            onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
                           />
                         ) : (
-                          <span style={{ color: "var(--text-secondary)" }}>
-                            [Image Data Missing]
-                          </span>
+                          <span style={{ color: "var(--text-secondary)", fontSize: "0.7rem" }}>DATA_MISSING</span>
                         )}
                       </div>
-                      <div
-                        style={{
-                          padding: "1.5rem",
-                          flex: 1,
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
+                      <div style={{ padding: "1.25rem", flex: 1, display: "flex", flexDirection: "column" }}>
+                        <p style={{ fontSize: "0.65rem", fontWeight: 800, color: "var(--primary-color)", textTransform: "uppercase", marginBottom: "0.5rem", letterSpacing: "1px" }}>
+                          {categories.find(c => c.id === prod.categoryId)?.name || "MODULE"}
+                        </p>
                         <h3
                           style={{
-                            fontSize: "1.2rem",
-                            marginBottom: "0.5rem",
+                            fontSize: "1rem",
+                            fontWeight: 700,
+                            marginBottom: "0.75rem",
                             color: "var(--text-primary)",
+                            lineHeight: 1.3,
+                            height: "2.6rem",
+                            overflow: "hidden",
                           }}
                         >
                           {prod.name}
                         </h3>
-                        {prod.color ? (
-                          <p
-                            style={{
-                              color: "var(--text-secondary)",
-                              fontSize: "0.85rem",
-                              marginBottom: "0.75rem",
-                            }}
-                          >
-                            Color: {prod.color}
-                          </p>
-                        ) : null}
                         <div
                           style={{
                             display: "flex",
@@ -411,9 +392,9 @@ export default function ProductsPage() {
                         >
                           <span
                             style={{
-                              fontSize: "1.25rem",
-                              fontWeight: 700,
-                              color: "var(--primary-color)",
+                              fontSize: "1.1rem",
+                              fontWeight: 900,
+                              color: "#fff",
                             }}
                           >
                             ${prod.price}
@@ -422,11 +403,23 @@ export default function ProductsPage() {
                             href={`/products/${prod.id}`}
                             className="btn-primary"
                             style={{
-                              padding: "0.5rem 1rem",
-                              fontSize: "0.8rem",
+                              padding: "0.4rem 0.8rem",
+                              fontSize: "0.75rem",
+                              borderRadius: "6px",
+                              background: "none",
+                              border: "1px solid var(--primary-color)",
+                              color: "var(--primary-color)",
+                            }}
+                            onMouseEnter={e => {
+                              e.currentTarget.style.background = "var(--primary-color)";
+                              e.currentTarget.style.color = "#000";
+                            }}
+                            onMouseLeave={e => {
+                              e.currentTarget.style.background = "none";
+                              e.currentTarget.style.color = "var(--primary-color)";
                             }}
                           >
-                            Buy Now
+                            INITIATE
                           </Link>
                         </div>
                       </div>

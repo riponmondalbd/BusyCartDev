@@ -182,16 +182,15 @@ export default function ElectroMarketplaceHome() {
       style={{ background: "var(--bg-color)", color: "var(--text-primary)" }}
     >
       {/* 1. Hero Section with Sidebar */}
-      <section style={{ padding: "2rem 0" }}>
-        <div className="container" style={{ display: "flex", gap: "2rem" }}>
-          {/* Vertical Category Sidebar (Electro Style) */}
+      <section style={{ padding: "1.5rem 0" }}>
+        <div className="container hero-container" style={{ display: "flex", gap: "2rem" }}>
+          {/* Vertical Category Sidebar - Hidden on smaller screens */}
           <aside
-            className="glass-panel"
+            className="glass-panel hidden-mobile"
             style={{
               width: "280px",
               flexShrink: 0,
               padding: "1rem 0",
-              display: "flex",
               flexDirection: "column",
             }}
           >
@@ -233,22 +232,12 @@ export default function ElectroMarketplaceHome() {
                   {cat.name} <ChevronRight size={14} />
                 </Link>
               ))}
-              <Link
-                href="/categories"
-                style={{
-                  padding: "1rem 1.5rem",
-                  color: "var(--primary-color)",
-                  fontWeight: 600,
-                  fontSize: "0.85rem",
-                }}
-              >
-                View All Categories
-              </Link>
             </div>
           </aside>
 
           {/* Main Slider */}
           <div
+            className="hero-slider"
             style={{
               flex: 1,
               position: "relative",
@@ -273,6 +262,7 @@ export default function ElectroMarketplaceHome() {
               >
                 <img
                   src={slide.image}
+                  alt="Slider"
                   style={{
                     position: "absolute",
                     inset: 0,
@@ -287,15 +277,16 @@ export default function ElectroMarketplaceHome() {
                     position: "absolute",
                     inset: 0,
                     background:
-                      "linear-gradient(90deg, rgba(11,12,16,0.95) 20%, transparent 80%)",
+                      "linear-gradient(90deg, rgba(11,12,16,0.95) 30%, transparent 100%)",
                   }}
                 />
                 <div
+                  className="slider-content"
                   style={{
                     position: "relative",
                     zIndex: 2,
-                    padding: "4rem",
-                    maxWidth: "500px",
+                    padding: "2.5rem",
+                    maxWidth: "600px",
                   }}
                 >
                   <span
@@ -304,17 +295,18 @@ export default function ElectroMarketplaceHome() {
                       fontWeight: 800,
                       letterSpacing: "2px",
                       textTransform: "uppercase",
-                      fontSize: "0.8rem",
+                      fontSize: "0.75rem",
                     }}
                   >
                     {slide.tagline}
                   </span>
                   <h1
+                    className="responsive-title"
                     style={{
-                      fontSize: "3.5rem",
+                      fontSize: "clamp(2rem, 5vw, 3.5rem)",
                       fontWeight: 900,
-                      margin: "1rem 0",
-                      lineHeight: 1,
+                      margin: "0.75rem 0",
+                      lineHeight: 1.1,
                     }}
                   >
                     {slide.title}
@@ -322,7 +314,9 @@ export default function ElectroMarketplaceHome() {
                   <p
                     style={{
                       color: "var(--text-secondary)",
-                      marginBottom: "2rem",
+                      marginBottom: "1.5rem",
+                      fontSize: "0.95rem",
+                      lineHeight: 1.6
                     }}
                   >
                     {slide.desc}
@@ -334,6 +328,7 @@ export default function ElectroMarketplaceHome() {
                       background: slide.color,
                       color: "#000",
                       border: "none",
+                      padding: "0.8rem 2rem"
                     }}
                   >
                     Initialize Order
@@ -341,45 +336,17 @@ export default function ElectroMarketplaceHome() {
                 </div>
               </div>
             ))}
-            <div
-              style={{
-                position: "absolute",
-                bottom: "2rem",
-                right: "4rem",
-                display: "flex",
-                gap: "0.75rem",
-              }}
-            >
-              {sliderData.map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveSlider(i)}
-                  style={{
-                    width: i === activeSlider ? "30px" : "10px",
-                    height: "10px",
-                    borderRadius: "5px",
-                    background:
-                      i === activeSlider
-                        ? "var(--primary-color)"
-                        : "rgba(255,255,255,0.2)",
-                    border: "none",
-                    cursor: "pointer",
-                    transition: "0.3s",
-                  }}
-                />
-              ))}
-            </div>
           </div>
         </div>
       </section>
 
       {/* 2. Special Deals Header Section */}
-      <section style={{ padding: "2rem 0" }}>
+      <section style={{ padding: "1.5rem 0" }}>
         <div
           className="container"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
             gap: "1.5rem",
           }}
         >
@@ -423,7 +390,7 @@ export default function ElectroMarketplaceHome() {
                 >
                   {box.title}
                 </p>
-                <h4 style={{ fontSize: "1.25rem", fontWeight: 700 }}>
+                <h4 style={{ fontSize: "1.1rem", fontWeight: 700 }}>
                   {box.desc}
                 </h4>
               </div>
@@ -434,9 +401,10 @@ export default function ElectroMarketplaceHome() {
       </section>
 
       {/* 3. Deal of the Day */}
-      <section style={{ padding: "4rem 0" }}>
+      <section style={{ padding: "3rem 0" }}>
         <div className="container">
           <div
+            className="deal-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "1fr 3fr",

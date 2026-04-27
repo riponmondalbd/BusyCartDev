@@ -121,14 +121,17 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div style={{ 
-          paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', 
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '2rem'
-        }}>
+        <div 
+          className="footer-bottom"
+          style={{ 
+            paddingTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.05)', 
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1.5rem'
+          }}
+        >
           <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>
-            &copy; {new Date().getFullYear()} BusyCart Terminal. All rights reserved. Built for the future of commerce.
+            &copy; {new Date().getFullYear()} BusyCart Terminal. All rights reserved.
           </p>
-          <div style={{ display: 'flex', gap: '2rem' }}>
+          <div style={{ display: 'flex', gap: '1.5rem' }}>
             <Link href="/privacy" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Privacy Protocol</Link>
             <Link href="/terms" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Terms of Service</Link>
           </div>

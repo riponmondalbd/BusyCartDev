@@ -22,7 +22,10 @@ export default function Navbar() {
     }
   };
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
   useEffect(() => {
+    // ... existing event listeners ...
     const handleWishlistUpdate = (e: any) => setWishlistCount(e.detail);
     window.addEventListener('wishlist-update', handleWishlistUpdate);
 
@@ -55,8 +58,6 @@ export default function Navbar() {
           setUser(res.data || res);
           await fetchCartData();
         } catch (err) {
-          console.error('Failed to fetch user profile', err);
-          // If token is invalid, clear it
           localStorage.removeItem('token');
           setIsLoggedIn(false);
         }
@@ -78,8 +79,8 @@ export default function Navbar() {
 
   return (
     <header style={{ width: '100%', zIndex: 1000, position: 'sticky', top: 0 }}>
-      {/* Top Utility Bar */}
-      <div style={{ background: '#0b0c10', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '0.5rem 0' }}>
+      {/* Top Utility Bar - Hidden on Mobile */}
+      <div className="hidden-mobile" style={{ background: '#0b0c10', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '0.5rem 0' }}>
         <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Welcome to the Future of Commerce. Worldwide Delivery.</p>
           <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
@@ -91,85 +92,154 @@ export default function Navbar() {
       </div>
 
       {/* Main Navbar */}
-      <nav style={{ background: 'rgba(11, 12, 16, 0.95)', backdropFilter: 'blur(10px)', borderBottom: 'var(--glass-border)', padding: '1.25rem 0' }}>
-        <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-          {/* Logo */}
-          <Link href="/" className="logo" style={{ flexShrink: 0 }}>
-            Busy<span>Cart</span>
-          </Link>
+      <nav style={{ background: 'rgba(11, 12, 16, 0.95)', backdropFilter: 'blur(10px)', borderBottom: 'var(--glass-border)', padding: '1rem 0' }}>
+        <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            {/* Mobile Menu Toggle */}
+            <button 
+              className="show-mobile" 
+              onClick={() => setMobileMenuOpen(true)}
+              style={{ background: 'none', border: 'none', color: 'var(--primary-color)', cursor: 'pointer', padding: 0 }}
+            >
+              <Menu size={24} />
+            </button>
 
-          {/* Search Bar (Electro Style) */}
-          <form onSubmit={handleSearch} style={{ flex: 1, position: 'relative' }}>
+            {/* Logo */}
+            <Link href="/" className="logo" style={{ flexShrink: 0, fontSize: '1.25rem' }}>
+              Busy<span>Cart</span>
+            </Link>
+          </div>
+
+          {/* Search Bar - Desktop Only */}
+          <form className="hidden-mobile" onSubmit={handleSearch} style={{ flex: 1, maxWidth: '600px', position: 'relative' }}>
             <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
                <input 
                  type="text" 
-                 placeholder="Search for hardware, modules, or cyberware..." 
-                 style={{ flex: 1, background: 'none', border: 'none', color: '#fff', padding: '0.75rem 1.25rem', outline: 'none' }}
+                 placeholder="Search for hardware..." 
+                 style={{ flex: 1, background: 'none', border: 'none', color: '#fff', padding: '0.6rem 1rem', outline: 'none', fontSize: '0.9rem' }}
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
                />
-               <button type="submit" style={{ background: 'var(--primary-color)', border: 'none', padding: '0 1.5rem', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
-                 <Search size={20} color="#000" />
+               <button type="submit" style={{ background: 'var(--primary-color)', border: 'none', padding: '0 1.25rem', cursor: 'pointer' }}>
+                 <Search size={18} color="#000" />
                </button>
             </div>
           </form>
 
           {/* Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '2rem', flexShrink: 0 }}>
-            <Link href="/wishlist" style={{ position: 'relative', color: 'var(--text-secondary)' }}>
-              <Heart size={24} />
-              <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>{wishlistCount}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
+            <Link href="/wishlist" className="hidden-mobile" style={{ position: 'relative', color: 'var(--text-secondary)' }}>
+              <Heart size={22} />
+              {wishlistCount > 0 && <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>{wishlistCount}</span>}
             </Link>
             
-            <Link href="/cart" style={{ position: 'relative', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <Link href="/cart" style={{ position: 'relative', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div style={{ position: 'relative' }}>
-                <ShoppingCart size={24} />
-                <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>{cartCount}</span>
+                <ShoppingCart size={22} />
+                {cartCount > 0 && <span style={{ position: 'absolute', top: '-8px', right: '-8px', background: 'var(--primary-color)', color: '#000', fontSize: '0.6rem', fontWeight: 800, padding: '2px 5px', borderRadius: '10px' }}>{cartCount}</span>}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', opacity: 0.6 }}>My Cart</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 800, color: 'var(--primary-color)' }}>${Number(cartTotal).toFixed(2)}</span>
+              <div className="hidden-mobile" style={{ display: 'flex', flexDirection: 'column' }}>
+                <span style={{ fontSize: '0.6rem', fontWeight: 700, opacity: 0.6 }}>CART</span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--primary-color)' }}>${Number(cartTotal).toFixed(2)}</span>
               </div>
             </Link>
 
             {isLoggedIn ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <Link href="/dashboard" style={{ 
-                  width: '45px', height: '45px', borderRadius: '50%', overflow: 'hidden', 
-                  border: '2px solid var(--primary-color)', background: 'rgba(255,255,255,0.05)',
-                  display: 'flex', justifyContent: 'center', alignItems: 'center'
-                }}>
-                  {user?.imageUrl ? (
-                    <img src={user.imageUrl} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  ) : (
-                    <User size={24} color="var(--primary-color)" />
-                  )}
-                </Link>
-              </div>
+              <Link href="/dashboard" style={{ 
+                width: '38px', height: '38px', borderRadius: '50%', overflow: 'hidden', 
+                border: '2px solid var(--primary-color)', background: 'rgba(255,255,255,0.05)',
+                display: 'flex', justifyContent: 'center', alignItems: 'center'
+              }}>
+                {user?.imageUrl ? (
+                  <img src={user.imageUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  <User size={20} color="var(--primary-color)" />
+                )}
+              </Link>
             ) : (
-              <Link href="/login" className="btn-primary" style={{ padding: '0.6rem 1.5rem', borderRadius: '8px', fontWeight: 700 }}>
-                LOGIN / REGISTER
+              <Link href="/login" className="btn-primary hidden-mobile" style={{ padding: '0.5rem 1rem', fontSize: '0.8rem' }}>
+                LOGIN
               </Link>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Category Bar (Secondary Nav) */}
-      <div style={{ background: 'rgba(11, 12, 16, 0.9)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '0.75rem 0' }}>
+      {/* Category Bar - Desktop Only */}
+      <div className="hidden-mobile" style={{ background: 'rgba(11, 12, 16, 0.9)', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '0.6rem 0' }}>
         <div className="container" style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
-           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 700, fontSize: '0.9rem' }}>
-              <Menu size={20} /> ALL DEPARTMENTS
+           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', color: 'var(--primary-color)', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem' }}>
+              <Menu size={18} /> ALL DEPARTMENTS
            </div>
-            <div style={{ display: 'flex', gap: '2rem' }}>
-               <Link href="/products?sort=newest" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>New Arrivals</Link>
-               <Link href="/products?deals=true" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Hot Deals</Link>
-               <Link href="/products?sort=bestseller" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Bestsellers</Link>
-               <Link href="/products?category=modules" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Modules</Link>
-               <Link href="/products?category=hardware" style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Hardware</Link>
+            <div style={{ display: 'flex', gap: '1.5rem' }}>
+               <Link href="/products?sort=newest" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>New Arrivals</Link>
+               <Link href="/products?deals=true" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Hot Deals</Link>
+               <Link href="/products?sort=bestseller" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Bestsellers</Link>
+               <Link href="/products?category=modules" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Modules</Link>
+               <Link href="/products?category=hardware" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', fontWeight: 600 }}>Hardware</Link>
             </div>
         </div>
       </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000 }}>
+          <div 
+            onClick={() => setMobileMenuOpen(false)}
+            style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(4px)' }} 
+          />
+          <div style={{ 
+            position: 'absolute', top: 0, left: 0, bottom: 0, width: '280px', 
+            background: '#0b0c10', borderRight: '1px solid var(--border-color)',
+            padding: '2rem 1.5rem', display: 'flex', flexDirection: 'column', gap: '2rem'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Link href="/" className="logo" onClick={() => setMobileMenuOpen(false)}>
+                Busy<span>Cart</span>
+              </Link>
+              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', color: '#fff' }}>
+                <XCircle size={24} />
+              </button>
+            </div>
+
+            <form onSubmit={(e) => { handleSearch(e); setMobileMenuOpen(false); }}>
+               <div style={{ display: 'flex', background: 'rgba(255,255,255,0.05)', borderRadius: '8px', border: '1px solid var(--border-color)', overflow: 'hidden' }}>
+                  <input 
+                    type="text" 
+                    placeholder="Search..." 
+                    style={{ flex: 1, background: 'none', border: 'none', color: '#fff', padding: '0.6rem 1rem', outline: 'none' }}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                  <button type="submit" style={{ background: 'var(--primary-color)', border: 'none', padding: '0 1rem' }}>
+                    <Search size={18} color="#000" />
+                  </button>
+               </div>
+            </form>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+               <Link href="/products?sort=newest" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-primary)', fontWeight: 600 }}>New Arrivals</Link>
+               <Link href="/products?deals=true" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Hot Deals</Link>
+               <Link href="/products?sort=bestseller" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Bestsellers</Link>
+               <Link href="/products?category=modules" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Modules</Link>
+               <Link href="/products?category=hardware" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-primary)', fontWeight: 600 }}>Hardware</Link>
+               <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.05)' }} />
+               <Link href="/track-order" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Track Order</Link>
+               <Link href="/help" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>Help Center</Link>
+               <Link href="/wishlist" onClick={() => setMobileMenuOpen(false)} style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>My Wishlist</Link>
+            </div>
+
+            {!isLoggedIn && (
+               <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="btn-primary" style={{ textAlign: 'center', marginTop: 'auto' }}>
+                 LOGIN / REGISTER
+               </Link>
+            )}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
+
+import { XCircle } from 'lucide-react';
