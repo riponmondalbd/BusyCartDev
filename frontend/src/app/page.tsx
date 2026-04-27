@@ -4,6 +4,7 @@ import { useWishlist } from "@/store/WishlistContext";
 import { fetchApi } from "@/utils/api";
 import {
   ArrowRight,
+  ChevronLeft,
   ChevronRight,
   Heart,
   LayoutGrid,
@@ -348,7 +349,7 @@ export default function ElectroMarketplaceHome() {
                     {slide.desc}
                   </p>
                   <Link
-                    href="/products"
+                    href={slide.link || "/products"}
                     className="btn-primary"
                     style={{
                       background: slide.color,
@@ -362,6 +363,34 @@ export default function ElectroMarketplaceHome() {
                 </div>
               </div>
             ))}
+
+            {/* Dots */}
+            {banners.length > 1 && (
+              <div style={{
+                position: "absolute",
+                bottom: "1.5rem",
+                right: "1.5rem",
+                zIndex: 10,
+                display: "flex",
+                gap: "0.75rem"
+              }}>
+                {banners.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveSlider(i)}
+                    style={{
+                      width: i === activeSlider ? "24px" : "8px",
+                      height: "8px",
+                      borderRadius: "4px",
+                      background: i === activeSlider ? "var(--primary-color)" : "rgba(255,255,255,0.3)",
+                      border: "none",
+                      cursor: "pointer",
+                      transition: "all 0.3s ease"
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
