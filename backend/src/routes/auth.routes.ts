@@ -1,5 +1,6 @@
 import { Router } from "express";
 import passport from "passport";
+import { URLSearchParams } from "url";
 import {
   googleCallback,
   loginUser,
@@ -16,13 +17,24 @@ router.post("/login", validate(loginSchema), loginUser);
 router.post("/logout", logoutUser);
 
 // Google OAuth routes
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-    session: false,
-  }),
-);
+router.get("/google", (req, res, next) => {
+  const params = new URLSearchParams({
+    client_id: process.env.GOOGLE_CLIENT_ID || "",
+    redirect_uri: process.env.GOOGLE_CALLBACK_URL || "",
+    response_type: "code",
+    scope: "profile email",
+    access_type: "offline",
+    prompt: "consent",
+  });
+
+  if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CALLBACK_URL) {
+    return next(new Error("Google OAuth environment variables are missing"));
+  }
+
+  return res.redirect(
+    `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`,
+  );
+});
 router.get(
   "/google/callback",
   passport.authenticate("google", {

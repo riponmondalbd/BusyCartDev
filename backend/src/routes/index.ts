@@ -2,11 +2,11 @@ import { Router } from "express";
 import adminRoutes from "./admin.routes";
 import analyticsRoutes from "./analytics.routes";
 import authRoutes from "./auth.routes";
+import bannerRoutes from "./banner.routes";
 import cartRoutes from "./cart.routes";
 import categoryRoutes from "./category.routes";
 import couponRoutes from "./coupon.routes";
 import dealRoutes from "./deal.routes";
-import googleAuthRoutes from "./googleAuth.routes";
 import invoiceRoutes from "./invoice.routes";
 import orderRoutes from "./order.routes";
 import paymentRoutes from "./payment.routes";
@@ -17,12 +17,10 @@ import reviewRoutes from "./review.routes";
 import superAdminRoutes from "./super.admin.routes";
 import userRoutes from "./user.routes";
 import wishlistRoutes from "./wishlist.routes";
-import bannerRoutes from "./banner.routes";
 
 const router = Router();
 
 router.use("/auth", authRoutes);
-router.use("/auth", googleAuthRoutes);
 router.use("/user", userRoutes);
 router.use("/super/admin", superAdminRoutes);
 router.use("/admin", adminRoutes);
