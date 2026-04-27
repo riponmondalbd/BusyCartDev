@@ -110,18 +110,11 @@ export default function BannerManagementPage() {
       
       const method = currentBanner.id ? "PUT" : "POST";
 
-      const token = localStorage.getItem("token");
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
-      
-      const response = await fetch(`${apiBase}${url}`, {
+      const data = await fetchApi(url, {
         method,
-        headers: {
-          "Authorization": `Bearer ${token}`
-        },
         body: formData
       });
 
-      const data = await response.json();
       if (data.success) {
         toast.success(currentBanner.id ? "Banner updated" : "Banner created");
         setIsEditing(false);

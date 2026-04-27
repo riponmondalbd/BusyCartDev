@@ -5,7 +5,7 @@ import { prisma } from "../prisma/prisma";
 // create banner - admin super admin only
 export const createBanner = async (req: Request, res: Response) => {
   try {
-    const { title, tagline, desc, price, color, link, order } = req.body;
+    const { title, tagline, desc, price, color, link, order, isActive } = req.body;
 
     if (!title) {
       return res.status(400).json({
@@ -41,13 +41,14 @@ export const createBanner = async (req: Request, res: Response) => {
     const newBanner = await prisma.banner.create({
       data: {
         title,
-        tagline,
-        desc,
-        price,
+        tagline: tagline || null,
+        desc: desc || null,
+        price: price || null,
         color: color || "#66fcf1",
         link: link || "/products",
         image: imageUrl,
-        order: order ? parseInt(order) : 0,
+        order: !isNaN(parseInt(order)) ? parseInt(order) : 0,
+        isActive: isActive === "false" ? false : true,
       },
     });
 
@@ -56,9 +57,9 @@ export const createBanner = async (req: Request, res: Response) => {
       banner: newBanner,
     });
   } catch (error: any) {
-    console.error(error);
+    console.error("Banner Creation Error:", error);
     return res.status(500).json({
-      message: "Failed to create banner",
+      message: error.message || "Failed to create banner",
     });
   }
 };
@@ -146,15 +147,15 @@ export const updateBanner = async (req: Request, res: Response) => {
     const updatedBanner = await prisma.banner.update({
       where: { id },
       data: {
-        title,
-        tagline,
-        desc,
-        price,
-        color,
-        link,
+        title: title || undefined,
+        tagline: tagline || null,
+        desc: desc || null,
+        price: price || null,
+        color: color || undefined,
+        link: link || undefined,
         image: imageUrl,
-        order: order ? parseInt(order) : undefined,
-        isActive: isActive !== undefined ? (isActive === 'true' || isActive === true) : undefined,
+        order: !isNaN(parseInt(order)) ? parseInt(order) : undefined,
+        isActive: isActive === undefined ? undefined : (isActive === "false" ? false : true),
       },
     });
 
