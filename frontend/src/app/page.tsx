@@ -102,7 +102,7 @@ export default function ElectroMarketplaceHome() {
   const [banners, setBanners] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSlider, setActiveSlider] = useState(0);
-  const [activeTab, setActiveTab] = useState("Trending");
+  const [activeTab, setActiveTab] = useState("Bestsellers");
   const [countdown, setCountdown] = useState<CountdownParts>({
     hours: "00",
     minutes: "00",
@@ -692,7 +692,7 @@ export default function ElectroMarketplaceHome() {
                       sizes="(max-width: 768px) 100vw, 50vw"
                       style={{
                         objectFit: "contain",
-                        padding: "1rem"
+                        padding: "1rem",
                       }}
                     />
                   </div>
@@ -882,7 +882,7 @@ export default function ElectroMarketplaceHome() {
                   marginBottom: "2rem",
                 }}
               >
-                {["Trending", "Bestsellers", "New Arrivals"].map((tab) => (
+                {["Bestsellers", "New Arrivals", "Trending"].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -937,7 +937,7 @@ export default function ElectroMarketplaceHome() {
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                           style={{
                             objectFit: "contain",
-                            padding: "1rem"
+                            padding: "1rem",
                           }}
                         />
                       </div>
