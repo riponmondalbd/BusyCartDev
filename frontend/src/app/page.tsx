@@ -764,7 +764,7 @@ export default function ElectroMarketplaceHome() {
                       <div
                         style={{
                           height: "100%",
-                          width: `${Math.min(100, Math.max(10, dealProduct.stock || 0))}%`,
+                          width: `${Math.min(100, Math.max(9, dealProduct.stock || 0))}%`,
                           background: "var(--primary-color)",
                         }}
                       />
@@ -907,7 +907,7 @@ export default function ElectroMarketplaceHome() {
                   </button>
                 ))}
               </div>
-              <div className="product-grid-5">
+              <div className="product-grid-3">
                 {filteredProducts.map((prod) => (
                   <div
                     key={prod.id}
@@ -1134,7 +1134,7 @@ export default function ElectroMarketplaceHome() {
                     </p>
                   </Link>
                 ))
-              : Array(10)
+              : Array(9)
                   .fill(0)
                   .map((_, i) => (
                     <div
