@@ -907,7 +907,7 @@ export default function ElectroMarketplaceHome() {
                   </button>
                 ))}
               </div>
-              <div className="product-grid-3">
+              <div className="product-grid-9">
                 {filteredProducts.map((prod) => (
                   <div
                     key={prod.id}
