@@ -917,7 +917,6 @@ export default function ElectroMarketplaceHome() {
                     <div
                       className="product-image-wrapper"
                       style={{
-                        aspectRatio: "4/3",
                         marginBottom: "1rem",
                         background: "rgba(255,255,255,0.02)",
                         borderRadius: "8px",

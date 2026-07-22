@@ -179,24 +179,32 @@ select.input-field option {
 
 .product-grid-5 {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
 }
 
 @media (max-width: 1500px) {
-  .product-grid-5 { grid-template-columns: repeat(4, 1fr); }
+  .product-grid-5 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 @media (max-width: 1200px) {
-  .product-grid-5 { grid-template-columns: repeat(3, 1fr); }
+  .product-grid-5 {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 @media (max-width: 900px) {
-  .product-grid-5 { grid-template-columns: repeat(2, 1fr); }
+  .product-grid-5 {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 600px) {
-  .product-grid-5 { grid-template-columns: repeat(1, 1fr); }
+  .product-grid-5 {
+    grid-template-columns: repeat(1, 1fr);
+  }
 }
 
 /* Hover Spin Utility */
@@ -205,8 +213,12 @@ select.input-field option {
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Navbar */
@@ -412,7 +424,7 @@ select.input-field option {
     flex-direction: column !important;
     gap: 1rem !important;
   }
-  
+
   .hero-slider {
     height: 400px !important;
   }
@@ -430,7 +442,7 @@ select.input-field option {
   .hero-slider {
     height: 450px !important;
   }
-  
+
   .slider-content {
     padding: 2rem 1.5rem !important;
     text-align: center;
@@ -442,7 +454,9 @@ select.input-field option {
 }
 /* Page Specific Responsiveness */
 @media (max-width: 992px) {
-  .products-layout, .product-detail-grid, .cart-layout {
+  .products-layout,
+  .product-detail-grid,
+  .cart-layout {
     grid-template-columns: 1fr !important;
   }
 }
