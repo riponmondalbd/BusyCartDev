@@ -277,3 +277,7 @@ npm run build
 ## Contributing
 
 Issues and pull requests are welcome. Keep changes focused, avoid committing secrets, and update the documentation when behavior changes.
+
+---
+
+Developed by [Ripon](https://riponmondalbd.vercel.app)
